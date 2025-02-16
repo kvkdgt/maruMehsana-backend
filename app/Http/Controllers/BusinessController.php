@@ -6,10 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Business;
 use App\Models\Category;
 use App\Models\BusinessImages;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
 class BusinessController extends Controller
 {
+    public function __construct()
+{
+    $this->middleware('auth');
+}
     public function createView()
     {
         $categories = Category::get();
@@ -40,7 +44,8 @@ class BusinessController extends Controller
             'mobile_no' => $request->mobile, // Optional
             'whatsapp_no' => $request->whatsapp, // Optional
             'website_url' => $request->website, // Optional
-            'email_id' => $request->email
+            'email_id' => $request->email,
+            'created_by' => Auth::id(),
         ]);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -120,6 +125,7 @@ class BusinessController extends Controller
             'whatsapp_no' => $request->whatsapp, // Optional
             'website_url' => $request->website, // Optional
             'email_id' => $request->email, // Optional
+            'updated_by' => Auth::id(),
         ]);
 
         // Update thumbnail if provided
