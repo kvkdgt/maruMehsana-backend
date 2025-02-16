@@ -8,12 +8,13 @@ use App\Models\Category;
 use App\Models\BusinessImages;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+
 class BusinessController extends Controller
 {
-    public function __construct()
-{
-    $this->middleware('auth');
-}
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
     public function createView()
     {
         $categories = Category::get();
@@ -153,5 +154,29 @@ class BusinessController extends Controller
         }
 
         return redirect()->route('admin.businesses')->with('success', 'Business updated successfully!');
+    }
+    // api
+    public function getBusinesses(Request $request)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'limit' => 'nullable|integer|min:1',
+        ]);
+
+        // Fetch businesses based on category_id
+        $query = Business::where('category_id', $request->category_id);
+
+        // Apply limit if provided
+        if ($request->has('limit')) {
+            $query->limit($request->limit);
+        }
+
+        $businesses = $query->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Businesses fetched successfully',
+            'data' => $businesses
+        ]);
     }
 }

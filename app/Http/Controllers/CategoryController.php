@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Auth;
 class CategoryController extends Controller
 {
     // Show the form for creating a new category
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
 
     public function create()
     {
