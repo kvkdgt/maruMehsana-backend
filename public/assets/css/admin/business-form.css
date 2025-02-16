@@ -1,0 +1,186 @@
+.business-form-container {
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.section-title {
+    /* background-color: #2596be; */
+    /* padding: 15px; */
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.form-column {
+    flex: 1;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 15px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #2596be;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.image-upload {
+    position: relative;
+}
+
+.image-upload input {
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    border: 2px solid #ddd;
+}
+
+.image-upload input:hover {
+    border-color: #2596be;
+}
+
+.image-preview {
+    margin-top: 15px;
+    max-width: 250px;
+    max-height: 150px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.image-preview img {
+    width: 100px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.btn-submit {
+    display: block;
+    padding: 12px 25px;
+    background-color: #2596be;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-submit:hover {
+    background-color: #1d7a99;
+    transform: translateY(-2px);
+}
+
+.form-action {
+    margin-top: 30px;
+    display: flex;
+    justify-content: end;
+}
+
+/* Container for the grid layout */
+.current-images-grid {
+    display: flex; /* Use flexbox for better alignment with fewer images */
+    flex-wrap: wrap; /* Allow items to wrap to the next line if needed */
+    gap: 15px; /* Add spacing between images */
+    /* margin-top: 20px; */
+    justify-content: flex-start; /* Align items to the left */
+}
+
+/* Individual image card */
+.image-card {
+    position: relative;
+    max-height: 100px; /* Limit the height of each card */
+    flex: 1 0 calc(25% - 15px); /* Take up 25% of the row, with gap considered */
+    max-width: 150px; /* Optional: Limit the maximum width */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.image-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Image styling */
+.image-preview-current {
+    height: 100px; /* Fixed height */
+    width: auto; /* Maintain aspect ratio */
+    object-fit: cover; /* Ensure the image is cropped nicely */
+    display: block;
+    margin: 0 auto;
+}
+
+/* Delete button styling */
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+    background-color: red;
+}
+.preview-image-title {
+    padding: 20px 0px;
+}
