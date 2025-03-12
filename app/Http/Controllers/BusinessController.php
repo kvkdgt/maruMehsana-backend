@@ -189,5 +189,30 @@ class BusinessController extends Controller
             ],
         ]);
     }
+
+    public function getBusinessByIdAPI(Request $request)
+{
+    $request->validate([
+        'business_id' => 'required|exists:businesses,id',
+    ]);
+
+    // Fetch business details along with category name
+    $business = Business::with('category:id,name')
+        ->where('id', $request->business_id)
+        ->first();
+
+    if (!$business) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Business not found',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Business details fetched successfully',
+        'data' => $business,
+    ]);
+}
     
 }
