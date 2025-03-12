@@ -161,22 +161,33 @@ class BusinessController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'limit' => 'nullable|integer|min:1',
+            'page' => 'nullable|integer|min:1',
         ]);
-
-        // Fetch businesses based on category_id
-        $query = Business::where('category_id', $request->category_id);
-
-        // Apply limit if provided
-        if ($request->has('limit')) {
-            $query->limit($request->limit);
-        }
-
-        $businesses = $query->get();
-
+    
+        $limit = $request->limit ?? 10; // Default limit per page
+        $page = $request->page ?? 1; // Default page number is 1
+        $offset = ($page - 1) * $limit; // Calculate offset for pagination
+    
+        // Fetch businesses with limit and offset
+        $businesses = Business::where('category_id', $request->category_id)
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+    
+        // Get total businesses count for the given category
+        $totalBusinesses = Business::where('category_id', $request->category_id)->count();
+    
         return response()->json([
             'status' => true,
             'message' => 'Businesses fetched successfully',
-            'data' => $businesses
+            'data' => $businesses,
+            'pagination' => [
+                'current_page' => $page,
+                'limit' => $limit,
+                'total_records' => $totalBusinesses,
+                'total_pages' => ceil($totalBusinesses / $limit),
+            ],
         ]);
     }
+    
 }
