@@ -163,20 +163,20 @@ class BusinessController extends Controller
             'limit' => 'nullable|integer|min:1',
             'page' => 'nullable|integer|min:1',
         ]);
-    
+
         $limit = $request->limit ?? 10; // Default limit per page
         $page = $request->page ?? 1; // Default page number is 1
         $offset = ($page - 1) * $limit; // Calculate offset for pagination
-    
+
         // Fetch businesses with limit and offset
         $businesses = Business::where('category_id', $request->category_id)
             ->offset($offset)
             ->limit($limit)
             ->get();
-    
+
         // Get total businesses count for the given category
         $totalBusinesses = Business::where('category_id', $request->category_id)->count();
-    
+
         return response()->json([
             'status' => true,
             'message' => 'Businesses fetched successfully',
@@ -191,28 +191,27 @@ class BusinessController extends Controller
     }
 
     public function getBusinessByIdAPI(Request $request)
-{
-    $request->validate([
-        'business_id' => 'required|exists:businesses,id',
-    ]);
+    {
+        $request->validate([
+            'business_id' => 'required|exists:businesses,id',
+        ]);
 
-    // Fetch business details along with category name
-    $business = Business::with('category:id,name')
-        ->where('id', $request->business_id)
-        ->first();
+        // Fetch business details along with category name
+        $business = Business::with('category:id,name')
+            ->where('id', $request->business_id)
+            ->first();
 
-    if (!$business) {
+        if (!$business) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Business not found',
+            ], 404);
+        }
+
         return response()->json([
-            'status' => false,
-            'message' => 'Business not found',
-        ], 404);
+            'status' => true,
+            'message' => 'Business details fetched successfully',
+            'data' => $business,
+        ]);
     }
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Business details fetched successfully',
-        'data' => $business,
-    ]);
-}
-    
 }

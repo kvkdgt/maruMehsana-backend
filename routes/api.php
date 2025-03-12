@@ -26,6 +26,6 @@ Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::get('/trending-categories', [CategoryController::class, 'trendingCategories']);
 Route::get('/categories', [CategoryController::class, 'categories']);
 Route::get('/businesses/get', [BusinessController::class, 'getBusinesses']);
-Route::get('/getBusinessById', [BusinessController::class, 'getBusinesses']);
+Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']);
 
 Route::post('/user/store', [UserController::class, 'store']);
