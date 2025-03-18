@@ -27,4 +27,15 @@ class FactsController extends Controller
 
         return redirect()->route('admin.facts')->with('success', 'Fact deleted successfully!');
     }
+
+    public function getFacts()
+    {
+        $facts = Fact::inRandomOrder()->take(20)->get();
+        return response()->json([
+            'status' => true,
+            'message' => 'facts fetched successfully',
+            'data' => $facts,
+        ]);
+       
+    }
 }

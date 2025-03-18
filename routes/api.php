@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\FactsController;
 use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
@@ -29,3 +30,4 @@ Route::get('/businesses/get', [BusinessController::class, 'getBusinesses']);
 Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']);
 
 Route::post('/user/store', [UserController::class, 'store']);
+Route::post('/facts/get', [FactsController::class, 'getFacts']);
