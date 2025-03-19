@@ -30,4 +30,4 @@ Route::get('/businesses/get', [BusinessController::class, 'getBusinesses']);
 Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']);
 
 Route::post('/user/store', [UserController::class, 'store']);
-Route::post('/facts/get', [FactsController::class, 'getFacts']);
+Route::get('/facts/get', [FactsController::class, 'getFacts']);
