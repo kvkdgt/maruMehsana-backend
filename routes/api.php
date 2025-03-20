@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\FactsController;
+use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +32,6 @@ Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']
 
 Route::post('/user/store', [UserController::class, 'store']);
 Route::get('/facts/get', [FactsController::class, 'getFacts']);
+
+Route::get('/tourist-places', [TouristPlaceController::class, 'index']);
+Route::get('/tourist-places/{id}', [TouristPlaceController::class, 'show']);

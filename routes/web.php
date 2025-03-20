@@ -5,6 +5,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\FactsController;
+use App\Http\Controllers\TouristPlaceController;
+
 
 
 /*
@@ -46,6 +48,11 @@ Route::middleware([ 'is_admin'])->group(function () {
     Route::get('/admin/facts', [AdminController::class, 'facts'])->name('admin.facts');
     Route::post('admin/facts/store', [FactsController::class, 'store'])->name('facts.store');
     Route::delete('admin/facts/delete/{id}', [FactsController::class, 'destroy'])->name('facts.delete');
+
+    Route::post('admin/tourist-place/store', [TouristPlaceController::class, 'store'])->name('tourist_place.store');
+    Route::delete('admin/tourist-places/delete/{id}', [TouristPlaceController::class, 'destroy'])->name('tourist_place.delete');
+
+
 
 
    

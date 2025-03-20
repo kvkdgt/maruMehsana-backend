@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Category;
 use App\Models\Business;
 use App\Models\Fact;
+use App\Models\TouristPlace;
 
 
 class AdminController extends Controller
@@ -122,14 +123,32 @@ class AdminController extends Controller
         return view("admin.businesses", compact('businesses'));
     }
 
-    public function touristPlaces(Request $request){
+    public function touristPlaces(Request $request)
+    {
         $search = $request->get('search');
         $sortBy = $request->get('sort_by');
-        
     
-        $tourist_places = [];
+        // Build the query
+        $touristPlacesQuery = TouristPlace::query();
+    
+        // Apply search filter
+        if ($search) {
+            $touristPlacesQuery->where('name', 'LIKE', "%$search%")
+                               ->orWhere('description', 'LIKE', "%$search%");
+        }
+    
+        // Apply sorting by visitors
+        if ($sortBy == 'highest') {
+            $touristPlacesQuery->orderBy('visitors', 'desc');
+        } elseif ($sortBy == 'lowest') {
+            $touristPlacesQuery->orderBy('visitors', 'asc');
+        }
+    
+        $tourist_places = $touristPlacesQuery->get();
+    
         return view("admin.tourist-places", compact('tourist_places'));
     }
+    
 
     public function facts(Request $request){
         $search = $request->get('search');
