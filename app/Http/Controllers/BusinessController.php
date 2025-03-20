@@ -162,7 +162,7 @@ class BusinessController extends Controller
             'category_id' => 'required|exists:categories,id',
             'limit' => 'nullable|integer|min:1',
             'page' => 'nullable|integer|min:1',
-            'isFromTrendingCategory' => 'nullable|boolean',
+            'isFromTrendingCategory' => 'nullable|boolean|string',
         ]);
 
         $limit = $request->limit ?? 10; // Default limit per page
