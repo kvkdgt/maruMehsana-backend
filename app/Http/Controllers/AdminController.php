@@ -122,6 +122,15 @@ class AdminController extends Controller
         return view("admin.businesses", compact('businesses'));
     }
 
+    public function touristPlaces(Request $request){
+        $search = $request->get('search');
+        $sortBy = $request->get('sort_by');
+        
+    
+        $tourist_places = [];
+        return view("admin.tourist-places", compact('tourist_places'));
+    }
+
     public function facts(Request $request){
         $search = $request->get('search');
         $factsQuery = Fact::query();

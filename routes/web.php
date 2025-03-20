@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\FactsController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -26,6 +27,8 @@ Route::post('/admin/login', [AdminController::class, 'login']);
 Route::middleware([ 'is_admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
+    Route::get('/admin/tourist-places', [AdminController::class, 'touristPlaces'])->name('admin.tourist-places');
+
     Route::post('admin/categories/store', [CategoryController::class, 'store'])->name('categories.store');
     Route::get('admin/categories/edit/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::post('admin/categories/update', [CategoryController::class, 'update'])->name('categories.update');

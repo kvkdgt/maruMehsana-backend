@@ -167,7 +167,7 @@ class BusinessController extends Controller
         $limit = $request->limit ?? 10; // Default limit per page
         $page = $request->page ?? 1; // Default page number is 1
         $offset = ($page - 1) * $limit; // Calculate offset for pagination
-
+        Category::where('id', $request->category_id)->increment('category_visitors');
         // Fetch businesses with limit and offset
         $businesses = Business::where('category_id', $request->category_id)
             ->offset($offset)
