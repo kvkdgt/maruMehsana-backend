@@ -162,15 +162,18 @@ class BusinessController extends Controller
             'category_id' => 'required|exists:categories,id',
             'limit' => 'nullable|integer|min:1',
             'page' => 'nullable|integer|min:1',
-            'isFromTrendingCategory' => 'nullable|boolean|string',
+            'isFromTrendingCategory' => 'nullable|string|in:true,false',
         ]);
 
         $limit = $request->limit ?? 10; // Default limit per page
         $page = $request->page ?? 1; // Default page number is 1
         $offset = ($page - 1) * $limit; // Calculate offset for pagination
-        if (!$request->has('isFromTrendingCategory') || !$request->isFromTrendingCategory) {
+        $isFromTrendingCategory = $request->isFromTrendingCategory == 'true';
+
+        if (!$isFromTrendingCategory) {
             Category::where('id', $request->category_id)->increment('category_visitors');
         }
+        
     
         // Fetch businesses with limit and offset
         $businesses = Business::where('category_id', $request->category_id)
