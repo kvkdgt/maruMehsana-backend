@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\BusinessEnquiryController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\UserController;
@@ -35,3 +36,6 @@ Route::get('/facts/get', [FactsController::class, 'getFacts']);
 
 Route::get('/tourist-places', [TouristPlaceController::class, 'index']);
 Route::get('/tourist-places/{id}', [TouristPlaceController::class, 'show']);
+
+Route::post('/enquiry/submit', [BusinessEnquiryController::class, 'create']);
+

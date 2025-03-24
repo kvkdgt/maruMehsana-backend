@@ -22,6 +22,8 @@ class Business extends Model
         'whatsapp_no',
         'website_url',
         'email_id',
+        'services',  
+        'products',
         'created_by',
         'updated_by',
     ];

@@ -261,6 +261,9 @@
             <li class="@if(request()->is('admin/marketing')) active @endif">
                 <a href="{{ url('admin/marketing') }}"><i class="fas fa-bullhorn"></i> Marketing</a>
             </li>
+            <li class="@if(request()->is('admin/business-enquiry')) active @endif">
+                <a href="{{ url('admin/business-enquiry') }}"><i class="fa-solid fa-user-tie"></i> Business Enquiry</a>
+            </li>
         </ul>
     </div>
 

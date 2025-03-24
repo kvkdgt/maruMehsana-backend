@@ -34,6 +34,7 @@ class BusinessController extends Controller
             'whatsapp' => 'nullable|string',
             'website' => 'nullable|url|max:255', // Optional website link
             'email' => 'nullable|email|max:255',
+            'products' => 'nullable|string',
         ]);
         $thumbnailPath = $request->file('thumbnail')->store('business_thumbnails', 'public');
         $business = Business::create([
@@ -46,6 +47,8 @@ class BusinessController extends Controller
             'whatsapp_no' => $request->whatsapp, // Optional
             'website_url' => $request->website, // Optional
             'email_id' => $request->email,
+            'services' => $request->services,  
+            'products' => $request->products, 
             'created_by' => Auth::id(),
         ]);
         if ($request->hasFile('images')) {
@@ -115,7 +118,9 @@ class BusinessController extends Controller
             'whatsapp' => 'nullable|string',
             'website' => 'nullable|url|max:255', // Optional website link
             'email' => 'nullable|email|max:255',
-        ]);
+            'services' => 'nullable|string',
+            'products' => 'nullable|string',
+    ]);
 
         // Update basic fields
         $business->update([
@@ -126,6 +131,8 @@ class BusinessController extends Controller
             'whatsapp_no' => $request->whatsapp, // Optional
             'website_url' => $request->website, // Optional
             'email_id' => $request->email, // Optional
+            'services' => $request->services,
+            'products' => $request->products, 
             'updated_by' => Auth::id(),
         ]);
 

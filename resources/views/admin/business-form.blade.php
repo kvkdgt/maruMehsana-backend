@@ -21,19 +21,19 @@
                     <div class="form-group">
                         <input type="hidden" id="id" name="id" class="form-control" value="{{ isset($business) ? $business->id : '' }}" required>
 
-                        <label for="name">Business Name</label>
+                        <label for="name" class="required-label">Business Name</label>
                         <input type="text" id="name" name="name" class="form-control" placeholder="Enter business name" value="{{ isset($business) ? $business->name : '' }}" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Business Description</label>
+                        <label for="description" class="required-label">Business Description</label>
                         <textarea id="description" name="description" class="form-control" placeholder="Enter business description" rows="5" required>{{ isset($business) ? $business->description : '' }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-column">
                     <div class="form-group">
-                        <label for="category">Category</label>
+                        <label for="category" class="required-label">Category</label>
                         <select id="category" name="category_id" class="form-control" required>
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
@@ -44,7 +44,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="thumbnail">Thumbnail</label>
+                        <label for="thumbnail" class="required-label">Thumbnail</label>
                         <div class="image-upload">
                             <input type="file" id="thumbnail" name="thumbnail" class="form-control" accept="image/*" @if(!isset($business)) required @endif  onchange="previewImage(event)">
                             <div class="image-preview">
@@ -74,6 +74,11 @@
                         <label for="name">Whatsapp No.</label>
                         <input type="text" id="whatsapp" name="whatsapp" value="{{ isset($business) ? $business->whatsapp_no : '' }}" class="form-control" placeholder="Enter Whatsapp No.">
                     </div>
+
+                    <div class="form-group">
+                <label for="products">Our Products</label>
+                <textarea id="products" name="products" class="form-control" placeholder="Enter all products with , seprated" rows="5">{{ isset($business) ? $business->products : '' }}</textarea>
+            </div>
                 </div>
 
                 <div class="form-column">
@@ -86,6 +91,11 @@
                         <label for="name">Email</label>
                         <input type="email" id="email" name="email" value="{{ isset($business) ? $business->email_id : '' }}" class="form-control" placeholder="Enter your email id">
                     </div>
+
+                    <div class="form-group">
+                <label for="services">Our Services</label>
+                <textarea id="services" name="services" class="form-control" placeholder="Enter all services with , seprated" rows="5">{{ isset($business) ? $business->services : '' }}</textarea>
+            </div>
                 </div>
 
 

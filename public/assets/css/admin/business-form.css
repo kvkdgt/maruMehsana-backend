@@ -184,3 +184,8 @@ textarea {
 .preview-image-title {
     padding: 20px 0px;
 }
+.required-label::after {
+    content: " *";
+    color: red;
+    font-weight: bold;
+}

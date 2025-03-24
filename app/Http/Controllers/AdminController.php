@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Business;
 use App\Models\Fact;
 use App\Models\TouristPlace;
+use App\Models\BusinessEnquiry;
 
 
 class AdminController extends Controller
@@ -148,6 +149,27 @@ class AdminController extends Controller
     
         return view("admin.tourist-places", compact('tourist_places'));
     }
+
+    public function BusinessEnquiry(Request $request)
+    {
+        $status = $request->get('status'); // Get status from request
+        $pageSize = $request->get('size', 10); // Default page size = 10
+    
+        // Build the query
+        $businessEnquiryQuery = BusinessEnquiry::query();
+    
+        // Apply status filter if provided
+        if ($status) {
+            $businessEnquiryQuery->where('status', $status);
+        }
+    
+        // Paginate dynamically based on frontend input
+        $business_enquiries = $businessEnquiryQuery->paginate($pageSize);
+    
+        return view("admin.business-enquiries", compact('business_enquiries'));
+    }
+    
+    
     
 
     public function facts(Request $request){
