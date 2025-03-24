@@ -95,8 +95,7 @@ class AdminController extends Controller
         }
     
         // Get categories
-        $categories = $categoriesQuery->get();
-    
+        $categories = $categoriesQuery->paginate(10);
         return view('admin.categories', compact('categories'));
     }
 
@@ -120,7 +119,7 @@ class AdminController extends Controller
             $businessesQuery->orderBy('visitors', 'asc');
         }
     
-        $businesses = $businessesQuery->get();
+        $businesses = $businessesQuery->paginate(10);
         return view("admin.businesses", compact('businesses'));
     }
 
@@ -145,7 +144,7 @@ class AdminController extends Controller
             $touristPlacesQuery->orderBy('visitors', 'asc');
         }
     
-        $tourist_places = $touristPlacesQuery->get();
+        $tourist_places = $touristPlacesQuery->paginate(10);
     
         return view("admin.tourist-places", compact('tourist_places'));
     }
@@ -178,7 +177,7 @@ class AdminController extends Controller
         if ($search) {
             $factsQuery->where('fact', 'LIKE', "%$search%");
         }
-        $facts = $factsQuery->get();
+        $facts = $factsQuery->paginate(10);
         return view("admin.facts", compact('facts'));
     }
 }

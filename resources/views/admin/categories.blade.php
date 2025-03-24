@@ -3,6 +3,8 @@
 @section('title', 'Categories')
 
 @section('content')
+<link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
+
 <div class="categories-container">
   <div class="header-container">
     <div>
@@ -80,7 +82,9 @@
         @endforeach
       </tbody>
     </table>
-
+    <div class="pagination-container">
+      {{ $categories->appends(request()->query())->links('vendor.pagination.custom') }}
+    </div>
   </div>
 </div>
 

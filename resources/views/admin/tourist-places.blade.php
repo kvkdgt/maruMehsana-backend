@@ -4,6 +4,8 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/tourist_places.css'); }}">
+<link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
+
 
 <div class="categories-container">
   <div class="header-container">
@@ -63,6 +65,9 @@
         @endforeach
       </tbody>
     </table>
+    <div class="pagination-container">
+      {{ $tourist_places->appends(request()->query())->links('vendor.pagination.custom') }}
+    </div>
   </div>
 </div>
 

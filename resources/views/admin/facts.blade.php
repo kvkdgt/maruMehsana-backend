@@ -4,6 +4,8 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/facts.css'); }}">
+<link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
+
 <div class="categories-container">
   <div class="header-container">
     <div>
@@ -74,6 +76,9 @@
 
       </tbody>
     </table>
+    <div class="pagination-container">
+      {{ $facts->appends(request()->query())->links('vendor.pagination.custom') }}
+    </div>
   </div>
 </div>
 <div id="categoryModal" class="modal">
