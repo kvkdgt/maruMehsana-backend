@@ -47,6 +47,11 @@ Route::middleware([ 'is_admin'])->group(function () {
 
 
     Route::get('/admin/facts', [AdminController::class, 'facts'])->name('admin.facts');
+    Route::get('/admin/marketing', [AdminController::class, 'marketing'])->name('admin.marketing');
+
+    Route::get('/admin/marketing/banner-ads', [AdminController::class, 'bannerAds'])->name('admin.banner-ads');
+
+
     Route::get('/admin/business-enquiry', [AdminController::class, 'BusinessEnquiry'])->name('admin.business-enquiry');
 
     Route::post('admin/facts/store', [FactsController::class, 'store'])->name('facts.store');

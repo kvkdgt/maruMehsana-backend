@@ -20,6 +20,11 @@ class AdminController extends Controller
         return view('admin.login');
     }
 
+    public function marketing()
+    {
+        return view('admin.marketing');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -179,5 +184,12 @@ class AdminController extends Controller
         }
         $facts = $factsQuery->paginate(10);
         return view("admin.facts", compact('facts'));
+    }
+
+    public function bannerAds(Request $request){
+        $search = $request->get('search');
+       
+        $bannerAds =[];
+        return view("admin.bannerAds", compact('bannerAds'));
     }
 }
