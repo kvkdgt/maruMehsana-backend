@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/admin/signup', [AdminController::class, 'signup']);
+Route::get('/search', [AdminController::class, 'search']);
+
 
 Route::get('/trending-categories', [CategoryController::class, 'trendingCategories']);
 Route::get('/categories', [CategoryController::class, 'categories']);

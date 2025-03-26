@@ -12,6 +12,7 @@ use App\Models\Fact;
 use App\Models\TouristPlace;
 use App\Models\BusinessEnquiry;
 use App\Models\BannerAd;
+use Illuminate\Support\Collection;
 
 
 class AdminController extends Controller
@@ -193,5 +194,64 @@ class AdminController extends Controller
             return $query->where('title', 'like', "%$search%");
         })->paginate(10);
         return view("admin.bannerAds", compact('bannerAds'));
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        if (!$query) {
+            return response()->json(['error' => 'Search query is required'], 400);
+        }
+
+        // Search in Categories
+        $categories = Category::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->select('id', 'name')
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'type' => 'Category',
+            ]);
+
+        // Search in Businesses
+        $businesses = Business::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->orWhere('products', 'LIKE', "%{$query}%")
+            ->orWhere('services', 'LIKE', "%{$query}%")
+            ->select('id', 'name')
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'type' => 'Business',
+            ]);
+
+        // Search in Tourist Places
+        $places = TouristPlace::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->orWhere('location', 'LIKE', "%{$query}%")
+            ->select('id', 'name')
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'type' => 'Tourist Place',
+            ]);
+
+        // Merge all results into a collection
+        $results = new Collection();
+        $results = $results->merge($categories);
+        $results = $results->merge($businesses);
+        $results = $results->merge($places);
+
+        // Shuffle to mix up results randomly
+        $shuffledResults = $results->shuffle();
+
+        // Limit to 10 most relevant results
+        $finalResults = $shuffledResults->take(10)->values();
+
+        return response()->json($finalResults);
     }
 }
