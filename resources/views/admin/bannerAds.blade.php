@@ -102,7 +102,7 @@
       <label for="banner-image" class="required-label">Image</label>
       <input type="file" id="banner-image" name="image" accept="image/*" required>
       <label for="banner-title">Redirection Link</label>
-      <input type="text" id="banner-link" name="link" required>
+      <input type="text" id="banner-link" name="link">
       <label for="banner-status" class="required-label">Status</label>
       <select id="banner-status" name="status">
         <option value="1">Active</option>
