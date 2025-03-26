@@ -50,9 +50,10 @@
       <thead>
         <tr>
           <th>Sr. No.</th>
-        
+
           <th>Title</th>
           <th>Status</th>
+          <th>Total Touch</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -60,21 +61,30 @@
         @foreach($bannerAds as $index => $banner)
         <tr>
           <td>{{ $index + 1 }}</td>
-         
+
           <td>{{ $banner->title }}</td>
-          <td>{{ $banner->status ? 'Active' : 'Inactive' }}</td>
           <td>
-            <form action="#" method="POST" style="display:inline-block;" onsubmit="return confirmDelete()">
+            <label class="switch">
+              <input type="checkbox" class="status-toggle" data-id="{{ $banner->id }}" {{ $banner->status ? 'checked' : '' }}>
+              <span class="slider round"></span>
+            </label>
+          </td>
+          <td>{{ $banner->touch }}</td>
+
+
+          <td>
+            <form action="{{ route('admin.banner-ads.destroy', $banner->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete()">
               @csrf
               @method('DELETE')
               <button type="submit" class="delete-btn">Delete</button>
             </form>
           </td>
+
         </tr>
         @endforeach
       </tbody>
     </table>
-    
+
   </div>
 </div>
 
@@ -82,7 +92,7 @@
   <div class="modal-content">
     <span class="close-btn" id="closeModalBtn">&times;</span>
     <h3 id="modal-title">Add New Banner Ad</h3>
-    <form action="{{ url('admin/banner-ads/store') }}" method="POST" enctype="multipart/form-data" id="categoryForm">
+    <form action="{{ route('admin.banner-ads.store') }}" method="POST" enctype="multipart/form-data" id="categoryForm">
       @csrf
       <input type="hidden" id="category-id" name="id">
 
@@ -116,7 +126,7 @@
   btn.onclick = function() {
     modal.style.display = "flex";
     document.getElementById("modal-title").innerText = "Add New Banner Ad";
-    document.getElementById('categoryForm').action = "{{ url('admin/banner-ads/store') }}";
+    document.getElementById('categoryForm').action = "{{ route('admin.banner-ads.store') }}";
     document.getElementById("category-id").value = '';
   }
 
@@ -129,6 +139,35 @@
       modal.style.display = "none";
     }
   }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".status-toggle").forEach(toggle => {
+      toggle.addEventListener("change", function() {
+        let bannerId = this.dataset.id;
+        let status = this.checked ? 1 : 0;
+
+        fetch("{{ url('admin/banner-ads/updateStatus') }}/" + bannerId, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+              status: status
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert("Banner status updated successfully.");
+            } else {
+              alert("Something went wrong. Please try again.");
+            }
+          });
+      });
+    });
+  });
 </script>
+
 
 @endsection

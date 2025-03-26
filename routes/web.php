@@ -7,7 +7,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessEnquiryController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
-
+use App\Http\Controllers\BannerAdController;
 
 
 /*
@@ -61,6 +61,13 @@ Route::middleware([ 'is_admin'])->group(function () {
     Route::delete('admin/tourist-places/delete/{id}', [TouristPlaceController::class, 'destroy'])->name('tourist_place.delete');
 
     Route::put('/admin/business-enquiry/update/{id}', [BusinessEnquiryController::class, 'updateStatus'])->name('admin.BusinessEnquery.updateStatus');
+    
+
+    Route::post('banner-ads/store', [BannerAdController::class, 'store'])->name('admin.banner-ads.store');
+    Route::delete('/banner-ads/{bannerAd}', [BannerAdController::class, 'destroy'])->name('admin.banner-ads.destroy');
+    Route::patch('/admin/banner-ads/updateStatus/{id}', [BannerAdController::class, 'updateStatus']);
+
+
 
 
 

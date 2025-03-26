@@ -11,6 +11,7 @@ use App\Models\Business;
 use App\Models\Fact;
 use App\Models\TouristPlace;
 use App\Models\BusinessEnquiry;
+use App\Models\BannerAd;
 
 
 class AdminController extends Controller
@@ -187,9 +188,10 @@ class AdminController extends Controller
     }
 
     public function bannerAds(Request $request){
-        $search = $request->get('search');
-       
-        $bannerAds =[];
+        $search = $request->search;
+        $bannerAds = BannerAd::when($search, function ($query, $search) {
+            return $query->where('title', 'like', "%$search%");
+        })->paginate(10);
         return view("admin.bannerAds", compact('bannerAds'));
     }
 }
