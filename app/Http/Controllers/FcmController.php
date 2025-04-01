@@ -19,8 +19,8 @@ class FcmController extends Controller
             ]);
     
             $user = \App\Models\AppUser::find($request->user_id);
-            // $fcmTokens = $user->fcm_tokens; // Decode JSON array
-            $fcmTokens = ["c-qRlw-_SAmbixmVwTrpui:APA91bFeCDWsPAnumXMpA3lB92SIw0q2ve70oVVvS5NtbPt-o7ieeFsYZp_5JxxiWG2l1J0r_vQkn_7-nc-fyCVljtdUCb4I6h3Ieer57I1yvAdX5DQca24"]; // Decode JSON array
+            $fcmTokens = $user->fcm_tokens; // Decode JSON array
+            // $fcmTokens = ["c-qRlw-_SAmbixmVwTrpui:APA91bFeCDWsPAnumXMpA3lB92SIw0q2ve70oVVvS5NtbPt-o7ieeFsYZp_5JxxiWG2l1J0r_vQkn_7-nc-fyCVljtdUCb4I6h3Ieer57I1yvAdX5DQca24"]; // Decode JSON array
     
             if (!$fcmTokens || empty($fcmTokens)) {
                 return response()->json(['message' => 'User does not have device tokens'], 400);
