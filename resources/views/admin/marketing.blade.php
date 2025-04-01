@@ -16,7 +16,7 @@
 " alt="Notifications" class="card-image">
       <h4 class="card-title">Notifications</h4>
       <p class="card-description">Manage push notifications and alerts for users.</p>
-      <a href="#" class="card-btn">Go to Notifications</a>
+      <a href="marketing/notifications" class="card-btn">Go to Notifications</a>
     </div>
 
     <!-- Banner Ads Card -->

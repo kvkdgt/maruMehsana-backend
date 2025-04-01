@@ -7,7 +7,9 @@
     "require": {
         "php": "^8.0.2",
         "doctrine/dbal": "^4.2",
+        "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.2",
+        "kreait/firebase-php": "^7.18",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7"

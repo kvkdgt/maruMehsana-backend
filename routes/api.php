@@ -10,6 +10,8 @@ use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerAdController;
+use App\Http\Controllers\FcmController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -43,3 +45,4 @@ Route::get('/tourist-places/{id}', [TouristPlaceController::class, 'show']);
 Route::post('/enquiry/submit', [BusinessEnquiryController::class, 'create']);
 Route::get('/banner-ads', [BannerAdController::class, 'getActiveBanners']);
 Route::post('/banner-ads/{id}/increment-touch', [BannerAdController::class, 'incrementTouch']);
+Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);

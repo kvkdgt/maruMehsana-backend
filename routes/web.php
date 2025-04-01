@@ -66,8 +66,10 @@ Route::middleware([ 'is_admin'])->group(function () {
     Route::post('banner-ads/store', [BannerAdController::class, 'store'])->name('admin.banner-ads.store');
     Route::delete('/banner-ads/{bannerAd}', [BannerAdController::class, 'destroy'])->name('admin.banner-ads.destroy');
     Route::patch('/admin/banner-ads/updateStatus/{id}', [BannerAdController::class, 'updateStatus']);
-
-
+    Route::get('/admin/marketing/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('admin.notifications');
+        Route::post('/admin/notifications/store', [App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
+        Route::post('/admin/notifications/send-now/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'sendNow'])->name('notifications.send-now');
+        Route::delete('/admin/notifications/delete/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'delete'])->name('notifications.delete');
 
 
 
@@ -77,3 +79,4 @@ Route::middleware([ 'is_admin'])->group(function () {
 
 
 });
+
