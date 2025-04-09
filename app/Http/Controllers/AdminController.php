@@ -13,6 +13,7 @@ use App\Models\TouristPlace;
 use App\Models\BusinessEnquiry;
 use App\Models\BannerAd;
 use Illuminate\Support\Collection;
+use App\Models\AppUser;
 
 
 class AdminController extends Controller
@@ -49,13 +50,59 @@ class AdminController extends Controller
     }
 
     // Admin dashboard
-    public function dashboard()
+    public function dashboardOld()
     {
         $totalCategories = Category::count();
         $totalBusinesses = Business::count();
 
         return view('admin.dashboard', compact('totalCategories','totalBusinesses')); // Create a simple admin dashboard view
     }
+
+    public function dashboard()
+{
+    // Core model counts
+    $totalCategories = Category::count();
+    $totalBusinesses = Business::count();
+    $totalAppUsers = AppUser::count();
+    $totalTouristPlaces = TouristPlace::count();
+    
+    // Visitor statistics
+    $totalCategoryVisitors = Category::sum('category_visitors');
+    $totalBusinessVisitors = Business::sum('visitors');
+    $totalTouristVisitors = TouristPlace::sum('visitors');
+    
+    // App users statistics
+    $activeUsers = AppUser::where('is_login', true)->count();
+    $newUsersToday = AppUser::whereDate('created_at', today())->count();
+    $recentUsers = AppUser::orderBy('created_at', 'desc')->take(5)->get();
+    
+    // Business enquiries
+    $pendingEnquiries = BusinessEnquiry::where('status', 'Pending')->count();
+    $recentEnquiries = BusinessEnquiry::orderBy('created_at', 'desc')->take(3)->get();
+    
+    // Banner ads
+    $activeBannerAds = BannerAd::where('status', 1)->take(4)->get();
+    
+    // Random facts
+    $randomFacts = Fact::inRandomOrder()->take(5)->get();
+    
+    return view('admin.dashboard', compact(
+        'totalCategories',
+        'totalBusinesses',
+        'totalAppUsers',
+        'totalTouristPlaces',
+        'totalCategoryVisitors',
+        'totalBusinessVisitors',
+        'totalTouristVisitors',
+        'activeUsers',
+        'newUsersToday',
+        'recentUsers',
+        'pendingEnquiries',
+        'recentEnquiries',
+        'activeBannerAds',
+        'randomFacts'
+    ));
+}
 
     public function signup(Request $request)
     {
