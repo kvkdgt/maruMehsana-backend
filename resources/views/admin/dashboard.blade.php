@@ -42,7 +42,7 @@
     <a href="{{ url('admin/tourist-places') }}" class="quick-action-btn tourist-btn">
       <i class="fas fa-map-marker-alt"></i>  Tourist Place
     </a>
-    <a href="{{ url('admin/push-notifications') }}" class="quick-action-btn notification-btn">
+    <a href="{{ url('admin/marketing/notifications') }}" class="quick-action-btn notification-btn">
       <i class="fas fa-bell"></i> Push Notifications
     </a>
   </div>
@@ -179,7 +179,7 @@
           <p>No recent enquiries to display</p>
         </div>
         @endif
-        <a href="{{ url('admin/business-enquiries') }}" class="view-all-btn">View All Enquiries</a>
+        <a href="{{ url('admin/business-enquiry') }}" class="view-all-btn">View All Enquiries</a>
       </div>
     </div>
   </div>
@@ -190,7 +190,7 @@
     <div class="wide-card ads-card">
       <div class="wide-card-header">
         <h3><i class="fas fa-ad"></i> Banner Ads</h3>
-        <a href="{{ url('admin/banner-ads/create') }}" class="add-btn"><i class="fas fa-plus"></i> Add New</a>
+        <a href="{{ url('admin/marketing/banner-ads') }}" class="add-btn"><i class="fas fa-plus"></i> Add New</a>
       </div>
       <div class="wide-card-body">
         @if(isset($activeBannerAds) && count($activeBannerAds) > 0)
@@ -215,7 +215,7 @@
           <p>No active banner ads to display</p>
         </div>
         @endif
-        <a href="{{ url('admin/banner-ads') }}" class="view-all-btn">Manage Banner Ads</a>
+        <a href="{{ url('admin/marketing/banner-ads') }}" class="view-all-btn">Manage Banner Ads</a>
       </div>
     </div>
 
@@ -223,7 +223,7 @@
     <div class="wide-card facts-card">
       <div class="wide-card-header">
         <h3><i class="fas fa-lightbulb"></i> Daily Facts</h3>
-        <a href="{{ url('admin/facts/create') }}" class="add-btn"><i class="fas fa-plus"></i> Add New</a>
+        <a href="{{ url('admin/facts') }}" class="add-btn"><i class="fas fa-plus"></i> Add New</a>
       </div>
       <div class="wide-card-body">
         @if(isset($randomFacts) && count($randomFacts) > 0)

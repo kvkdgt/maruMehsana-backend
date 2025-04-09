@@ -51,7 +51,7 @@
 
     .brand-side {
       flex: 1;
-      background: linear-gradient(135deg, #2c3e50, #34495e);
+      background: linear-gradient(135deg, #FF5722, #FF9800);
       padding: 40px;
       color: white;
       position: relative;
@@ -66,7 +66,7 @@
       position: absolute;
       width: 300px;
       height: 300px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       top: -100px;
       left: -100px;
@@ -77,7 +77,7 @@
       position: absolute;
       width: 200px;
       height: 200px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       bottom: -50px;
       right: -50px;
@@ -92,7 +92,7 @@
     }
 
     .logo span {
-      color: #3498db;
+      color: #FFD700;
     }
 
     .brand-tagline {
@@ -142,7 +142,7 @@
 
     .login-header h2 {
       font-size: 28px;
-      color: #2c3e50;
+      color: #333;
       font-weight: 600;
     }
 
@@ -168,7 +168,7 @@
       width: 100%;
       padding: 15px;
       border: none;
-      background: #eef2f7;
+      background: #f0f5ff;
       border-radius: 12px;
       font-size: 15px;
       color: #333;
@@ -176,9 +176,9 @@
     }
 
     .form-group input:focus {
-      background: #e5eef7;
+      background: #e0e9ff;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.2);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
     }
 
     .form-group .input-icon {
@@ -201,7 +201,7 @@
     .login-btn {
       width: 100%;
       padding: 15px;
-      background: linear-gradient(to right, #2c3e50, #3498db);
+      background: linear-gradient(to right, #FF5722, #FF9800);
       border: none;
       border-radius: 12px;
       color: white;
@@ -211,9 +211,6 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
-      opacity: 1 !important; /* Ensure the button is always visible */
-      display: block !important; /* Ensure the button is always displayed */
-      visibility: visible !important; /* Ensure the button is always visible */
     }
 
     .login-btn::before {
@@ -232,7 +229,7 @@
     }
 
     .login-btn:hover {
-      box-shadow: 0 7px 15px rgba(44, 62, 80, 0.4);
+      box-shadow: 0 7px 15px rgba(255, 87, 34, 0.4);
       transform: translateY(-2px);
     }
 
@@ -352,7 +349,7 @@
           </div>
         </div>
 
-        <button type="submit" class="login-btn">Login</button>
+        <button type="submit" class="login-btn">Sign In</button>
       </form>
 
       <div class="login-footer">
@@ -365,7 +362,7 @@
     // Create animated background circles
     function createCircles() {
       const body = document.querySelector('body');
-      const colors = ['rgba(44, 62, 80, 0.2)', 'rgba(52, 73, 94, 0.15)', 'rgba(52, 152, 219, 0.1)'];
+      const colors = ['rgba(255, 87, 34, 0.2)', 'rgba(255, 152, 0, 0.15)', 'rgba(255, 215, 0, 0.1)'];
       
       for (let i = 0; i < 6; i++) {
         const circle = document.createElement('div');
@@ -399,7 +396,7 @@
     window.addEventListener('load', () => {
       createCircles();
       
-      // Animate login container without affecting the button
+      // Animate login container
       gsap.from('.login-container', {
         opacity: 0,
         y: 30,
@@ -427,8 +424,8 @@
         ease: "power2.out"
       });
       
-      // Animate form elements but exclude the button from opacity animations
-      gsap.from('.login-header, .form-group, .login-footer', {
+      // Animate login form elements
+      gsap.from('.login-header, .form-group, .login-btn, .login-footer', {
         opacity: 0,
         y: 20,
         stagger: 0.15,
@@ -436,17 +433,6 @@
         delay: 0.5,
         ease: "power2.out"
       });
-      
-      // Ensure the button is visible immediately
-      document.querySelector('.login-btn').style.opacity = "1";
-      document.querySelector('.login-btn').style.visibility = "visible";
-    });
-    
-    // Additional check to ensure the button remains visible
-    document.addEventListener('DOMContentLoaded', function() {
-      // Force the button to be visible
-      document.querySelector('.login-btn').style.opacity = "1";
-      document.querySelector('.login-btn').style.visibility = "visible";
     });
   </script>
 </body>
