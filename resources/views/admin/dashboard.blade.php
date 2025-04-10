@@ -99,6 +99,22 @@
         <a href="{{ url('admin/tourist-places') }}" class="card-link">Manage Places</a>
       </div>
     </div>
+
+    <!-- Notifications Card -->
+<div class="stat-card notification-card">
+  <div class="card-icon">
+    <i class="fas fa-bell"></i>
+  </div>
+  <div class="stat-content">
+    <h3>Notifications</h3>
+    <p class="count">{{ $notificationStats['total'] }}</p>
+    <div class="stat-footer">
+      <span class="stat-label">Delivered</span>
+      <span class="stat-value">{{ $notificationStats['logs']['delivered'] ?? 0 }}</span>
+    </div>
+    <a href="{{ url('admin/marketing/notifications') }}" class="card-link">Manage Notifications</a>
+  </div>
+</div>
   </div>
 
   <!-- Second Row: App Users & Enquiries -->
@@ -246,6 +262,60 @@
       </div>
     </div>
   </div>
+
+  <!-- Notifications Overview Card -->
+<div class="wide-card notification-overview-card">
+  <div class="wide-card-header">
+    <h3><i class="fas fa-bell"></i> Notification Overview</h3>
+    <span class="badge">{{ $notificationStats['scheduled'] }} Scheduled</span>
+  </div>
+  <div class="wide-card-body">
+    <div class="notification-stats">
+      <div class="notification-stat">
+        <span class="stat-value">{{ $notificationStats['sent'] }}</span>
+        <span class="stat-label">Sent</span>
+      </div>
+      <div class="notification-stat">
+        <span class="stat-value">{{ $notificationStats['logs']['delivered'] }}</span>
+        <span class="stat-label">Delivered</span>
+      </div>
+      <div class="notification-stat">
+        <span class="stat-value">{{ $notificationStats['logs']['failed'] }}</span>
+        <span class="stat-label">Failed</span>
+      </div>
+    </div>
+    
+   
+    
+    @if(isset($recentNotifications) && count($recentNotifications) > 0)
+    <div class="recent-notifications">
+      <h4>Recent Notifications</h4>
+      <div class="notification-list">
+        @foreach($recentNotifications as $notification)
+        <div class="notification-item">
+          <div class="notification-icon">
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <div class="notification-info">
+            <h5>{{ $notification->title }}</h5>
+            <p>{{ Str::limit($notification->message, 50) }}</p>
+            <span class="notification-date">{{ $notification->created_at->format('M d, Y') }}</span>
+          </div>
+          <div class="notification-status {{ $notification->is_sent ? 'sent' : 'pending' }}">
+            {{ $notification->is_sent ? 'Sent' : 'Pending' }}
+          </div>
+        </div>
+        @endforeach
+      </div>
+    </div>
+    @else
+    <div class="no-data">
+      <p>No recent notifications to display</p>
+    </div>
+    @endif
+    <a href="{{ url('admin/marketing/notifications') }}" class="view-all-btn">View All Notifications</a>
+  </div>
+</div>
 </div>
 
 <style>
@@ -849,6 +919,138 @@
     border-radius: 10px;
   }
 
+  /* Notification Card */
+.notification-card .card-icon {
+  background: linear-gradient(135deg, #8E2DE2, #4A00E0);
+}
+
+/* Notification Overview Card */
+.notification-overview-card .wide-card-header i {
+  color: #8E2DE2;
+}
+
+.notification-overview-card .badge {
+  background-color: #f0e6ff;
+  color: #8E2DE2;
+}
+
+.notification-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 25px;
+}
+
+.notification-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 10px;
+  min-width: 100px;
+}
+
+.notification-stat .stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+.notification-stat .stat-label {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.notification-chart {
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 10px;
+}
+
+.notification-chart h4 {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  color: var(--dark-color);
+}
+
+.recent-notifications h4 {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  color: var(--dark-color);
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 10px;
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0e6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.notification-icon i {
+  color: #8E2DE2;
+}
+
+.notification-info {
+  flex-grow: 1;
+}
+
+.notification-info h5 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--dark-color);
+}
+
+.notification-info p {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.notification-date {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.notification-status {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+.notification-status.sent {
+  background-color: #e3f5e9;
+  color: var(--secondary-color);
+}
+
+.notification-status.pending {
+  background-color: #fff8e1;
+  color: #ffa000;
+}
+
   /* Responsive Design */
   @media (max-width: 1200px) {
     .banner-stats {
@@ -927,6 +1129,15 @@
         }
       }, 5000);
     }
+    
   });
+
+  // Chart for weekly notifications
+
+</script>
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+<script>
+ 
 </script>
 @endsection
