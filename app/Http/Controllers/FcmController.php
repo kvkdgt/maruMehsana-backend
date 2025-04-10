@@ -5,24 +5,34 @@ use Illuminate\Http\Request;
 use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use App\Models\NotificationLog;
 
 class FcmController extends Controller
 {
-    public function sendFcmNotification(Request $request)
+    public function sendFcmNotification(Request $request, $notificationId = null)
     {
         try {
             $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'title' => 'required|string',
                 'body' => 'required|string',
-                'image' => 'nullable|string', // Image is now optional
+                'image' => 'nullable|string', // Image is optional
             ]);
     
             $user = \App\Models\AppUser::find($request->user_id);
             $fcmTokens = $user->fcm_tokens; // Decode JSON array
-            // $fcmTokens = ["c-qRlw-_SAmbixmVwTrpui:APA91bFeCDWsPAnumXMpA3lB92SIw0q2ve70oVVvS5NtbPt-o7ieeFsYZp_5JxxiWG2l1J0r_vQkn_7-nc-fyCVljtdUCb4I6h3Ieer57I1yvAdX5DQca24"]; // Decode JSON array
     
             if (!$fcmTokens || empty($fcmTokens)) {
+                // Log the failure if notification ID is provided
+                if ($notificationId) {
+                    NotificationLog::create([
+                        'notification_id' => $notificationId,
+                        'app_user_id' => $user->id,
+                        'status' => 'failed',
+                        'error_message' => 'User does not have device tokens',
+                        'device_type' => $user->device_type ?? 'unknown',
+                    ]);
+                }
                 return response()->json(['message' => 'User does not have device tokens'], 400);
             }
     
@@ -119,10 +129,48 @@ class FcmController extends Controller
                 $err = curl_error($ch);
                 curl_close($ch);
     
+                // Parse the response
+                $responseData = json_decode($response, true);
+                
+                // Create device type determination logic
+                $deviceType = 'unknown';
+                if (isset($user->device_type)) {
+                    $deviceType = $user->device_type;
+                } elseif (strpos($fcmToken, 'ios') !== false) {
+                    $deviceType = 'ios';
+                } elseif (strpos($fcmToken, 'android') !== false) {
+                    $deviceType = 'android';
+                }
+                
                 if ($err) {
                     $responses[] = ['token' => $fcmToken, 'status' => 'failed', 'error' => $err];
+                    
+                    // Log the failure if notification ID is provided
+                    if ($notificationId) {
+                        NotificationLog::create([
+                            'notification_id' => $notificationId,
+                            'app_user_id' => $user->id,
+                            'status' => 'failed',
+                            'error_message' => $err,
+                            'device_type' => $deviceType,
+                            'fcm_message_id' => null,
+                        ]);
+                    }
                 } else {
-                    $responses[] = ['token' => $fcmToken, 'status' => 'sent', 'response' => json_decode($response, true)];
+                    $responses[] = ['token' => $fcmToken, 'status' => 'sent', 'response' => $responseData];
+                    
+                    // Log the success if notification ID is provided
+                    if ($notificationId) {
+                        $messageId = $responseData['name'] ?? null;
+                        NotificationLog::create([
+                            'notification_id' => $notificationId,
+                            'app_user_id' => $user->id,
+                            'status' => 'sent', // Initial status is 'sent', can be updated to 'delivered' via webhook
+                            'error_message' => null,
+                            'device_type' => $deviceType,
+                            'fcm_message_id' => $messageId,
+                        ]);
+                    }
                 }
             }
     
@@ -132,11 +180,55 @@ class FcmController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            // Log the exception if notification ID is provided
+            if ($notificationId && isset($user)) {
+                NotificationLog::create([
+                    'notification_id' => $notificationId,
+                    'app_user_id' => $user->id ?? null,
+                    'status' => 'failed',
+                    'error_message' => 'Error: ' . $e->getMessage(),
+                    'device_type' => $user->device_type ?? 'unknown',
+                    'fcm_message_id' => null,
+                ]);
+            }
+            
             return response()->json([
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
-      
     
+    /**
+     * Handle FCM delivery status updates (can be called by a webhook)
+     */
+    public function updateNotificationStatus(Request $request)
+    {
+        try {
+            $request->validate([
+                'message_id' => 'required|string',
+                'status' => 'required|string|in:delivered,failed',
+                'error' => 'nullable|string',
+            ]);
+            
+            // Find the notification log by FCM message ID
+            $log = NotificationLog::where('fcm_message_id', $request->message_id)->first();
+            
+            if (!$log) {
+                return response()->json(['success' => false, 'message' => 'Notification log not found'], 404);
+            }
+            
+            // Update the status
+            $log->status = $request->status;
+            
+            if ($request->status === 'failed' && $request->has('error')) {
+                $log->error_message = $request->error;
+            }
+            
+            $log->save();
+            
+            return response()->json(['success' => true, 'message' => 'Status updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
 }

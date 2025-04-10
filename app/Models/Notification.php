@@ -22,4 +22,21 @@ class Notification extends Model
         'scheduled_at' => 'datetime',
         'is_sent' => 'boolean',
     ];
+
+    public function logs()
+{
+    return $this->hasMany(NotificationLog::class);
+}
+public function successCount()
+{
+    return $this->logs()->where('status', 'delivered')->count();
+}
+
+/**
+ * Get the count of failed notifications.
+ */
+public function failureCount()
+{
+    return $this->logs()->where('status', 'failed')->count();
+}
 }

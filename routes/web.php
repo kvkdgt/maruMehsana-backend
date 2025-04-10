@@ -74,6 +74,8 @@ Route::middleware([ 'is_admin'])->group(function () {
         Route::post('/admin/notifications/send-now/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'sendNow'])->name('notifications.send-now');
         Route::delete('/admin/notifications/delete/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'delete'])->name('notifications.delete');
 
+        Route::get('/admin/notifications/{id}/logs', [App\Http\Controllers\Admin\NotificationController::class, 'showLogs'])->name('admin.notifications.logs');
+
 
 
 

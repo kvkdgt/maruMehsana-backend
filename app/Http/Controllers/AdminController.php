@@ -14,6 +14,9 @@ use App\Models\BusinessEnquiry;
 use App\Models\BannerAd;
 use Illuminate\Support\Collection;
 use App\Models\AppUser;
+use App\Models\Notification;
+use App\Models\NotificationLog;
+use Carbon\Carbon;
 
 
 class AdminController extends Controller
@@ -85,6 +88,34 @@ class AdminController extends Controller
     
     // Random facts
     $randomFacts = Fact::inRandomOrder()->take(5)->get();
+    $notificationStats = [
+        'total' => Notification::count(),
+        'sent' => Notification::where('is_sent', true)->count(),
+        'scheduled' => Notification::where('is_sent', false)->whereNotNull('scheduled_at')->count(),
+        'logs' => [
+            'total' => NotificationLog::count(),
+            'delivered' => NotificationLog::where('status', 'delivered')->count(),
+            'sent' => NotificationLog::where('status', 'sent')->count(),
+            'failed' => NotificationLog::where('status', 'failed')->count(),
+        ],
+    ];
+    
+    // Recent notifications
+    $recentNotifications = Notification::where('is_sent', true)
+        ->orderBy('created_at', 'desc')
+        ->limit(5)
+        ->get();
+        $startDate = Carbon::now()->subDays(7);
+        $weeklyNotifications = Notification::where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+            
+        $chartData = [
+            'labels' => $weeklyNotifications->pluck('date')->toArray(),
+            'data' => $weeklyNotifications->pluck('count')->toArray(),
+        ];
     
     return view('admin.dashboard', compact(
         'totalCategories',
@@ -100,7 +131,8 @@ class AdminController extends Controller
         'pendingEnquiries',
         'recentEnquiries',
         'activeBannerAds',
-        'randomFacts'
+        'randomFacts',
+        'notificationStats', 'recentNotifications', 'chartData'
     ));
 }
 

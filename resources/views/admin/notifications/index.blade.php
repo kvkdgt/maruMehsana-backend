@@ -142,6 +142,9 @@
                   @csrf
                   <button type="submit" class="edit-btn">Send Now</button>
                 </form>
+                @if($notification->is_sent)
+        <a href="{{ route('admin.notifications.logs', $notification->id) }}" class="btn btn-sm btn-info">View Logs</a>
+    @endif
                 
                 <form action="{{ route('notifications.delete', $notification->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete()">
                   @csrf
