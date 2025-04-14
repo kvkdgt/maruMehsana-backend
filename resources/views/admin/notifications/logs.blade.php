@@ -4,6 +4,7 @@
 @section('title', 'Notifications Stats')
 
 @section('content')
+<link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
 
 <style>
     /* Custom CSS for Notification Logs Page */
@@ -207,63 +208,90 @@
         font-size: 1rem;
     }
 
-    .pagination-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-    }
+   /* Enhanced Pagination Styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
 
-    /* Custom styling for Laravel pagination */
-    .pagination {
-        display: flex;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        border-radius: 0.375rem;
-        overflow: hidden;
-    }
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
-    .pagination li {
-        margin: 0;
-    }
+.pagination li {
+    margin: 0;
+}
 
+.pagination li a,
+.pagination li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem;
+    padding: 0 1rem;
+    min-width: 2.5rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    background-color: white;
+    color: #1f2937;
+    text-decoration: none;
+    margin-left: -1px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.pagination li:first-child a,
+.pagination li:first-child span {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.pagination li:last-child a,
+.pagination li:last-child span {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+.pagination li.active span {
+    background-color: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.pagination li:not(.active) a:hover {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    border-color: #e0e7ff;
+    z-index: 1;
+}
+
+.pagination li.disabled span {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+}
+
+/* For smaller screens */
+@media (max-width: 480px) {
     .pagination li a,
     .pagination li span {
-        display: block;
-        padding: 0.5rem 0.75rem;
+        padding: 0 0.75rem;
         min-width: 2.25rem;
-        text-align: center;
-        border: 1px solid #e5e7eb;
-        color: var(--text-dark);
-        text-decoration: none;
-        margin-left: -1px;
+        height: 2.25rem;
+        font-size: 0.875rem;
     }
-
-    .pagination li:first-child a,
-    .pagination li:first-child span {
-        border-top-left-radius: 0.375rem;
-        border-bottom-left-radius: 0.375rem;
-    }
-
-    .pagination li:last-child a,
-    .pagination li:last-child span {
-        border-top-right-radius: 0.375rem;
-        border-bottom-right-radius: 0.375rem;
-    }
-
-    .pagination li.active span {
-        background-color: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-        font-weight: 500;
-    }
-
-    .pagination li a:hover {
-        background-color: var(--neutral-light);
-        z-index: 1;
-        position: relative;
-    }
+}
 
     /* For responsive design */
     @media (max-width: 768px) {
@@ -371,7 +399,7 @@
     </div>
     
     <div class="pagination-container">
-        {{ $logs->links() }}
-    </div>
+    {{ $logs->appends(request()->query())->links('vendor.pagination.custom') }}
+</div>
 </div>
 @endsection
