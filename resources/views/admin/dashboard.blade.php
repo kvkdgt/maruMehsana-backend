@@ -129,7 +129,7 @@
         <div class="user-stats">
           <div class="user-stat">
             <span class="stat-value">{{ $activeUsers ?? 0 }}</span>
-            <span class="stat-label">Active Users</span>
+            <span class="stat-label">Loggedin Users</span>
           </div>
           <div class="user-stat">
             <span class="stat-value">{{ $newUsersToday ?? 0 }}</span>

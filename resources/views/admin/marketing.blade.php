@@ -13,7 +13,7 @@
             <h1 class="dashboard-title">Marketing Hub</h1>
             <p class="dashboard-subtitle">Manage your marketing channels and campaigns in one place</p>
         </div>
-        <div class="dashboard-stats">
+        <!-- <div class="dashboard-stats">
             <div class="stat-item">
                 <span class="stat-value">2.4k</span>
                 <span class="stat-label">Active Users</span>
@@ -26,7 +26,7 @@
                 <span class="stat-value">12</span>
                 <span class="stat-label">Campaigns</span>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Marketing Tools Section -->
@@ -43,8 +43,8 @@
                     <h3 class="card-title">Notifications</h3>
                     <p class="card-description">Create and schedule push notifications, alerts and in-app messages to engage users.</p>
                     <div class="card-meta">
-                        <span class="meta-stat"><i class="fas fa-paper-plane"></i> 24 active</span>
-                        <span class="meta-stat"><i class="fas fa-clock"></i> 3 scheduled</span>
+                        <!-- <span class="meta-stat"><i class="fas fa-paper-plane"></i> 24 active</span> -->
+                        <span class="meta-stat"><i class="fas fa-clock"></i> {{$scheduledCount}} scheduled</span>
                     </div>
                     <a href="marketing/notifications" class="card-btn">
                         Manage Notifications <i class="fas fa-arrow-right"></i>
@@ -61,8 +61,8 @@
                     <h3 class="card-title">Banner Ads</h3>
                     <p class="card-description">Design eye-catching banner advertisements and promotions to boost conversion rates.</p>
                     <div class="card-meta">
-                        <span class="meta-stat"><i class="fas fa-image"></i> 8 active</span>
-                        <span class="meta-stat"><i class="fas fa-chart-line"></i> 3.2% CTR</span>
+                        <span class="meta-stat"><i class="fas fa-image"></i> {{$activeBannerCount}} active</span>
+                        <!-- <span class="meta-stat"><i class="fas fa-chart-line"></i> 3.2% CTR</span> -->
                     </div>
                     <a href="marketing/banner-ads" class="card-btn">
                         Manage Banner Ads <i class="fas fa-arrow-right"></i>
@@ -71,7 +71,7 @@
             </div>
 
             <!-- Email Campaigns Tool -->
-            <div class="tool-card email-card">
+            <!-- <div class="tool-card email-card">
                 <div class="card-icon">
                     <i class="fas fa-envelope"></i>
                 </div>
@@ -86,10 +86,10 @@
                         Manage Email Campaigns <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Analytics Tool -->
-            <div class="tool-card analytics-card">
+            <!-- <div class="tool-card analytics-card">
                 <div class="card-icon">
                     <i class="fas fa-chart-pie"></i>
                 </div>
@@ -104,7 +104,7 @@
                         View Analytics <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 

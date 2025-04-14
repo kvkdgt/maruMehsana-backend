@@ -34,9 +34,9 @@ class SendScheduledNotifications extends Command
         
         // Get all unsent scheduled notifications that are due
         $notifications = Notification::where('is_sent', false)
-            ->whereNotNull('scheduled_at')
-            ->where('scheduled_at', '<=', Carbon::now())
-            ->get();
+        ->whereNotNull('scheduled_at')
+        ->where('scheduled_at', '<=', Carbon::now('Asia/Kolkata'))
+        ->get();
             
         $this->info("Found {$notifications->count()} notifications to send.");
         
@@ -78,16 +78,10 @@ class SendScheduledNotifications extends Command
         
         // Customize this based on your audience requirements
         switch ($audience) {
-            case 'all':
+            case 'all_users':
                 // No filtering needed, get all users
                 break;
-            case 'active':
-                $query->where('last_active_at', '>=', now()->subDays(30));
-                break;
-            case 'inactive':
-                $query->where('last_active_at', '<', now()->subDays(30))
-                      ->orWhereNull('last_active_at');
-                break;
+          
             // Add more audience types as needed
         }
         

@@ -12,17 +12,17 @@ class FcmController extends Controller
     public function sendFcmNotification(Request $request, $notificationId = null)
     {
         try {
+
             $request->validate([
-                'user_id' => 'required|exists:users,id',
+                'user_id' => 'required',
                 'title' => 'required|string',
                 'body' => 'required|string',
                 'image' => 'nullable|string', // Image is optional
             ]);
-    
             $user = \App\Models\AppUser::find($request->user_id);
             $fcmTokens = $user->fcm_tokens; // Decode JSON array
     
-            if (!$fcmTokens || empty($fcmTokens)) {
+            if (!$fcmTokens || empty($fcmTokens)) { 
                 // Log the failure if notification ID is provided
                 if ($notificationId) {
                     NotificationLog::create([
@@ -180,6 +180,7 @@ class FcmController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            dd($e->getMessage());
             // Log the exception if notification ID is provided
             if ($notificationId && isset($user)) {
                 NotificationLog::create([

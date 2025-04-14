@@ -22,26 +22,61 @@ class NotificationController extends Controller
         $this->fcmController = $fcmController;
     }
     
-    public function index(Request $request)
-    {
-        $tab = $request->tab ?? 'send';
-        
-        $query = Notification::query();
-        
-        if ($tab === 'scheduled') {
-            $query->whereNotNull('scheduled_at')
-                  ->orderBy('scheduled_at');
-        } else {
-            $query->where(function($q) {
-                $q->whereNull('scheduled_at');
-            })
-            ->orderBy('created_at', 'desc');
+        // public function index(Request $request)
+        // {
+        //     $tab = $request->tab ?? 'send';
+            
+        //     $query = Notification::query();
+            
+        //     if ($tab === 'scheduled') {
+        //         $query->whereNotNull('scheduled_at')
+        //             ->orderBy('scheduled_at');
+        //     } else {
+        //         $query->where(function($q) {
+        //             $q->whereNull('scheduled_at');
+        //         })
+        //         ->orderBy('created_at', 'desc');
+        //     }
+            
+        //     $notifications = $query->paginate(10);
+            
+        //     return view('admin.notifications.index', compact('notifications', 'tab'));
+        // }
+
+        public function index(Request $request)
+        {
+            $query = Notification::query();
+            
+            // Apply filters
+            if ($request->has('type')) {
+                if ($request->type === 'direct') {
+                    $query->whereNull('scheduled_at');
+                } elseif ($request->type === 'scheduled') {
+                    $query->whereNotNull('scheduled_at');
+                }
+            }
+            
+            if ($request->has('status')) {
+                if ($request->status === 'sent') {
+                    $query->where('is_sent', 1);
+                } elseif ($request->status === 'pending') {
+                    $query->where('is_sent', 0);
+                }
+            }
+            
+            if ($request->has('image')) {
+                if ($request->image === 'with') {
+                    $query->whereNotNull('banner');
+                } elseif ($request->image === 'without') {
+                    $query->whereNull('banner');
+                }
+            }
+            
+            $notifications = $query->orderBy('created_at', 'desc')->paginate(10);
+            $tab = $request->tab ?? 'send';
+            
+            return view('admin.notifications.index', compact('notifications', 'tab'));
         }
-        
-        $notifications = $query->paginate(10);
-        
-        return view('admin.notifications.index', compact('notifications', 'tab'));
-    }
     
     /**
      * Store a newly created notification in storage.
@@ -111,11 +146,11 @@ class NotificationController extends Controller
         
         // Get users based on audience
         $appUsers = $this->getUsersByAudience($notification->audience);
-        
         // Send notification to each user
         $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
         
         foreach ($appUsers as $user) {
+            
             $this->fcmController->sendFcmNotification(new Request([
                 'user_id' => $user->id,
                 'title' => $notification->title,
@@ -155,16 +190,10 @@ class NotificationController extends Controller
         
         // Customize this based on your audience requirements
         switch ($audience) {
-            case 'all':
+            case 'all_users':
                 // No filtering needed, get all users
                 break;
-            case 'active':
-                $query->where('last_active_at', '>=', now()->subDays(30));
-                break;
-            case 'inactive':
-                $query->where('last_active_at', '<', now()->subDays(30))
-                      ->orWhereNull('last_active_at');
-                break;
+         
             // Add more audience types as needed
         }
         

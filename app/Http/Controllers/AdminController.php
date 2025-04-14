@@ -28,7 +28,11 @@ class AdminController extends Controller
 
     public function marketing()
     {
-        return view('admin.marketing');
+        $scheduledCount = Notification::where('scheduled_at', '>', now())->count();
+        $activeBannerCount = \App\Models\BannerAd::where('status', 1)->count();
+
+
+        return view('admin.marketing',compact('scheduledCount','activeBannerCount'));
     }
 
     public function login(Request $request)
