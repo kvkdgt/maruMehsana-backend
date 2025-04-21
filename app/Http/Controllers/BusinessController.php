@@ -27,8 +27,8 @@ class BusinessController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional additional images
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Optional additional images
             'category_id' => 'required|integer|exists:categories,id',
             'mobile' => 'nullable|string',
             'whatsapp' => 'nullable|string',
