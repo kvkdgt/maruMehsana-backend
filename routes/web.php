@@ -8,6 +8,7 @@ use App\Http\Controllers\BusinessEnquiryController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\BannerAdController;
+use App\Http\Controllers\ShareController;
 
 
 /*
@@ -24,6 +25,7 @@ use App\Http\Controllers\BannerAdController;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/business/{businessId}', [ShareController::class, 'business']);
 
 Route::get('/privacy-policy', function () {
     return view('privacy');
