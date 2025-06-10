@@ -26,6 +26,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
+Route::get('/place/{placeId}', [ShareController::class, 'place']);
+
 
 Route::get('/privacy-policy', function () {
     return view('privacy');
