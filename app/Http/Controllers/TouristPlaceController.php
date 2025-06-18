@@ -16,7 +16,9 @@ class TouristPlaceController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'location' => 'nullable|string', // Added location as an optional field
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -26,7 +28,9 @@ class TouristPlaceController extends Controller
         $touristPlace = TouristPlace::create([
             'name' => $request->name,
             'description' => $request->description,
-            'location' => $request->location, // Saving the location
+            'location' => $request->location,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'thumbnail' => $thumbnailPath,
             'created_by' => Auth::id(),
             'visitors' => 0,
@@ -49,14 +53,11 @@ class TouristPlaceController extends Controller
     // Get all tourist places
     public function index(Request $request)
     {
-        $pageNo = $request->input('pageNo', 1); // Default page number is 1
-        $limit = $request->input('limit', 10);  // Default limit per page is 10
+        $pageNo = $request->input('pageNo', 1);
+        $limit = $request->input('limit', 10);
     
-        // Paginate the results
         $places = TouristPlace::with('placeImages')
             ->paginate($limit, ['*'], 'page', $pageNo);
-    
-     
     
         return response()->json([
             'message' => 'Tourist places retrieved successfully',
@@ -87,15 +88,19 @@ class TouristPlaceController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'location' => 'required|string|max:255',
         ]);
 
         $place->update([
             'name' => $request->name,
             'description' => $request->description,
             'location' => $request->location,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'updated_by' => Auth::id(),
         ]);
 
@@ -133,5 +138,36 @@ class TouristPlaceController extends Controller
         $place->delete();
 
         return response()->json(['message' => 'Tourist place deleted successfully'], 200);
+    }
+
+    // Get tourist places within a radius (bonus method for location-based queries)
+    public function getNearbyPlaces(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'radius' => 'nullable|numeric|min:1|max:100', // radius in kilometers
+        ]);
+
+        $lat = $request->latitude;
+        $lng = $request->longitude;
+        $radius = $request->radius ?? 10; // default 10km
+
+        // Using Haversine formula to calculate distance
+        $places = TouristPlace::selectRaw("
+                *,
+                (6371 * acos(cos(radians($lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(latitude)))) AS distance
+            ")
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->having('distance', '<=', $radius)
+            ->orderBy('distance')
+            ->with('placeImages')
+            ->get();
+
+        return response()->json([
+            'message' => 'Nearby tourist places retrieved successfully',
+            'data' => $places
+        ], 200);
     }
 }
