@@ -51,19 +51,94 @@ class TouristPlaceController extends Controller
     
 
     // Get all tourist places
-    public function index(Request $request)
-    {
-        $pageNo = $request->input('pageNo', 1);
-        $limit = $request->input('limit', 10);
+    // public function index(Request $request)
+    // {
+    //     $pageNo = $request->input('pageNo', 1);
+    //     $limit = $request->input('limit', 10);
     
-        $places = TouristPlace::with('placeImages')
-            ->paginate($limit, ['*'], 'page', $pageNo);
+    //     $places = TouristPlace::with('placeImages')
+    //         ->paginate($limit, ['*'], 'page', $pageNo);
     
-        return response()->json([
-            'message' => 'Tourist places retrieved successfully',
-            'data' => $places
-        ], 200);
+    //     return response()->json([
+    //         'message' => 'Tourist places retrieved successfully',
+    //         'data' => $places
+    //     ], 200);
+    // }
+
+   public function index(Request $request)
+{
+    $pageNo = $request->input('pageNo', 1);
+    $limit = $request->input('limit', 10);
+    $sortBy = $request->input('sortBy'); // Options: 'nearest_first', 'nearest_last', 'most_viewed', 'least_viewed'
+    $userLatitude = $request->input('latitude');
+    $userLongitude = $request->input('longitude');
+
+    $query = TouristPlace::with('placeImages');
+
+    // Always calculate distance if user coordinates are provided
+    if ($userLatitude && $userLongitude) {
+        $query->selectRaw("
+            *,
+            (6371 * acos(
+                cos(radians(?)) * 
+                cos(radians(latitude)) * 
+                cos(radians(longitude) - radians(?)) + 
+                sin(radians(?)) * 
+                sin(radians(latitude))
+            )) AS distance
+        ", [$userLatitude, $userLongitude, $userLatitude]);
+    } else {
+        // If no user coordinates, set distance as -1
+        $query->selectRaw("*, -1 AS distance");
     }
+
+    // Apply sorting based on the sortBy parameter
+    if ($sortBy) {
+        switch ($sortBy) {
+            case 'nearest_first':
+                // Validate that user coordinates are provided for distance sorting
+                if (!$userLatitude || !$userLongitude) {
+                    return response()->json([
+                        'message' => 'User latitude and longitude are required for distance sorting',
+                        'data' => null
+                    ], 400);
+                }
+                $query->orderBy('distance', 'asc');
+                break;
+
+            case 'nearest_last':
+                // Validate that user coordinates are provided for distance sorting
+                if (!$userLatitude || !$userLongitude) {
+                    return response()->json([
+                        'message' => 'User latitude and longitude are required for distance sorting',
+                        'data' => null
+                    ], 400);
+                }
+                $query->orderBy('distance', 'desc');
+                break;
+
+            case 'most_viewed':
+                $query->orderBy('visitors', 'desc');
+                break;
+
+            case 'least_viewed':
+                $query->orderBy('visitors', 'asc');
+                break;
+
+            default:
+                // If invalid sortBy parameter, continue without sorting
+                break;
+        }
+    }
+
+    $places = $query->paginate($limit, ['*'], 'page', $pageNo);
+
+    return response()->json([
+        'message' => 'Tourist places retrieved successfully',
+        'data' => $places,
+        'sorting_applied' => $sortBy ?? 'none'
+    ], 200);
+}
 
     // Get a single tourist place by ID
     public function show($id)
