@@ -23,7 +23,7 @@ use App\Http\Controllers\ShareController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
