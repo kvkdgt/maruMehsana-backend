@@ -600,6 +600,11 @@
                     <span>Business Enquiry</span>
                 </a>
             </li>
+            <li class="@if(request()->is('admin/news-agencies*')) active @endif">
+    <a href="{{ url('admin/news-agencies') }}">
+        <i class="fas fa-newspaper"></i>
+        <span>News Agencies</span>
+    </a>
         </ul>
     </div>
 

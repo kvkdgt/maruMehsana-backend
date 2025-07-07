@@ -9,7 +9,7 @@ use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\ShareController;
-
+use App\Http\Controllers\NewsAgencyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ Route::get('/privacy-policy', function () {
 });
 Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login']);
-Route::middleware([ 'is_admin'])->group(function () {
+Route::middleware(['is_admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
     Route::get('/admin/tourist-places', [AdminController::class, 'touristPlaces'])->name('admin.tourist-places');
@@ -68,24 +68,23 @@ Route::middleware([ 'is_admin'])->group(function () {
     Route::delete('admin/tourist-places/delete/{id}', [TouristPlaceController::class, 'destroy'])->name('tourist_place.delete');
 
     Route::put('/admin/business-enquiry/update/{id}', [BusinessEnquiryController::class, 'updateStatus'])->name('admin.BusinessEnquery.updateStatus');
-    
+
 
     Route::post('banner-ads/store', [BannerAdController::class, 'store'])->name('admin.banner-ads.store');
     Route::delete('/banner-ads/{bannerAd}', [BannerAdController::class, 'destroy'])->name('admin.banner-ads.destroy');
     Route::patch('/admin/banner-ads/updateStatus/{id}', [BannerAdController::class, 'updateStatus']);
     Route::get('/admin/marketing/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('admin.notifications');
-        Route::post('/admin/notifications/store', [App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
-        Route::post('/admin/notifications/send-now/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'sendNow'])->name('notifications.send-now');
-        Route::delete('/admin/notifications/delete/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'delete'])->name('notifications.delete');
+    Route::post('/admin/notifications/store', [App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
+    Route::post('/admin/notifications/send-now/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'sendNow'])->name('notifications.send-now');
+    Route::delete('/admin/notifications/delete/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'delete'])->name('notifications.delete');
 
-        Route::get('/admin/notifications/{id}/logs', [App\Http\Controllers\Admin\NotificationController::class, 'showLogs'])->name('admin.notifications.logs');
+    Route::get('/admin/notifications/{id}/logs', [App\Http\Controllers\Admin\NotificationController::class, 'showLogs'])->name('admin.notifications.logs');
 
-
-
-
-   
-
-
-
+    Route::get('/admin/news-agencies', [App\Http\Controllers\NewsAgencyController::class, 'index'])->name('admin.news-agencies');
+    Route::get('/admin/news-agencies/create', [App\Http\Controllers\NewsAgencyController::class, 'create'])->name('admin.news-agencies.create');
+    Route::post('/admin/news-agencies/store', [App\Http\Controllers\NewsAgencyController::class, 'store'])->name('admin.news-agencies.store');
+    Route::get('/admin/news-agencies/edit/{id}', [App\Http\Controllers\NewsAgencyController::class, 'edit'])->name('admin.news-agencies.edit');
+    Route::put('/admin/news-agencies/update/{id}', [App\Http\Controllers\NewsAgencyController::class, 'update'])->name('admin.news-agencies.update');
+    Route::delete('/admin/news-agencies/delete/{id}', [App\Http\Controllers\NewsAgencyController::class, 'destroy'])->name('admin.news-agencies.destroy');
+    Route::post('/admin/news-agencies/{id}/toggle-status', [App\Http\Controllers\NewsAgencyController::class, 'toggleStatus'])->name('admin.news-agencies.toggle-status');
 });
-
