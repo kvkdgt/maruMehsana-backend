@@ -369,7 +369,8 @@
             border-collapse: collapse;
         }
 
-        .data-table th, .data-table td {
+        .data-table th,
+        .data-table td {
             padding: 15px 20px;
             text-align: left;
             border-bottom: 1px solid #eee;
@@ -547,7 +548,106 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .dropdown-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .dropdown-menu.show {
+            max-height: 200px;
+            /* Adjust based on number of items */
+        }
+
+        .dropdown-toggle {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-toggle::after {
+            content: '▶';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .dropdown-toggle.active::after {
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .dropdown-item {
+            padding-left: 50px !important;
+            font-size: 0.85rem;
+            border-left: 4px solid transparent;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent);
+        }
+
+        .dropdown-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid var(--accent);
+        }
+
+        .group-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 20px 5px 20px;
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .group-label:first-child {
+            margin-top: 0;
+            border-top: none;
+        }
     </style>
+
+    <script>
+        // Dropdown toggle functionality
+        function toggleDropdown(dropdownId, toggleElement) {
+            const dropdown = document.getElementById(dropdownId);
+            const isOpen = dropdown.classList.contains('show');
+
+            // Close all dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+            document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+
+            // If this dropdown wasn't open, open it
+            if (!isOpen) {
+                dropdown.classList.add('show');
+                toggleElement.classList.add('active');
+            }
+        }
+
+        // Auto-open dropdown if we're on a page within that section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're on news management pages
+            if (window.location.pathname.includes('/admin/news-agencies') ||
+                window.location.pathname.includes('/admin/news-categories')) {
+                const newsDropdown = document.getElementById('newsDropdown');
+                const newsToggle = document.querySelector('[onclick*="newsDropdown"]');
+                if (newsDropdown && newsToggle) {
+                    newsDropdown.classList.add('show');
+                    newsToggle.classList.add('active');
+                }
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -557,55 +657,75 @@
             Maru Mehsana
             <div class="tagline">Locally made for <span class="highlight">local peoples</span></div>
         </div>
-        <ul>
-            <li class="@if(request()->is('admin/dashboard')) active @endif">
-                <a href="{{ url('admin/dashboard') }}">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/categories')) active @endif">
-                <a href="{{ url('admin/categories') }}">
-                    <i class="fas fa-list"></i>
-                    <span>Categories</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/businesses') || request()->is('admin/businesses/create')|| request()->is('admin/businesses/edit/*')) active @endif">
-                <a href="{{ url('admin/businesses') }}">
-                    <i class="fas fa-briefcase"></i>
-                    <span>Businesses</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/tourist-places')) active @endif">
-                <a href="{{ url('admin/tourist-places') }}">
-                    <i class="fas fa-signs-post"></i>
-                    <span>Tourist Places</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/facts')) active @endif">
-                <a href="{{ url('admin/facts') }}">
-                    <i class="fas fa-check"></i>
-                    <span>Facts</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/marketing') || request()->is('admin/marketing/banner-ads')) active @endif">
-                <a href="{{ url('admin/marketing') }}">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Marketing</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/business-enquiry')) active @endif">
-                <a href="{{ url('admin/business-enquiry') }}">
-                    <i class="fa-solid fa-user-tie"></i>
-                    <span>Business Enquiry</span>
-                </a>
-            </li>
-            <li class="@if(request()->is('admin/news-agencies*')) active @endif">
-    <a href="{{ url('admin/news-agencies') }}">
-        <i class="fas fa-newspaper"></i>
-        <span>News Agencies</span>
-    </a>
-        </ul>
+        
+<ul>
+    <li class="@if(request()->is('admin/dashboard')) active @endif">
+        <a href="{{ url('admin/dashboard') }}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    <li class="@if(request()->is('admin/categories')) active @endif">
+        <a href="{{ url('admin/categories') }}">
+            <i class="fas fa-list"></i>
+            <span>Categories</span>
+        </a>
+    </li>
+    <li class="@if(request()->is('admin/businesses') || request()->is('admin/businesses/create')|| request()->is('admin/businesses/edit/*')) active @endif">
+        <a href="{{ url('admin/businesses') }}">
+            <i class="fas fa-briefcase"></i>
+            <span>Businesses</span>
+        </a>
+    </li>
+    <li class="@if(request()->is('admin/tourist-places')) active @endif">
+        <a href="{{ url('admin/tourist-places') }}">
+            <i class="fas fa-signs-post"></i>
+            <span>Tourist Places</span>
+        </a>
+    </li>
+    <li class="@if(request()->is('admin/facts')) active @endif">
+        <a href="{{ url('admin/facts') }}">
+            <i class="fas fa-check"></i>
+            <span>Facts</span>
+        </a>
+    </li>
+    
+    <!-- News Management Dropdown -->
+    <li class="dropdown-toggle @if(request()->is('admin/news-agencies*') || request()->is('admin/news-categories*')) active @endif" 
+        onclick="toggleDropdown('newsDropdown', this)">
+        <a href="javascript:void(0)">
+            <i class="fas fa-newspaper"></i>
+            <span>News Management</span>
+        </a>
+    </li>
+    <div id="newsDropdown" class="dropdown-menu @if(request()->is('admin/news-agencies*') || request()->is('admin/news-categories*')) show @endif">
+        <li class="dropdown-item @if(request()->is('admin/news-agencies*')) active @endif">
+            <a href="{{ url('admin/news-agencies') }}">
+                <i class="fas fa-building"></i>
+                <span>News Agencies</span>
+            </a>
+        </li>
+        <li class="dropdown-item @if(request()->is('admin/news-categories*')) active @endif">
+            <a href="{{ url('admin/news-categories') }}">
+                <i class="fas fa-tags"></i>
+                <span>News Categories</span>
+            </a>
+        </li>
+    </div>
+    
+    <li class="@if(request()->is('admin/marketing') || request()->is('admin/marketing/banner-ads')) active @endif">
+        <a href="{{ url('admin/marketing') }}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Marketing</span>
+        </a>
+    </li>
+    <li class="@if(request()->is('admin/business-enquiry')) active @endif">
+        <a href="{{ url('admin/business-enquiry') }}">
+            <i class="fa-solid fa-user-tie"></i>
+            <span>Business Enquiry</span>
+        </a>
+    </li>
+</ul>
     </div>
 
     <div class="content">
@@ -627,10 +747,10 @@
             </div>
         </div>
         <div class="main-content">
-           
 
-          
-            
+
+
+
             @yield('content')
         </div>
     </div>

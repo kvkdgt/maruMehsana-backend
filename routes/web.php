@@ -11,6 +11,8 @@ use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\NewsAgencyController;
 use App\Http\Controllers\AgencyAuthController;
+use App\Http\Controllers\NewsCategoryController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -91,6 +93,12 @@ Route::middleware(['is_admin'])->group(function () {
 
 
 
+Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories');
+    Route::post('/admin/news-categories/store', [NewsCategoryController::class, 'store'])->name('news-categories.store');
+    Route::get('/admin/news-categories/edit/{id}', [NewsCategoryController::class, 'edit'])->name('news-categories.edit');
+    Route::post('/admin/news-categories/update', [NewsCategoryController::class, 'update'])->name('news-categories.update');
+    Route::delete('/admin/news-categories/delete/{id}', [NewsCategoryController::class, 'destroy'])->name('news-categories.delete');
+    Route::post('/admin/news-categories/toggle-status/{id}', [NewsCategoryController::class, 'toggleStatus'])->name('news-categories.toggle-status');
 
 
 

@@ -328,14 +328,14 @@
                             <span>Articles</span>
                         </div>
                     </a>
-                    <a href="#" class="nav-item">
+                    <!-- <a href="#" class="nav-item">
                         <div class="nav-item-content">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                             </svg>
                             <span>Categories</span>
                         </div>
-                    </a>
+                    </a> -->
                 </div>
 
                 <div class="nav-group">
