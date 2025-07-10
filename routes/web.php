@@ -10,6 +10,7 @@ use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\NewsAgencyController;
+use App\Http\Controllers\AgencyAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,4 +88,48 @@ Route::middleware(['is_admin'])->group(function () {
     Route::put('/admin/news-agencies/update/{id}', [App\Http\Controllers\NewsAgencyController::class, 'update'])->name('admin.news-agencies.update');
     Route::delete('/admin/news-agencies/delete/{id}', [App\Http\Controllers\NewsAgencyController::class, 'destroy'])->name('admin.news-agencies.destroy');
     Route::post('/admin/news-agencies/{id}/toggle-status', [App\Http\Controllers\NewsAgencyController::class, 'toggleStatus'])->name('admin.news-agencies.toggle-status');
+
+
+
+
+
+
+
+
+    
 });
+Route::prefix('agency')->name('agency.')->group(function () {
+
+        // Guest routes (only accessible when not logged in)
+        Route::middleware('guest:agency')->group(function () {
+            Route::get('/login', [AgencyAuthController::class, 'showLoginForm'])->name('login');
+            Route::post('/login', [AgencyAuthController::class, 'login'])->name('login.submit');
+        });
+
+        // Protected routes (only accessible when logged in as agency admin)
+        Route::middleware(['agency.auth'])->group(function () {
+
+            // Dashboard
+            Route::get('/dashboard', [AgencyAuthController::class, 'dashboard'])->name('dashboard');
+
+            // Profile Management
+            Route::get('/profile', [AgencyAuthController::class, 'profile'])->name('profile');
+            Route::put('/profile', [AgencyAuthController::class, 'updateProfile'])->name('profile.update');
+
+            // Logout
+            Route::post('/logout', [AgencyAuthController::class, 'logout'])->name('logout');
+
+            // API Routes for checking authentication
+            Route::get('/check-auth', [AgencyAuthController::class, 'checkAuth'])->name('check.auth');
+
+            // Add more protected routes here as needed
+            // Example:
+            // Route::resource('articles', AgencyArticleController::class);
+            // Route::resource('categories', AgencyCategoryController::class);
+        });
+    });
+
+    // Optional: Redirect root agency URL to login
+    Route::get('/agency', function () {
+        return redirect()->route('agency.login');
+    });

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AgencyAdmin extends Authenticatable
 {
     use SoftDeletes;
+  protected $table = 'agency_admins';
 
     protected $fillable = [
         'agency_id', 
