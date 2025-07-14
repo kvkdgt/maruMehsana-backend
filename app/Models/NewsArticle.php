@@ -19,6 +19,7 @@ class NewsArticle extends Model
         'image',
         'is_active',
         'is_featured',
+        'is_for_mehsana',
         'visitor',
         'agency_id'
     ];
