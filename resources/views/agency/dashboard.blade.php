@@ -78,7 +78,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="quick-actions">
+    <!-- <div class="quick-actions">
         <h2 class="section-title">Quick Actions</h2>
         <div class="actions-grid">
             <a href="#" class="action-card">
@@ -131,7 +131,7 @@
                 </div>
             </a>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <style>
