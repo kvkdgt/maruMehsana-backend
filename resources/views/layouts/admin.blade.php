@@ -705,12 +705,12 @@
                 <span>News Agencies</span>
             </a>
         </li>
-        <li class="dropdown-item @if(request()->is('admin/news-categories*')) active @endif">
+        <!-- <li class="dropdown-item @if(request()->is('admin/news-categories*')) active @endif">
             <a href="{{ url('admin/news-categories') }}">
                 <i class="fas fa-tags"></i>
                 <span>News Categories</span>
             </a>
-        </li>
+        </li> -->
     </div>
     
     <li class="@if(request()->is('admin/marketing') || request()->is('admin/marketing/banner-ads')) active @endif">

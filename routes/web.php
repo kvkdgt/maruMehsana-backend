@@ -129,7 +129,8 @@ Route::prefix('agency')->name('agency.')->group(function () {
 
             // API Routes for checking authentication
             Route::get('/check-auth', [AgencyAuthController::class, 'checkAuth'])->name('check.auth');
-
+    Route::resource('news', App\Http\Controllers\Agency\NewsArticleController::class);
+Route::post('/upload-image', [App\Http\Controllers\Agency\NewsArticleController::class, 'uploadImage'])->name('upload.image');
             // Add more protected routes here as needed
             // Example:
             // Route::resource('articles', AgencyArticleController::class);

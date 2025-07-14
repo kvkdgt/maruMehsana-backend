@@ -97,6 +97,7 @@
             text-decoration: none;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
+            position: relative;
         }
 
         .nav-item:hover {
@@ -108,7 +109,7 @@
         .nav-item.active {
             background: rgba(255, 255, 255, 0.15);
             color: white;
-            border-left-color: #3498db;
+            border-left-color: #f2652d;
         }
 
         .nav-item-content {
@@ -210,11 +211,14 @@
             padding: 0.75rem 1rem;
             color: #374151;
             text-decoration: none;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
         }
 
         .dropdown-item:hover {
             background: #f9fafb;
+            border-left-color: #f2652d;
+            color: #2c3e50;
         }
 
         .dropdown-divider {
@@ -249,6 +253,12 @@
             color: #991b1b;
         }
 
+        .alert-warning {
+            background: #fffbeb;
+            border-left-color: #f2652d;
+            color: #92400e;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -269,10 +279,15 @@
                 border: none;
                 padding: 0.5rem;
                 cursor: pointer;
+                color: #f2652d;
             }
 
             .content {
                 padding: 1rem;
+            }
+
+            .header-title::after {
+                width: 30px;
             }
         }
 
@@ -280,6 +295,69 @@
             .mobile-menu-button {
                 display: none;
             }
+        }
+
+        /* Additional utility classes using secondary color */
+        .text-secondary {
+            color: #f2652d;
+        }
+
+        .bg-secondary {
+            background-color: #f2652d;
+        }
+
+        .border-secondary {
+            border-color: #f2652d;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f2652d, #e55a26);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(242, 101, 45, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(242, 101, 45, 0.4);
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            color: #f2652d;
+            border: 2px solid #f2652d;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f2652d;
+            color: white;
+            box-shadow: 0 2px 8px rgba(242, 101, 45, 0.3);
+        }
+
+        /* Accent elements */
+        .accent-dot {
+            width: 8px;
+            height: 8px;
+            background: #f2652d;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .accent-line {
+            height: 2px;
+            background: linear-gradient(90deg, #f2652d, transparent);
+            width: 100%;
         }
     </style>
     
@@ -317,26 +395,18 @@
                     </a>
                 </div>
 
-                <div class="nav-group">
-                    <div class="nav-group-title">Content</div>
-                    <a href="#" class="nav-item">
-                        <div class="nav-item-content">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                            </svg>
-                            <span>Articles</span>
-                        </div>
-                    </a>
-                    <!-- <a href="#" class="nav-item">
-                        <div class="nav-item-content">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                            </svg>
-                            <span>Categories</span>
-                        </div>
-                    </a> -->
-                </div>
+               <div class="nav-group">
+    <div class="nav-group-title">Content</div>
+    <a href="{{ route('agency.news.index') }}" class="nav-item {{ request()->routeIs('agency.news.*') ? 'active' : '' }}">
+        <div class="nav-item-content">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            <span>News Articles</span>
+        </div>
+    </a>
+</div>
 
                 <div class="nav-group">
                     <div class="nav-group-title">Settings</div>
