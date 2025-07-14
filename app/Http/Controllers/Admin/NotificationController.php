@@ -121,14 +121,14 @@ class NotificationController extends Controller
             $appUsers = $this->getUsersByAudience($request->audience);
 
             // Send notification to each user
-            // foreach ($appUsers as $user) {
+            foreach ($appUsers as $user) {
                 $this->fcmController->sendFcmNotification(new Request([
-                    'user_id' => '467',
+                    'user_id' => $user->id,
                     'title' => $request->title,
                     'body' => $request->description,
                     'image' => $imageUrl,
                 ]), $notification->id);
-            // }
+            }
         }
         
         return redirect()->route('admin.notifications', ['tab' => $request->has('schedule') && $request->schedule === 'yes' ? 'scheduled' : 'send'])
