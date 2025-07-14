@@ -121,14 +121,14 @@ class NotificationController extends Controller
             $appUsers = $this->getUsersByAudience($request->audience);
 
             // Send notification to each user
-            foreach ($appUsers as $user) {
+            // foreach ($appUsers as $user) {
                 $this->fcmController->sendFcmNotification(new Request([
-                    'user_id' => $user->id,
+                    'user_id' => '467',
                     'title' => $request->title,
                     'body' => $request->description,
                     'image' => $imageUrl,
                 ]), $notification->id);
-            }
+            // }
         }
         
         return redirect()->route('admin.notifications', ['tab' => $request->has('schedule') && $request->schedule === 'yes' ? 'scheduled' : 'send'])
@@ -217,4 +217,49 @@ class NotificationController extends Controller
         
         return view('admin.notifications.logs', compact('notification', 'logs', 'stats'));
     }
+    public function sendNewsNotification($newsArticle)
+{
+    try {
+        // Create notification record
+        $notification = Notification::create([
+            'title' => $newsArticle->title,
+            'description' => $newsArticle->excerpt,
+            'audience' => 'all_users',
+            'banner' => $newsArticle->image, // Use news image as banner
+            'is_sent' => true,
+            'news_article_id' => $newsArticle->id, // Add this field to track related news
+            'type' => 'news', // Add this field to identify notification type
+        ]);
+
+        // Get image URL
+        $imageUrl = $newsArticle->image_url;
+
+        // Get all users
+        $appUsers = $this->getUsersByAudience('all_users');
+
+        // Send notification to each user
+        foreach ($appUsers as $user) {
+            $this->fcmController->sendNewsNotification(new Request([
+                'user_id' => $user->id,
+                'title' => $newsArticle->title,
+                'body' => $newsArticle->excerpt,
+                'image' => $imageUrl,
+                'news_id' => $newsArticle->id,
+                'news_slug' => $newsArticle->slug,
+            ]), $notification->id);
+        }
+
+        return ['success' => true, 'message' => 'News notification sent successfully'];
+    } catch (\Exception $e) {
+        \Log::error('News notification error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to send news notification'];
+    }
+}
+
+// Add this method to your existing FcmController (App\Http\Controllers\FcmController)
+
+/**
+ * Send FCM notification for news articles
+ */
+
 }

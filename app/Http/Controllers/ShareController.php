@@ -27,5 +27,15 @@ class ShareController extends Controller
         
         return view('share.place', compact('placeId', 'playStoreUrl', 'appDeepLink'));
     }
+         public function news($newsId)
+    {
+        // You can fetch business details from database if needed
+        // $business = Business::find($businessId);
+        
+        $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
+        $appDeepLink = "marumehsana://place/{$newsId}";
+        
+        return view('share.news', compact('newsId', 'playStoreUrl', 'appDeepLink'));
+    }
 
 }

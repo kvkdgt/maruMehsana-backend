@@ -9,9 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Http\Controllers\Admin\NotificationController;
 
 class NewsArticleController extends Controller
 {
+     protected $notificationController;
+     public function __construct()
+    {
+        // Initialize notification controller
+        $this->notificationController = app(NotificationController::class);
+    }
     public function index(Request $request)
     {
         $query = NewsArticle::where('agency_id', Auth::guard('agency')->id())
@@ -53,9 +60,26 @@ class NewsArticleController extends Controller
         }
 
         NewsArticle::create($data);
+$article = NewsArticle::create($data);
+         if ($article->is_active) {
+            try {
+                $notificationResult = $this->notificationController->sendNewsNotification($article);
+                
+                if ($notificationResult['success']) {
+                    $message = 'News article created and notification sent successfully!';
+                } else {
+                    $message = 'News article created successfully, but notification failed to send.';
+                }
+            } catch (\Exception $e) {
+                \Log::error('Notification sending failed: ' . $e->getMessage());
+                $message = 'News article created successfully, but notification failed to send.';
+            }
+        } else {
+            $message = 'News article created successfully! (No notification sent - article is inactive)';
+        }
 
         return redirect()->route('agency.news.index')
-            ->with('success', 'News article created successfully!');
+            ->with('success', $message);
     }
 
     public function show(NewsArticle $news)
@@ -78,7 +102,7 @@ class NewsArticleController extends Controller
         return view('agency.news.edit', compact('news'));
     }
 
-    public function update(NewsArticleRequest $request, NewsArticle $news)
+   public function update(NewsArticleRequest $request, NewsArticle $news)
     {
         // Ensure the article belongs to the current agency
         if ($news->agency_id !== Auth::guard('agency')->id()) {
@@ -86,10 +110,11 @@ class NewsArticleController extends Controller
         }
 
         $data = $request->validated();
-        $data['is_active'] = $request->has('is_active');
-        $data['is_featured'] = $request->has('is_featured');
-        $data['is_for_mehsana'] = $request->has('is_for_mehsana');
-
+        $wasInactive = !$news->is_active; // Check if article was previously inactive
+        
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
+        $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
+        $data['is_for_mehsana'] = $request->has('is_for_mehsana') ? 1 : 0;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -106,8 +131,26 @@ class NewsArticleController extends Controller
 
         $news->update($data);
 
+        // Send notification if article was just activated (published for first time)
+        if ($wasInactive && $news->is_active) {
+            try {
+                $notificationResult = $this->notificationController->sendNewsNotification($news);
+                
+                if ($notificationResult['success']) {
+                    $message = 'News article updated and notification sent successfully!';
+                } else {
+                    $message = 'News article updated successfully, but notification failed to send.';
+                }
+            } catch (\Exception $e) {
+                \Log::error('Notification sending failed: ' . $e->getMessage());
+                $message = 'News article updated successfully, but notification failed to send.';
+            }
+        } else {
+            $message = 'News article updated successfully!';
+        }
+
         return redirect()->route('agency.news.index')
-            ->with('success', 'News article updated successfully!');
+            ->with('success', $message);
     }
 
     public function destroy(NewsArticle $news)
