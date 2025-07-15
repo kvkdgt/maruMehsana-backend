@@ -30,7 +30,7 @@ Route::get('/', function () {
 });
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
-Route::get('/News/{newsId}', [ShareController::class, 'news']);
+Route::get('/news/{newsId}', [ShareController::class, 'news']);
 
 
 
