@@ -240,7 +240,7 @@ class NotificationController extends Controller
         // Send notification to each user
         // foreach ($appUsers as $user) {
             $this->fcmController->sendNewsNotification(new Request([
-                'user_id' =>'467',
+                'user_id' =>467,
                 'title' => $newsArticle->title,
                 'body' => $newsArticle->excerpt,
                 'image' => $imageUrl,
