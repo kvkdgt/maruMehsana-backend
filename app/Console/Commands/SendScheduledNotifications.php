@@ -184,7 +184,6 @@ class SendScheduledNotifications extends Command
         switch ($audience) {
             case 'all_users':
                 // No filtering needed, get all users
-                $query->where('id',467);
                 break;
             case 'active_users':
                 // Example: Add filter for active users
