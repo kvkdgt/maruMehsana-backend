@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use App\Models\AppUser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
 class NotificationController extends Controller
 {
     /**
@@ -221,50 +221,105 @@ class NotificationController extends Controller
     /**
      * Schedule news notification for 5 minutes later (NEW METHOD)
      */
+    // public function scheduleNewsNotification($newsArticle)
+    // {
+    //     try {
+    //         // Calculate auto-schedule time (5 minutes from now)
+    //         $autoScheduledAt = Carbon::now()->addMinutes(5);
+            
+    //         // Create notification record with auto-scheduling
+    //         $notification = Notification::create([
+    //             'title' => $newsArticle->title,
+    //             'description' => $newsArticle->excerpt,
+    //             'audience' => 'all_users',
+    //             'banner' => $newsArticle->image,
+    //             'news_article_id' => $newsArticle->id,
+    //             'type' => 'news',
+    //             'auto_scheduled_at' => $autoScheduledAt, // Auto-schedule for 5 minutes later
+    //             'is_sent' => false, // Not sent yet
+    //         ]);
+
+    //         Log::info("News notification scheduled", [
+    //             'notification_id' => $notification->id,
+    //             'news_id' => $newsArticle->id,
+    //             'scheduled_for' => $autoScheduledAt->format('Y-m-d H:i:s'),
+    //             'title' => $newsArticle->title
+    //         ]);
+
+    //         return [
+    //             'success' => true, 
+    //             'message' => 'News notification scheduled for ' . $autoScheduledAt->format('Y-m-d H:i:s'),
+    //             'notification_id' => $notification->id,
+    //             'scheduled_at' => $autoScheduledAt
+    //         ];
+    //     } catch (\Exception $e) {
+    //         Log::error('News notification scheduling error: ' . $e->getMessage(), [
+    //             'news_id' => $newsArticle->id ?? null,
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+            
+    //         return [
+    //             'success' => false, 
+    //             'message' => 'Failed to schedule news notification: ' . $e->getMessage()
+    //         ];
+    //     }
+    // }
     public function scheduleNewsNotification($newsArticle)
-    {
-        try {
-            // Calculate auto-schedule time (5 minutes from now)
-            $autoScheduledAt = Carbon::now()->addMinutes(5);
-            
-            // Create notification record with auto-scheduling
-            $notification = Notification::create([
-                'title' => $newsArticle->title,
-                'description' => $newsArticle->excerpt,
-                'audience' => 'all_users',
-                'banner' => $newsArticle->image,
-                'news_article_id' => $newsArticle->id,
-                'type' => 'news',
-                'auto_scheduled_at' => $autoScheduledAt, // Auto-schedule for 5 minutes later
-                'is_sent' => false, // Not sent yet
-            ]);
+{
+    try {
+        // Calculate auto-schedule time (5 minutes from now)
+        $autoScheduledAt = Carbon::now()->addMinutes(5);
+        
+        // Clean the description
+        $description = $newsArticle->excerpt ?: ('New article: ' . $newsArticle->title);
+        $description = trim($description);
+        
+        Log::info("Using raw SQL for Gujarati text", [
+            'description' => $description,
+            'length' => strlen($description)
+        ]);
+        
+        // Use raw SQL with parameter binding to avoid parsing issues
+        $notificationId = DB::table('notifications')->insertGetId([
+            'title' => $newsArticle->title,
+            'description' => $description,
+            'audience' => 'all_users',
+            'banner' => $newsArticle->image,
+            'news_article_id' => $newsArticle->id,
+            'type' => 'general',
+            'auto_scheduled_at' => $autoScheduledAt,
+            'is_sent' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            Log::info("News notification scheduled", [
-                'notification_id' => $notification->id,
-                'news_id' => $newsArticle->id,
-                'scheduled_for' => $autoScheduledAt->format('Y-m-d H:i:s'),
-                'title' => $newsArticle->title
-            ]);
+        Log::info("News notification scheduled via raw SQL", [
+            'notification_id' => $notificationId,
+            'news_id' => $newsArticle->id,
+            'scheduled_for' => $autoScheduledAt->format('Y-m-d H:i:s')
+        ]);
 
-            return [
-                'success' => true, 
-                'message' => 'News notification scheduled for ' . $autoScheduledAt->format('Y-m-d H:i:s'),
-                'notification_id' => $notification->id,
-                'scheduled_at' => $autoScheduledAt
-            ];
-        } catch (\Exception $e) {
-            Log::error('News notification scheduling error: ' . $e->getMessage(), [
-                'news_id' => $newsArticle->id ?? null,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return [
-                'success' => false, 
-                'message' => 'Failed to schedule news notification: ' . $e->getMessage()
-            ];
-        }
+        return [
+            'success' => true,
+            'message' => 'News notification scheduled for ' . $autoScheduledAt->format('Y-m-d H:i:s'),
+            'notification_id' => $notificationId,
+            'scheduled_at' => $autoScheduledAt
+        ];
+    } catch (\Exception $e) {
+        Log::error('Raw SQL notification scheduling error', [
+            'news_id' => $newsArticle->id ?? null,
+            'error' => $e->getMessage(),
+            'description' => $newsArticle->excerpt,
+            'title' => $newsArticle->title
+        ]);
+        
+        return [
+            'success' => false,
+            'message' => 'Failed to schedule notification: ' . $e->getMessage()
+        ];
     }
+}
 
     /**
      * Legacy method - now calls scheduleNewsNotification
