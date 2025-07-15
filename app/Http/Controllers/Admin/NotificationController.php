@@ -285,7 +285,7 @@ class NotificationController extends Controller
             'title' => $newsArticle->title,
             'description' => $description,
             'audience' => 'all_users',
-            'banner' => 'news/'+$newsArticle->image,
+            'banner' => 'news/'.$newsArticle->image,
             'news_article_id' => $newsArticle->id,
             'type' => 'general',
             'auto_scheduled_at' => $autoScheduledAt,
