@@ -12,6 +12,8 @@ use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\FcmController;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,11 +56,70 @@ Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification
 Route::prefix('news')->group(function () {
     
     // Get all active news articles with pagination and agency details
+    // Route::get('/', function (Request $request) {
+    //     $query = NewsArticle::with(['agency' => function($q) {
+    //         $q->select('id', 'name', 'logo', 'status');
+    //     }])->active();
+    //     // Add sorting options
+    //     switch ($request->get('sort', 'latest')) {
+    //         case 'popular':
+    //             $query->popular();
+    //             break;
+    //         case 'featured':
+    //             $query->featured()->latest();
+    //             break;
+    //         default:
+    //             $query->latest();
+    //             break;
+    //     }
+
+    //     $articles = $query->paginate($request->get('per_page', 10));
+
+    //     // Transform the data to include agency details
+    //     $transformedArticles = $articles->getCollection()->map(function ($article) {
+    //         return [
+    //             'id' => $article->id,
+    //             'title' => $article->title,
+    //             'slug' => $article->slug,
+    //             'excerpt' => $article->excerpt,
+    //             'content' => $article->content,
+    //             'image' => $article->image,
+    //             'image_url' => $article->image_url,
+    //             'is_active' => $article->is_active,
+    //             'is_featured' => $article->is_featured,
+    //             'is_for_mehsana' => $article->is_for_mehsana,
+    //             'visitor' => $article->visitor,
+    //             'created_at' => $article->created_at,
+    //             'updated_at' => $article->updated_at,
+    //             'agency' => [
+    //                 'id' => $article->agency->id,
+    //                 'name' => $article->agency->name,
+    //                 'logo' => $article->agency->logo,
+    //                 'logo_url' => $article->agency->logo_url,
+    //                 'initial' => $article->agency->initial,
+    //                 'is_active' => $article->agency->is_active
+    //             ]
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $transformedArticles,
+    //         'pagination' => [
+    //             'current_page' => $articles->currentPage(),
+    //             'last_page' => $articles->lastPage(),
+    //             'per_page' => $articles->perPage(),
+    //             'total' => $articles->total(),
+    //             'has_more' => $articles->hasMorePages()
+    //         ]
+    //     ]);
+    // });
     Route::get('/', function (Request $request) {
-        $query = NewsArticle::with(['agency' => function($q) {
+    try {
+        $query = NewsArticle::with(['agency' => function ($q) {
             $q->select('id', 'name', 'logo', 'status');
         }])->active();
-        
+
         // Add sorting options
         switch ($request->get('sort', 'latest')) {
             case 'popular':
@@ -91,12 +152,12 @@ Route::prefix('news')->group(function () {
                 'created_at' => $article->created_at,
                 'updated_at' => $article->updated_at,
                 'agency' => [
-                    'id' => $article->agency->id,
-                    'name' => $article->agency->name,
-                    'logo' => $article->agency->logo,
-                    'logo_url' => $article->agency->logo_url,
-                    'initial' => $article->agency->initial,
-                    'is_active' => $article->agency->is_active
+                    'id' => optional($article->agency)->id,
+                    'name' => optional($article->agency)->name,
+                    'logo' => optional($article->agency)->logo,
+                    'logo_url' => optional($article->agency)->logo_url,
+                    'initial' => optional($article->agency)->initial,
+                    'is_active' => optional($article->agency)->is_active
                 ]
             ];
         });
@@ -112,7 +173,20 @@ Route::prefix('news')->group(function () {
                 'has_more' => $articles->hasMorePages()
             ]
         ]);
-    });
+    } catch (\Throwable $e) {
+        // Log the full error for debugging
+        Log::error('Error fetching articles: ' . $e->getMessage(), [
+            'exception' => $e
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Something went wrong. Please try again later.',
+            'error' => $e->getMessage(), // Remove in production or wrap with debug check
+            // 'trace' => $e->getTrace() // You can uncomment this for deeper debugging
+        ], 500);
+    }
+});
 
     // Get featured articles with agency details
     Route::get('/featured', function () {
