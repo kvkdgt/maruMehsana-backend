@@ -114,13 +114,13 @@ Route::prefix('news')->group(function () {
     //         ]
     //     ]);
     // });
-    Route::get('/', function (Request $request) {
+
+Route::get('/', function (Request $request) {
     try {
         $query = NewsArticle::with(['agency' => function ($q) {
             $q->select('id', 'name', 'logo', 'status');
         }])->active();
 
-        // Add sorting options
         switch ($request->get('sort', 'latest')) {
             case 'popular':
                 $query->popular();
@@ -135,16 +135,16 @@ Route::prefix('news')->group(function () {
 
         $articles = $query->paginate($request->get('per_page', 10));
 
-        // Transform the data to include agency details
+        // Sanitize output
         $transformedArticles = $articles->getCollection()->map(function ($article) {
             return [
                 'id' => $article->id,
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'excerpt' => $article->excerpt,
-                'content' => $article->content,
-                'image' => $article->image,
-                'image_url' => $article->image_url,
+                'title' => cleanUtf8($article->title),
+                'slug' => cleanUtf8($article->slug),
+                'excerpt' => cleanUtf8($article->excerpt),
+                'content' => cleanUtf8($article->content),
+                'image' => cleanUtf8($article->image),
+                'image_url' => cleanUtf8($article->image_url),
                 'is_active' => $article->is_active,
                 'is_featured' => $article->is_featured,
                 'is_for_mehsana' => $article->is_for_mehsana,
@@ -153,10 +153,10 @@ Route::prefix('news')->group(function () {
                 'updated_at' => $article->updated_at,
                 'agency' => [
                     'id' => optional($article->agency)->id,
-                    'name' => optional($article->agency)->name,
-                    'logo' => optional($article->agency)->logo,
-                    'logo_url' => optional($article->agency)->logo_url,
-                    'initial' => optional($article->agency)->initial,
+                    'name' => cleanUtf8(optional($article->agency)->name),
+                    'logo' => cleanUtf8(optional($article->agency)->logo),
+                    'logo_url' => cleanUtf8(optional($article->agency)->logo_url),
+                    'initial' => cleanUtf8(optional($article->agency)->initial),
                     'is_active' => optional($article->agency)->is_active
                 ]
             ];
@@ -174,19 +174,22 @@ Route::prefix('news')->group(function () {
             ]
         ]);
     } catch (\Throwable $e) {
-        // Log the full error for debugging
-        Log::error('Error fetching articles: ' . $e->getMessage(), [
-            'exception' => $e
-        ]);
+        Log::error('Error fetching articles: ' . $e->getMessage(), ['exception' => $e]);
 
         return response()->json([
             'status' => 'error',
             'message' => 'Something went wrong. Please try again later.',
-            'error' => $e->getMessage(), // Remove in production or wrap with debug check
-            // 'trace' => $e->getTrace() // You can uncomment this for deeper debugging
+            'error' => $e->getMessage(),
         ], 500);
     }
 });
+
+// Helper to clean malformed UTF-8 strings
+function cleanUtf8($string)
+{
+    return is_string($string) ? mb_convert_encoding($string, 'UTF-8', 'UTF-8') : $string;
+}
+
 
     // Get featured articles with agency details
     Route::get('/featured', function () {
