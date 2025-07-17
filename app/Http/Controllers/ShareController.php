@@ -33,7 +33,7 @@ class ShareController extends Controller
         // $business = Business::find($businessId);
         
         $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
-        $appDeepLink = "marumehsana://place/{$newsId}";
+        $appDeepLink = "marumehsana://news/{$newsId}";
         
         return view('share.news', compact('newsId', 'playStoreUrl', 'appDeepLink'));
     }
