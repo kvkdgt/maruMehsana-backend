@@ -84,6 +84,8 @@ Route::middleware(['is_admin'])->group(function () {
     Route::delete('/admin/notifications/delete/{id}', [App\Http\Controllers\Admin\NotificationController::class, 'delete'])->name('notifications.delete');
 
     Route::get('/admin/notifications/{id}/logs', [App\Http\Controllers\Admin\NotificationController::class, 'showLogs'])->name('admin.notifications.logs');
+    Route::get('/admin/notifications/{id}/progress', [App\Http\Controllers\Admin\NotificationController::class, 'getProgress'])->name('admin.notifications.progress');
+    Route::get('/admin/notifications-progress', [App\Http\Controllers\Admin\NotificationController::class, 'getAllProgress'])->name('admin.notifications.all-progress');
 
     Route::get('/admin/news-agencies', [App\Http\Controllers\NewsAgencyController::class, 'index'])->name('admin.news-agencies');
     Route::get('/admin/news-agencies/create', [App\Http\Controllers\NewsAgencyController::class, 'create'])->name('admin.news-agencies.create');

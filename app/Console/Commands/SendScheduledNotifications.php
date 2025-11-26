@@ -4,11 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Notification;
-use App\Http\Controllers\FcmController;
+use App\Jobs\SendFcmNotificationJob;
 use App\Models\AppUser;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificationReportMail;
+use App\Jobs\SendNotificationCompletionEmail;
 
 class SendScheduledNotifications extends Command
 {
@@ -31,7 +33,6 @@ class SendScheduledNotifications extends Command
      */
     public function handle()
     {
-        $fcmController = app(FcmController::class);
         $type = $this->option('type');
         
         $this->info("Starting scheduled notification process...");
@@ -63,7 +64,7 @@ class SendScheduledNotifications extends Command
         }
         
         foreach ($notifications as $notification) {
-            $this->processNotification($notification, $fcmController);
+            $this->processNotification($notification);
         }
         
         $this->info("Scheduled notification process completed!");
@@ -75,7 +76,7 @@ class SendScheduledNotifications extends Command
     /**
      * Process individual notification
      */
-    private function processNotification($notification, $fcmController)
+    private function processNotification($notification)
     {
         $scheduleType = $notification->isAutoScheduled() ? 'auto-scheduled' : 'manually scheduled';
         $this->info("Processing {$scheduleType} notification ID {$notification->id}: {$notification->title}");
@@ -90,7 +91,7 @@ class SendScheduledNotifications extends Command
         try {
             // Get users based on audience
             $appUsers = $this->getUsersByAudience($notification->audience);
-            $this->info("Sending to {$appUsers->count()} users");
+            $this->info("Dispatching jobs for {$appUsers->count()} users");
             
             if ($appUsers->isEmpty()) {
                 $this->warn("No users found for audience: {$notification->audience}");
@@ -108,56 +109,53 @@ class SendScheduledNotifications extends Command
             // Get image URL
             $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
             
-            // Send to each user based on notification type
-            $successCount = 0;
-            $failureCount = 0;
+            // Dispatch jobs for each user (background processing)
+            $jobCount = 0;
             
             foreach ($appUsers as $user) {
-                try {
-                    if ($notification->type === 'news' && $notification->newsArticle) {
-                        // Send news notification with special data
-                        $response = $fcmController->sendNewsNotification(new Request([
-                            'user_id' => $user->id,
-                            'title' => $notification->title,
-                            'body' => $notification->description,
-                            'image' => $imageUrl,
-                            'news_id' => $notification->news_article_id,
-                            'news_slug' => $notification->newsArticle->slug,
-                        ]), $notification->id);
-                        
-                        $this->info("News notification sent to user {$user->id}");
-                    } else {
-                        // Send regular notification
-                        $response = $fcmController->sendFcmNotification(new Request([
-                            'user_id' => $user->id,
-                            'title' => $notification->title,
-                            'body' => $notification->description,
-                            'image' => $imageUrl,
-                        ]), $notification->id);
-                        
-                        $this->info("Regular notification sent to user {$user->id}");
-                    }
-                    
-                    $successCount++;
-                } catch (\Exception $e) {
-                    $failureCount++;
-                    $this->error("Failed to send notification to user {$user->id}: " . $e->getMessage());
-                    Log::error('Failed to send notification to user', [
-                        'notification_id' => $notification->id,
-                        'user_id' => $user->id,
-                        'error' => $e->getMessage()
-                    ]);
+                if ($notification->type === 'news' && $notification->newsArticle) {
+                    // Dispatch news notification job
+                    SendFcmNotificationJob::dispatch(
+                        $user->id,
+                        $notification->title,
+                        $notification->description,
+                        $imageUrl,
+                        $notification->id,
+                        $notification->news_article_id,
+                        $notification->newsArticle->slug
+                    );
+                } else {
+                    // Dispatch regular notification job
+                    SendFcmNotificationJob::dispatch(
+                        $user->id,
+                        $notification->title,
+                        $notification->description,
+                        $imageUrl,
+                        $notification->id
+                    );
                 }
+                $jobCount++;
             }
             
-            $this->info("Notification ID {$notification->id} processing completed. Success: {$successCount}, Failures: {$failureCount}");
+            $this->info("Notification ID {$notification->id}: Dispatched {$jobCount} jobs to queue");
             
-            Log::info('Notification processing completed', [
+            Log::info('Notification jobs dispatched', [
                 'notification_id' => $notification->id,
-                'success_count' => $successCount,
-                'failure_count' => $failureCount,
+                'jobs_dispatched' => $jobCount,
                 'total_users' => $appUsers->count()
             ]);
+
+            // Send start email report
+            $this->sendNotificationEmail($notification, [
+                'total_users' => $appUsers->count(),
+                'jobs_dispatched' => $jobCount,
+                'sent' => 0,
+                'failed' => 0,
+            ], 'started');
+
+            // Dispatch completion email job
+            SendNotificationCompletionEmail::dispatch($notification->id, $appUsers->count())
+                ->delay(now()->addSeconds(30));
             
         } catch (\Exception $e) {
             $this->error("Error processing notification ID {$notification->id}: " . $e->getMessage());
@@ -193,5 +191,29 @@ class SendScheduledNotifications extends Command
         }
         
         return $query->whereNotNull('fcm_tokens')->get();
+    }
+
+    /**
+     * Send notification email report
+     */
+    private function sendNotificationEmail($notification, $stats, $type = 'started')
+    {
+        try {
+            Mail::to('kvkdgt12345@gmail.com')
+                ->send(new NotificationReportMail($notification, $stats, $type));
+            
+            $this->info("Email report sent for notification ID {$notification->id}");
+            Log::info('Notification email sent', [
+                'notification_id' => $notification->id,
+                'type' => $type,
+                'email' => 'kvkdgt12345@gmail.com'
+            ]);
+        } catch (\Exception $e) {
+            $this->error("Failed to send email: " . $e->getMessage());
+            Log::error('Failed to send notification email', [
+                'notification_id' => $notification->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

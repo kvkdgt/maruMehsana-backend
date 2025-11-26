@@ -5,12 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Http\Controllers\FcmController;
+use App\Jobs\SendFcmNotificationJob;
+use App\Jobs\SendNotificationCompletionEmail;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\AppUser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificationReportMail;
+
 class NotificationController extends Controller
 {
     /**
@@ -113,15 +118,28 @@ class NotificationController extends Controller
             // Get users based on audience
             $appUsers = $this->getUsersByAudience($request->audience);
 
-            // Send notification to each user
+            // Dispatch jobs to send notifications in background
             foreach ($appUsers as $user) {
-                $this->fcmController->sendFcmNotification(new Request([
-                    'user_id' => $user->id,
-                    'title' => $request->title,
-                    'body' => $request->description,
-                    'image' => $imageUrl,
-                ]), $notification->id);
+                SendFcmNotificationJob::dispatch(
+                    $user->id,
+                    $request->title,
+                    $request->description,
+                    $imageUrl,
+                    $notification->id
+                );
             }
+
+            // Send start email report
+            $this->sendNotificationEmail($notification, [
+                'total_users' => $appUsers->count(),
+                'jobs_dispatched' => $appUsers->count(),
+                'sent' => 0,
+                'failed' => 0,
+            ], 'started');
+
+            // Dispatch completion email job (will wait and check for completion)
+            SendNotificationCompletionEmail::dispatch($notification->id, $appUsers->count())
+                ->delay(now()->addSeconds(30));
         }
         
         return redirect()->route('admin.notifications', ['tab' => $request->has('schedule') && $request->schedule === 'yes' ? 'scheduled' : 'send'])
@@ -141,26 +159,40 @@ class NotificationController extends Controller
         $appUsers = $this->getUsersByAudience($notification->audience);
         $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
         
-        // Determine which FCM method to use based on notification type
+        // Dispatch jobs to send notifications in background
         foreach ($appUsers as $user) {
             if ($notification->type === 'news' && $notification->newsArticle) {
-                $this->fcmController->sendNewsNotification(new Request([
-                    'user_id' => $user->id,
-                    'title' => $notification->title,
-                    'body' => $notification->description,
-                    'image' => $imageUrl,
-                    'news_id' => $notification->news_article_id,
-                    'news_slug' => $notification->newsArticle->slug,
-                ]), $notification->id);
+                SendFcmNotificationJob::dispatch(
+                    $user->id,
+                    $notification->title,
+                    $notification->description,
+                    $imageUrl,
+                    $notification->id,
+                    $notification->news_article_id,
+                    $notification->newsArticle->slug
+                );
             } else {
-                $this->fcmController->sendFcmNotification(new Request([
-                    'user_id' => $user->id,
-                    'title' => $notification->title,
-                    'body' => $notification->description,
-                    'image' => $imageUrl,
-                ]), $notification->id);
+                SendFcmNotificationJob::dispatch(
+                    $user->id,
+                    $notification->title,
+                    $notification->description,
+                    $imageUrl,
+                    $notification->id
+                );
             }
         }
+
+        // Send start email report
+        $this->sendNotificationEmail($notification, [
+            'total_users' => $appUsers->count(),
+            'jobs_dispatched' => $appUsers->count(),
+            'sent' => 0,
+            'failed' => 0,
+        ], 'started');
+
+        // Dispatch completion email job
+        SendNotificationCompletionEmail::dispatch($notification->id, $appUsers->count())
+            ->delay(now()->addSeconds(30));
         
         return redirect()->route('admin.notifications', ['tab' => 'scheduled'])
             ->with('success', 'Notification sent successfully!');
@@ -201,6 +233,28 @@ class NotificationController extends Controller
     }
 
     /**
+     * Send notification email report
+     */
+    private function sendNotificationEmail($notification, $stats, $type = 'started')
+    {
+        try {
+            Mail::to('kvkdgt12345@gmail.com')
+                ->send(new NotificationReportMail($notification, $stats, $type));
+            
+            Log::info('Notification email sent', [
+                'notification_id' => $notification->id,
+                'type' => $type,
+                'email' => 'kvkdgt12345@gmail.com'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send notification email', [
+                'notification_id' => $notification->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Show notification logs for a specific notification.
      */
     public function showLogs($id)
@@ -216,6 +270,128 @@ class NotificationController extends Controller
         ];
         
         return view('admin.notifications.logs', compact('notification', 'logs', 'stats'));
+    }
+
+    /**
+     * Get notification progress (AJAX endpoint)
+     */
+    public function getProgress($id)
+    {
+        $notification = Notification::findOrFail($id);
+        
+        // Get total users for this audience
+        $totalUsers = $this->getUsersByAudience($notification->audience)->count();
+        
+        // Count unique users who received notification (not tokens)
+        $usersWithSent = $notification->logs()->where('status', 'sent')
+            ->distinct('app_user_id')->count('app_user_id');
+        $usersWithFailed = $notification->logs()->where('status', 'failed')
+            ->whereNotIn('app_user_id', function($query) use ($notification) {
+                $query->select('app_user_id')
+                    ->from('notification_logs')
+                    ->where('notification_id', $notification->id)
+                    ->where('status', 'sent');
+            })
+            ->distinct('app_user_id')->count('app_user_id');
+        
+        // Total unique users processed
+        $processedUsers = $notification->logs()->distinct('app_user_id')->count('app_user_id');
+        $pendingUsers = max(0, $totalUsers - $processedUsers);
+        
+        // Check pending jobs in queue for THIS notification
+        $pendingJobs = \DB::table('jobs')
+            ->where('payload', 'like', '%SendFcmNotificationJob%')
+            ->where('payload', 'like', '%"notificationId":' . $notification->id . '%')
+            ->count();
+        
+        // Also check with different JSON format
+        if ($pendingJobs == 0) {
+            $pendingJobs = \DB::table('jobs')
+                ->where('payload', 'like', '%SendFcmNotificationJob%')
+                ->where('payload', 'like', '%notification_id%' . $notification->id . '%')
+                ->count();
+        }
+        
+        $isComplete = ($processedUsers >= $totalUsers) || ($notification->is_sent && $pendingJobs == 0 && $processedUsers > 0);
+        
+        // Calculate progress percentage
+        $progress = $totalUsers > 0 ? min(100, round(($processedUsers / $totalUsers) * 100, 1)) : 0;
+        
+        return response()->json([
+            'notification_id' => $notification->id,
+            'title' => $notification->title,
+            'total_users' => $totalUsers,
+            'sent' => $usersWithSent,
+            'failed' => $usersWithFailed,
+            'processed' => $processedUsers,
+            'pending' => $pendingUsers,
+            'pending_jobs' => $pendingJobs,
+            'progress' => $progress,
+            'is_complete' => $isComplete,
+            'is_sent' => $notification->is_sent,
+            'success_rate' => $processedUsers > 0 ? round(($usersWithSent / $processedUsers) * 100, 1) : 0,
+        ]);
+    }
+
+    /**
+     * Get all active notification progresses - only those with pending jobs
+     */
+    public function getAllProgress()
+    {
+        // Check if there are any pending FCM jobs
+        $pendingJobCount = \DB::table('jobs')
+            ->where('payload', 'like', '%SendFcmNotificationJob%')
+            ->count();
+        
+        if ($pendingJobCount == 0) {
+            return response()->json(['notifications' => [], 'has_active' => false]);
+        }
+        
+        // Get recent sent notifications that might still be processing
+        $notifications = Notification::where('is_sent', true)
+            ->where('updated_at', '>=', now()->subHours(1))
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        $progresses = [];
+        
+        foreach ($notifications as $notification) {
+            $totalUsers = $this->getUsersByAudience($notification->audience)->count();
+            $processedUsers = $notification->logs()->distinct('app_user_id')->count('app_user_id');
+            
+            // Only include if not complete
+            if ($processedUsers < $totalUsers) {
+                $usersWithSent = $notification->logs()->where('status', 'sent')
+                    ->distinct('app_user_id')->count('app_user_id');
+                $usersWithFailed = $notification->logs()->where('status', 'failed')
+                    ->whereNotIn('app_user_id', function($query) use ($notification) {
+                        $query->select('app_user_id')
+                            ->from('notification_logs')
+                            ->where('notification_id', $notification->id)
+                            ->where('status', 'sent');
+                    })
+                    ->distinct('app_user_id')->count('app_user_id');
+                
+                $progresses[] = [
+                    'notification_id' => $notification->id,
+                    'title' => $notification->title,
+                    'total_users' => $totalUsers,
+                    'sent' => $usersWithSent,
+                    'failed' => $usersWithFailed,
+                    'processed' => $processedUsers,
+                    'pending' => max(0, $totalUsers - $processedUsers),
+                    'progress' => $totalUsers > 0 ? min(100, round(($processedUsers / $totalUsers) * 100, 1)) : 0,
+                    'is_complete' => false,
+                    'created_at' => $notification->created_at->format('M d, Y h:i A'),
+                ];
+            }
+        }
+        
+        return response()->json([
+            'notifications' => $progresses,
+            'has_active' => count($progresses) > 0
+        ]);
     }
 
     /**

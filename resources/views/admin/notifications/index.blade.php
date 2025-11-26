@@ -34,6 +34,15 @@
     <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
   </div>
   @endif
+
+  <!-- Live Progress Section -->
+  <div id="progressSection" class="progress-section" style="display: none;">
+    <div class="progress-header">
+      <h4><i class="fas fa-tasks"></i> Notification Progress</h4>
+      <button class="close-progress-btn" onclick="hideProgressSection()"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="progressCards"></div>
+  </div>
 <!-- Filter Section -->
 <div class="filters-card">
   <div class="filters-header">
@@ -127,6 +136,9 @@
             <td class="status">
               @if($notification->is_sent == 1)
                 <span class="status-sent">Sent</span>
+                <button class="btn-progress-view" onclick="showProgress({{ $notification->id }})" title="View Progress">
+                  <i class="fas fa-chart-line"></i>
+                </button>
               @elseif($notification->is_sent == 0)
                 <span class="status-scheduled">Scheduled</span>
               @endif
@@ -387,6 +399,112 @@
 
 function confirmDelete() {
   return confirm("Are you sure you want to delete this notification? This action cannot be undone.");
+}
+
+// Progress tracking
+let progressInterval = null;
+let activeNotificationId = null;
+
+function showProgress(notificationId) {
+  activeNotificationId = notificationId;
+  document.getElementById('progressSection').style.display = 'block';
+  fetchProgress(notificationId);
+  
+  // Auto-refresh every 2 seconds
+  if (progressInterval) clearInterval(progressInterval);
+  progressInterval = setInterval(() => fetchProgress(notificationId), 2000);
+}
+
+function hideProgressSection() {
+  document.getElementById('progressSection').style.display = 'none';
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+}
+
+function fetchProgress(notificationId) {
+  fetch(`/admin/notifications/${notificationId}/progress`)
+    .then(response => response.json())
+    .then(data => {
+      renderProgressCard(data);
+      
+      // Stop polling if complete
+      if (data.is_complete && progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    })
+    .catch(error => console.error('Error fetching progress:', error));
+}
+
+function renderProgressCard(data) {
+  const container = document.getElementById('progressCards');
+  const statusClass = data.is_complete ? 'complete' : 'processing';
+  const statusText = data.is_complete ? 'Completed' : 'Processing...';
+  
+  container.innerHTML = `
+    <div class="progress-card ${statusClass}">
+      <div class="progress-card-header">
+        <h5>${data.title}</h5>
+        <span class="progress-status ${statusClass}">${statusText}</span>
+      </div>
+      
+      <div class="progress-bar-container">
+        <div class="progress-bar" style="width: ${data.progress}%"></div>
+        <span class="progress-text">${data.progress}%</span>
+      </div>
+      
+      <div class="progress-stats">
+        <div class="stat-item total">
+          <i class="fas fa-users"></i>
+          <span class="stat-value">${data.total_users}</span>
+          <span class="stat-label">Total Users</span>
+        </div>
+        <div class="stat-item success">
+          <i class="fas fa-check-circle"></i>
+          <span class="stat-value">${data.sent}</span>
+          <span class="stat-label">Sent</span>
+        </div>
+        <div class="stat-item danger">
+          <i class="fas fa-times-circle"></i>
+          <span class="stat-value">${data.failed}</span>
+          <span class="stat-label">Failed</span>
+        </div>
+        <div class="stat-item warning">
+          <i class="fas fa-clock"></i>
+          <span class="stat-value">${data.pending}</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      
+      ${data.is_complete ? `
+        <div class="progress-summary">
+          <strong>Success Rate:</strong> ${data.success_rate}%
+        </div>
+      ` : `
+        <div class="progress-summary processing">
+          <i class="fas fa-spinner fa-spin"></i> Processing notifications...
+        </div>
+      `}
+    </div>
+  `;
+}
+
+// Check for active notifications on page load
+document.addEventListener('DOMContentLoaded', function() {
+  checkActiveNotifications();
+});
+
+function checkActiveNotifications() {
+  fetch('/admin/notifications-progress')
+    .then(response => response.json())
+    .then(data => {
+      if (data.has_active && data.notifications.length > 0) {
+        showProgress(data.notifications[0].notification_id);
+      }
+    })
+    .catch(error => console.error('Error checking active notifications:', error));
 }
 </script>
 @endsection
