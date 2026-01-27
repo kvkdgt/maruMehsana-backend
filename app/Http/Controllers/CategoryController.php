@@ -100,7 +100,8 @@ class CategoryController extends Controller
     public function trendingCategories()
     {
         // Fetch top 5 categories ordered by category_visitors in descending order
-        $categories = Category::orderByDesc('category_visitors')
+        $categories = Category::withCount('businesses')
+            ->orderByDesc('category_visitors')
             ->limit(5)
             ->get();
 
@@ -113,7 +114,7 @@ class CategoryController extends Controller
 
     public function categories()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('businesses')->get();
         return response()->json([
             'status' => true,
             'message' => 'All Categories',
