@@ -36,70 +36,87 @@ class SendNotificationCompletionEmail implements ShouldQueue
      */
     public function handle(): void
     {
-        $notification = Notification::find($this->notificationId);
-        
-        if (!$notification) {
-            Log::warning('SendNotificationCompletionEmail: Notification not found', [
-                'notification_id' => $this->notificationId
-            ]);
-            return;
-        }
-
-        // Count unique users (not tokens)
-        $processedUsers = $notification->logs()->distinct('app_user_id')->count('app_user_id');
-
-        // Check if all users are processed
-        if ($processedUsers < $this->totalUsers) {
-            // Check if there are still pending jobs
-            $pendingJobs = \DB::table('jobs')
-                ->where('payload', 'like', '%SendFcmNotificationJob%')
-                ->count();
+        try {
+            $notification = Notification::find($this->notificationId);
             
-            if ($pendingJobs > 0) {
-                // Re-queue this job to check again in 30 seconds
-                self::dispatch($this->notificationId, $this->totalUsers)
-                    ->delay(now()->addSeconds(30));
+            if (!$notification) {
+                Log::warning('SendNotificationCompletionEmail: Notification not found', [
+                    'notification_id' => $this->notificationId
+                ]);
                 return;
             }
-        }
 
-        // Get final stats - count unique users
-        $usersWithSent = $notification->logs()->where('status', 'sent')
-            ->distinct('app_user_id')->count('app_user_id');
-        $usersWithFailed = $notification->logs()->where('status', 'failed')
-            ->whereNotIn('app_user_id', function($query) use ($notification) {
-                $query->select('app_user_id')
-                    ->from('notification_logs')
-                    ->where('notification_id', $notification->id)
-                    ->where('status', 'sent');
-            })
-            ->distinct('app_user_id')->count('app_user_id');
+            // Count unique users (not tokens)
+            $processedUsers = $notification->logs()->distinct('app_user_id')->count('app_user_id');
 
-        // Calculate success rate
-        $successRate = $processedUsers > 0 ? round(($usersWithSent / $processedUsers) * 100, 1) : 0;
+            // Check if all users are processed
+            if ($processedUsers < $this->totalUsers) {
+                try {
+                    // Check if there are still pending jobs
+                    $pendingJobs = \DB::table('jobs')
+                        ->where('payload', 'like', '%SendFcmNotificationJob%')
+                        ->count();
+                    
+                    if ($pendingJobs > 0) {
+                        // Re-queue this job to check again in 30 seconds
+                        self::dispatch($this->notificationId, $this->totalUsers)
+                            ->delay(now()->addSeconds(30));
+                        return;
+                    }
+                } catch (\Exception $e) {
+                    // If jobs table doesn't exist or query fails, just continue
+                    Log::warning('Could not check pending jobs', [
+                        'notification_id' => $this->notificationId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
 
-        $stats = [
-            'total_users' => $this->totalUsers,
-            'sent' => $usersWithSent,
-            'failed' => $usersWithFailed,
-            'pending' => 0,
-            'success_rate' => $successRate,
-        ];
+            // Get final stats - count unique users
+            $usersWithSent = $notification->logs()->where('status', 'sent')
+                ->distinct('app_user_id')->count('app_user_id');
+            $usersWithFailed = $notification->logs()->where('status', 'failed')
+                ->whereNotIn('app_user_id', function($query) use ($notification) {
+                    $query->select('app_user_id')
+                        ->from('notification_logs')
+                        ->where('notification_id', $notification->id)
+                        ->where('status', 'sent');
+                })
+                ->distinct('app_user_id')->count('app_user_id');
 
-        try {
-            Mail::to('kvkdgt12345@gmail.com')
-                ->send(new NotificationReportMail($notification, $stats, 'completed'));
+            // Calculate success rate
+            $successRate = $processedUsers > 0 ? round(($usersWithSent / $processedUsers) * 100, 1) : 0;
 
-            Log::info('Notification completion email sent', [
-                'notification_id' => $this->notificationId,
-                'stats' => $stats
-            ]);
+            $stats = [
+                'total_users' => $this->totalUsers,
+                'sent' => $usersWithSent,
+                'failed' => $usersWithFailed,
+                'pending' => 0,
+                'success_rate' => $successRate,
+            ];
+
+            try {
+                Mail::to('kvkdgt12345@gmail.com')
+                    ->send(new NotificationReportMail($notification, $stats, 'completed'));
+
+                Log::info('Notification completion email sent', [
+                    'notification_id' => $this->notificationId,
+                    'stats' => $stats
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to send notification completion email', [
+                    'notification_id' => $this->notificationId,
+                    'error' => $e->getMessage()
+                ]);
+                // Don't throw - we don't want to retry email sending
+            }
         } catch (\Exception $e) {
-            Log::error('Failed to send notification completion email', [
+            Log::error('SendNotificationCompletionEmail job failed', [
                 'notification_id' => $this->notificationId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            throw $e;
+            // Don't throw to prevent infinite retries
         }
     }
 }
