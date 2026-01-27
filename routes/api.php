@@ -43,6 +43,9 @@ Route::post('/user/store', [UserController::class, 'store']);
 Route::post('/user/signup', [UserController::class, 'signup']);
 Route::post('/user/login', [UserController::class, 'login']);
 Route::post('/user/upgrade-guest', [UserController::class, 'upgradeGuest']);
+Route::get('/user/notifications', [UserController::class, 'getNotifications']);
+Route::post('/user/notifications/mark-read', [UserController::class, 'markNotificationAsRead']);
+Route::get('/user/notifications/unread-count', [UserController::class, 'getUnreadNotificationCount']);
 Route::get('/facts/get', [FactsController::class, 'getFacts']);
 
 Route::get('/tourist-places', [TouristPlaceController::class, 'index']);

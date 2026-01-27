@@ -65,6 +65,14 @@ class SendFcmNotificationJob implements ShouldQueue
                 return;
             }
 
+            // Create notification status entry for the user if it doesn't exist
+            if ($this->notificationId) {
+                \App\Models\UserNotificationStatus::updateOrCreate(
+                    ['app_user_id' => $user->id, 'notification_id' => $this->notificationId],
+                    ['is_read' => false]
+                );
+            }
+
             $fcmTokens = $user->fcm_tokens;
 
             if (!$fcmTokens || empty($fcmTokens)) {

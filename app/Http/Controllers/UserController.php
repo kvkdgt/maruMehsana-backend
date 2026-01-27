@@ -106,4 +106,50 @@ class UserController extends Controller
         return response()->json(['message' => 'Upgraded to registered user', 'user' => $user, 'status' => 200]);
     }
 
+    public function getNotifications(Request $request)
+    {
+        $userId = $request->user_id;
+        if (!$userId) return response()->json(['error' => 'User ID required'], 400);
+
+        $notifications = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->with('notification')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $notifications
+        ]);
+    }
+
+    public function markNotificationAsRead(Request $request)
+    {
+        $userId = $request->user_id;
+        $notificationId = $request->notification_id;
+
+        if (!$userId || !$notificationId) {
+            return response()->json(['error' => 'User ID and Notification ID required'], 400);
+        }
+
+        \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->where('notification_id', $notificationId)
+            ->update(['is_read' => true]);
+
+        return response()->json(['status' => 'success', 'message' => 'Notification marked as read']);
+    }
+
+    public function getUnreadNotificationCount(Request $request)
+    {
+        $userId = $request->user_id;
+        if (!$userId) return response()->json(['error' => 'User ID required'], 400);
+
+        $count = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json([
+            'status' => 'success',
+            'unread_count' => $count
+        ]);
+    }
 }
