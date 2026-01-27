@@ -132,6 +132,12 @@ class TouristPlaceController extends Controller
     }
 
     $places = $query->paginate($limit, ['*'], 'page', $pageNo);
+    
+    // Add average rating to each place
+    foreach ($places as $place) {
+        $avgRating = $place->reviews()->avg('rating');
+        $place->avg_rating = $avgRating ? round($avgRating, 1) : 0;
+    }
 
     return response()->json([
         'message' => 'Tourist places retrieved successfully',
@@ -143,10 +149,25 @@ class TouristPlaceController extends Controller
     // Get a single tourist place by ID
     public function show($id)
     {
-        $place = TouristPlace::with('placeImages')->findOrFail($id);
+        $place = TouristPlace::with('placeImages')
+            ->withCount('reviews')
+            ->findOrFail($id);
     
         // Increment visitor count
         $place->increment('visitors');
+        
+        // Calculate average rating
+        $avgRating = $place->reviews()->avg('rating');
+        $place->avg_rating = $avgRating ? round($avgRating, 1) : 0;
+        
+        // Get recent 5 reviews
+        $recentReviews = $place->reviews()
+            ->with(['user:id,name'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        $place->recent_reviews = $recentReviews;
     
         return response()->json([
             'message' => 'Tourist place retrieved successfully',

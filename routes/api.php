@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\FcmController;
 use App\Http\Controllers\BusinessReviewController;
+use App\Http\Controllers\TouristPlaceReviewController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -62,6 +63,12 @@ Route::get('/businesses/{id}/reviews', [BusinessReviewController::class, 'getBus
 Route::post('/reviews', [BusinessReviewController::class, 'store']);
 Route::put('/reviews/{id}', [BusinessReviewController::class, 'update']);
 Route::delete('/reviews/{id}', [BusinessReviewController::class, 'destroy']);
+
+// Tourist Place Reviews
+Route::get('/tourist-places/{id}/reviews', [TouristPlaceReviewController::class, 'getPlaceReviews']);
+Route::post('/place-reviews', [TouristPlaceReviewController::class, 'store']);
+Route::put('/place-reviews/{id}', [TouristPlaceReviewController::class, 'update']);
+Route::delete('/place-reviews/{id}', [TouristPlaceReviewController::class, 'destroy']);
 
 
 

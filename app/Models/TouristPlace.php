@@ -34,6 +34,11 @@ class TouristPlace extends Model
         return $this->hasMany(TouristPlaceImage::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(TouristPlaceReview::class);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
