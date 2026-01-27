@@ -117,28 +117,31 @@ class NotificationController extends Controller
             
             // Get users based on audience
             $appUsers = $this->getUsersByAudience($request->audience);
+            $totalUsers = $appUsers->count();
 
-            // Dispatch jobs to send notifications in background
-            foreach ($appUsers as $user) {
-                SendFcmNotificationJob::dispatch(
-                    $user->id,
-                    $request->title,
-                    $request->description,
-                    $imageUrl,
-                    $notification->id
-                );
-            }
+            // Process users in chunks to prevent memory issues
+            $appUsers->chunk(100, function ($userChunk) use ($request, $imageUrl, $notification) {
+                foreach ($userChunk as $user) {
+                    SendFcmNotificationJob::dispatch(
+                        $user->id,
+                        $request->title,
+                        $request->description,
+                        $imageUrl,
+                        $notification->id
+                    )->onQueue('notifications');
+                }
+            });
 
             // Send start email report
             $this->sendNotificationEmail($notification, [
-                'total_users' => $appUsers->count(),
-                'jobs_dispatched' => $appUsers->count(),
+                'total_users' => $totalUsers,
+                'jobs_dispatched' => $totalUsers,
                 'sent' => 0,
                 'failed' => 0,
             ], 'started');
 
             // Dispatch completion email job (will wait and check for completion)
-            SendNotificationCompletionEmail::dispatch($notification->id, $appUsers->count())
+            SendNotificationCompletionEmail::dispatch($notification->id, $totalUsers)
                 ->delay(now()->addSeconds(30));
         }
         
@@ -158,40 +161,43 @@ class NotificationController extends Controller
         // Get users based on audience
         $appUsers = $this->getUsersByAudience($notification->audience);
         $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
+        $totalUsers = $appUsers->count();
         
-        // Dispatch jobs to send notifications in background
-        foreach ($appUsers as $user) {
-            if ($notification->type === 'news' && $notification->newsArticle) {
-                SendFcmNotificationJob::dispatch(
-                    $user->id,
-                    $notification->title,
-                    $notification->description,
-                    $imageUrl,
-                    $notification->id,
-                    $notification->news_article_id,
-                    $notification->newsArticle->slug
-                );
-            } else {
-                SendFcmNotificationJob::dispatch(
-                    $user->id,
-                    $notification->title,
-                    $notification->description,
-                    $imageUrl,
-                    $notification->id
-                );
+        // Process users in chunks to prevent memory issues and timeouts
+        $appUsers->chunk(100, function ($userChunk) use ($notification, $imageUrl) {
+            foreach ($userChunk as $user) {
+                if ($notification->type === 'news' && $notification->newsArticle) {
+                    SendFcmNotificationJob::dispatch(
+                        $user->id,
+                        $notification->title,
+                        $notification->description,
+                        $imageUrl,
+                        $notification->id,
+                        $notification->news_article_id,
+                        $notification->newsArticle->slug
+                    )->onQueue('notifications');
+                } else {
+                    SendFcmNotificationJob::dispatch(
+                        $user->id,
+                        $notification->title,
+                        $notification->description,
+                        $imageUrl,
+                        $notification->id
+                    )->onQueue('notifications');
+                }
             }
-        }
+        });
 
         // Send start email report
         $this->sendNotificationEmail($notification, [
-            'total_users' => $appUsers->count(),
-            'jobs_dispatched' => $appUsers->count(),
+            'total_users' => $totalUsers,
+            'jobs_dispatched' => $totalUsers,
             'sent' => 0,
             'failed' => 0,
         ], 'started');
 
         // Dispatch completion email job
-        SendNotificationCompletionEmail::dispatch($notification->id, $appUsers->count())
+        SendNotificationCompletionEmail::dispatch($notification->id, $totalUsers)
             ->delay(now()->addSeconds(30));
         
         return redirect()->route('admin.notifications', ['tab' => 'scheduled'])
