@@ -40,6 +40,9 @@ Route::get('/businesses/get', [BusinessController::class, 'getBusinesses']);
 Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']);
 
 Route::post('/user/store', [UserController::class, 'store']);
+Route::post('/user/signup', [UserController::class, 'signup']);
+Route::post('/user/login', [UserController::class, 'login']);
+Route::post('/user/upgrade-guest', [UserController::class, 'upgradeGuest']);
 Route::get('/facts/get', [FactsController::class, 'getFacts']);
 
 Route::get('/tourist-places', [TouristPlaceController::class, 'index']);
