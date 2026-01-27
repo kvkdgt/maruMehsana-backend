@@ -12,6 +12,7 @@ use App\Http\Controllers\TouristPlaceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\FcmController;
+use App\Http\Controllers\BusinessReviewController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -55,6 +56,12 @@ Route::post('/enquiry/submit', [BusinessEnquiryController::class, 'create']);
 Route::get('/banner-ads', [BannerAdController::class, 'getActiveBanners']);
 Route::post('/banner-ads/{id}/increment-touch', [BannerAdController::class, 'incrementTouch']);
 Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
+
+// Business Reviews
+Route::get('/businesses/{id}/reviews', [BusinessReviewController::class, 'getBusinessReviews']);
+Route::post('/reviews', [BusinessReviewController::class, 'store']);
+Route::put('/reviews/{id}', [BusinessReviewController::class, 'update']);
+Route::delete('/reviews/{id}', [BusinessReviewController::class, 'destroy']);
 
 
 

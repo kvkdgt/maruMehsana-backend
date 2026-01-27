@@ -38,6 +38,11 @@ class Business extends Model
         return $this->hasMany(BusinessImages::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(BusinessReview::class);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');

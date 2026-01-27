@@ -187,6 +187,12 @@ class BusinessController extends Controller
             ->offset($offset)
             ->limit($limit)
             ->get();
+            
+        // Add average rating to each business
+        foreach ($businesses as $business) {
+            $avgRating = $business->reviews()->avg('rating');
+            $business->avg_rating = $avgRating ? round($avgRating, 1) : 0;
+        }
 
         // Get total businesses count for the given category
         $totalBusinesses = Business::where('category_id', $request->category_id)->count();
@@ -209,18 +215,34 @@ class BusinessController extends Controller
         $request->validate([
             'business_id' => 'required|exists:businesses,id',
         ]);
+        
         Business::where('id', $request->business_id)->increment('visitors');
-        // Fetch business details along with category and images
+        
+        // Fetch business details along with category, images, and basic review stats
         $business = Business::with(['category:id,name', 'businessImages'])
+            ->withCount('reviews')
             ->where('id', $request->business_id)
             ->first();
-    
+
         if (!$business) {
             return response()->json([
                 'status' => false,
                 'message' => 'Business not found',
             ], 404);
         }
+
+        // Calculate average rating manually to be precise
+        $avgRating = $business->reviews()->avg('rating');
+        $business->avg_rating = $avgRating ? round($avgRating, 1) : 0;
+        
+        // Get recent 5 reviews
+        $recentReviews = $business->reviews()
+            ->with(['user:id,name'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        $business->recent_reviews = $recentReviews;
     
         return response()->json([
             'status' => true,
