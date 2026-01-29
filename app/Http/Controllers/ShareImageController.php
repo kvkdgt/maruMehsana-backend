@@ -81,13 +81,12 @@ class ShareImageController extends Controller
         // Add White Banner at bottom
         imagefilledrectangle($canvas, 0, $height, $width, $newHeight, $white);
 
-        // Add subtle top border to banner
-        $lightGray = imagecolorallocate($canvas, 230, 230, 230);
-        imageline($canvas, 0, $height, $width, $height, $lightGray);
+        // Add professional blue accent strip at the top of the banner (instead of a simple line)
+        imagefilledrectangle($canvas, 0, $height, $width, $height + 4, $blue);
 
         // Fonts
-        $fontSizeTitle = round($bannerHeight * 0.2);
-        $fontSizeSub = round($bannerHeight * 0.15);
+        $fontSizeTitle = round($bannerHeight * 0.22);
+        $fontSizeSub = round($bannerHeight * 0.14);
         
         // Try to find a font
         $fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
@@ -96,22 +95,22 @@ class ShareImageController extends Controller
         }
 
         if (file_exists($fontPath)) {
-            // Draw "Maru Mehsana" Brand
-            imagettftext($canvas, $fontSizeTitle, 0, 20, $height + ($bannerHeight * 0.45), $blue, $fontPath, "Maru Mehsana");
+            // Draw "Maru Mehsana" Brand (Centered vertically in the banner area)
+            imagettftext($canvas, $fontSizeTitle, 0, 30, $height + ($bannerHeight * 0.48), $blue, $fontPath, "Maru Mehsana");
             
-            // Draw Play Store CTA
+            // Draw Play Store CTA (Subtle and professional)
             $ctaText = "Download Maru Mehsana from Play Store";
-            imagettftext($canvas, $fontSizeSub, 0, 20, $height + ($bannerHeight * 0.75), $gray, $fontPath, $ctaText);
+            imagettftext($canvas, $fontSizeSub, 0, 30, $height + ($bannerHeight * 0.78), $gray, $fontPath, $ctaText);
             
-            // Draw "Shared via" on the right
+            // Draw "Shared via" on the right (Right aligned)
             $rightText = "Shared from Maru Mehsana " . $type;
             $bbox = imagettfbbox($fontSizeSub, 0, $fontPath, $rightText);
             $textWidth = $bbox[2] - $bbox[0];
-            imagettftext($canvas, $fontSizeSub, 0, $width - $textWidth - 20, $height + ($bannerHeight * 0.6), $black, $fontPath, $rightText);
+            imagettftext($canvas, $fontSizeSub, 0, $width - $textWidth - 30, $height + ($bannerHeight * 0.6), $black, $fontPath, $rightText);
         } else {
             // Fallback to builtin fonts
-            imagestring($canvas, 5, 20, $height + 20, "Maru Mehsana", $blue);
-            imagestring($canvas, 3, 20, $height + 50, "Download from Play Store", $gray);
+            imagestring($canvas, 5, 20, $height + 25, "Maru Mehsana", $blue);
+            imagestring($canvas, 3, 20, $height + 55, "Download from Play Store", $gray);
         }
 
         // Output image to buffer
