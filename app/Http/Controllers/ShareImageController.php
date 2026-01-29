@@ -50,24 +50,30 @@ class ShareImageController extends Controller
             mkdir(dirname($outputPath), 0755, true);
         }
 
-        // Try Node.js HTML Rendering first (High Quality)
+        // Try Node.js HTML Rendering first (High Quality) - Only if enabled
         try {
-            $scriptPath = base_path('image-generator/render.js');
-            // Escape arguments
-            $cmd = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($sourcePath) . " " . escapeshellarg("MARU MEHSANA") . " " . escapeshellarg($outputPath) . " 2>&1";
-            
-            $output = [];
-            $returnVar = 0;
-            exec($cmd, $output, $returnVar);
+            // Check if exec is enabled and node exists (Standard Shared Hosting usually disables this)
+            $nodeAvailable = function_exists('exec') && 
+                             !in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))));
 
-            if ($returnVar === 0 && file_exists($outputPath)) {
-                return response()->file($outputPath);
+            if ($nodeAvailable) {
+                $scriptPath = base_path('image-generator/render.js');
+                // Escape arguments
+                $cmd = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($sourcePath) . " " . escapeshellarg("MARU MEHSANA") . " " . escapeshellarg($outputPath) . " 2>&1";
+                
+                $output = [];
+                $returnVar = 0;
+                exec($cmd, $output, $returnVar);
+
+                if ($returnVar === 0 && file_exists($outputPath)) {
+                    return response()->file($outputPath);
+                }
+                
+                // Optional: Log only if we expected it to work but it failed
+                // \Illuminate\Support\Facades\Log::warning("Node Render Failed: " . implode("\n", $output));
             }
-            
-            // Log error if node failed
-            \Illuminate\Support\Facades\Log::error("Node Render Failed: " . implode("\n", $output));
         } catch (\Throwable $e) {
-             \Illuminate\Support\Facades\Log::error("Node Render Exception: " . $e->getMessage());
+             // Silent fail to fallback
         }
 
         // Fallback to GD (PHP Canvas) if Node fails
