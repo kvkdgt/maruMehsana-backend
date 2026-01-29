@@ -59,32 +59,29 @@ class ShareImageController extends Controller
         $width = imagesx($source);
         $height = imagesy($source);
 
-        // Banner height (15% of total height or min 100px)
-        $bannerHeight = max(100, round($height * 0.15));
-        // Fixed professional height for the branded footer
-        $bannerHeight = max(100, round($width * 0.15));
-        if ($bannerHeight > 180) $bannerHeight = 180;
+        // Fixed professional height - more room for the "pill" design
+        $bannerHeight = max(140, round($width * 0.18));
+        if ($bannerHeight > 220) $bannerHeight = 220;
         
         $newHeight = $height + $bannerHeight;
 
         // Create new true color image
         $canvas = imagecreatetruecolor($width, $newHeight);
 
-        // Colors from Reference
+        // Colors from Reference Image
         $white = imagecolorallocate($canvas, 255, 255, 255);
-        $brandBlue = imagecolorallocate($canvas, 1, 105, 178); // #0169b2 - Primary Brand Blue
-        $darkBlue = imagecolorallocate($canvas, 1, 85, 145);  // Slightly darker for depth
-        $lightBlue = imagecolorallocate($canvas, 200, 225, 245);
+        $darkBlue = imagecolorallocate($canvas, 28, 76, 138); // Exact blue from image #1c4c8a
+        $bgGrey = imagecolorallocate($canvas, 245, 247, 250);
 
         // Fill background
         imagefill($canvas, 0, 0, $white);
         imagecopy($canvas, $source, 0, 0, 0, 0, $width, $height);
 
-        // Draw the Blue Banner (Footer)
-        imagefilledrectangle($canvas, 0, $height, $width, $newHeight, $brandBlue);
+        // Draw the Blue Footer Background
+        imagefilledrectangle($canvas, 0, $height, $width, $newHeight, $darkBlue);
 
         // Layout Constants
-        $padding = $bannerHeight * 0.2;
+        $margin = $bannerHeight * 0.15;
         $vCenter = $height + ($bannerHeight / 2);
         
         // Font paths
@@ -96,65 +93,95 @@ class ShareImageController extends Controller
         }
 
         if (file_exists($fontBold)) {
-            // 1. Draw Map Pin Icon (left side)
-            $iconSize = $bannerHeight * 0.5;
-            $iconX = $padding + ($iconSize / 2);
+            // 1. Draw Map Pin Icon
+            $iconHeight = $bannerHeight * 0.6;
+            $iconWidth = $iconHeight * 0.8;
+            $iconX = $margin * 2;
             $iconY = $vCenter;
 
-            // Simple Map Pin shape with white fill
-            imagefilledellipse($canvas, $iconX, $iconY - ($iconSize * 0.1), $iconSize, $iconSize, $white);
+            // Draw Pin Head (Circle)
+            $headSize = $iconWidth;
+            imagefilledellipse($canvas, $iconX + ($headSize/2), $iconY - ($iconHeight * 0.1), $headSize, $headSize, $white);
             
-            // The "M" inside the pin
-            $mSize = $iconSize * 0.5;
+            // Draw Pin Point (Triangle/Point at bottom)
+            $pointWidth = $headSize * 0.4;
+            $points = [
+                $iconX + ($headSize/2) - ($pointWidth/2), $iconY + ($headSize/3),
+                $iconX + ($headSize/2) + ($pointWidth/2), $iconY + ($headSize/3),
+                $iconX + ($headSize/2), $iconY + ($iconHeight/2)
+            ];
+            imagefilledpolygon($canvas, $points, 3, $white);
+
+            // Draw "M" centered in circle
+            $mSize = $headSize * 0.45;
             $bboxM = imagettfbbox($mSize, 0, $fontBold, "M");
             $mWidth = $bboxM[2] - $bboxM[0];
-            $mHeight = $bboxM[1] - $bboxM[7];
-            imagettftext($canvas, $mSize, 0, $iconX - ($mWidth/2), $iconY + ($mHeight/3) - ($iconSize * 0.1), $brandBlue, $fontBold, "M");
+            $mHeight = abs($bboxM[7] - $bboxM[1]);
+            imagettftext($canvas, $mSize, 0, $iconX + ($headSize/2) - ($mWidth/2), $iconY - ($iconHeight * 0.1) + ($mHeight/2), $darkBlue, $fontBold, "M");
 
-            // 2. Draw Brand Text & Tagline
-            $textX = $iconX + ($iconSize * 0.8);
-            $fontSizeMain = $bannerHeight * 0.22;
-            $fontSizeSub = $bannerHeight * 0.13;
+            // 2. Text Section
+            $textX = $iconX + $headSize + $margin;
+            $fsMain = $bannerHeight * 0.20;
+            $fsTag = $bannerHeight * 0.12;
 
-            imagettftext($canvas, $fontSizeMain, 0, $textX, $vCenter - 5, $white, $fontBold, "MARU MEHSANA");
-            imagettftext($canvas, $fontSizeSub, 0, $textX, $vCenter + ($fontSizeMain), $white, $fontReg, "Your City in Your Pocket");
+            imagettftext($canvas, $fsMain, 0, $textX, $vCenter - ($bannerHeight * 0.05), $white, $fontBold, "MARU MEHSANA");
+            imagettftext($canvas, $fsTag, 0, $textX, $vCenter + ($bannerHeight * 0.15), $white, $fontReg, "Your City in Your Pocket");
 
-            // 3. Vertical Separator Line
-            $separatorX = $width * 0.7; // Positioned towards the right
-            imageline($canvas, $separatorX, $height + ($padding * 1.5), $separatorX, $newHeight - ($padding * 1.5), $white);
+            // 3. Vertical Separator
+            $sepX = $width * 0.68;
+            imagesetthickness($canvas, 2);
+            imageline($canvas, $sepX, $height + ($bannerHeight * 0.2), $sepX, $newHeight - ($bannerHeight * 0.2), $white);
+            imagesetthickness($canvas, 1);
 
-            // 4. Download on Play Store Section (Right side)
-            $playStoreX = $separatorX + ($padding * 0.8);
+            // 4. Play Store Badge
+            $badgeX = $sepX + $margin;
+            $badgeH = $bannerHeight * 0.5;
+            $badgeW = $width - $badgeX - ($margin * 2);
+            if ($badgeW > $badgeH * 2.8) $badgeW = $badgeH * 2.8;
+            $badgeY = $vCenter - ($badgeH / 2);
+
+            // Draw Rounded Rectangle for Badge (using thickness for border)
+            imagesetthickness($canvas, 2);
+            $radius = 12;
+            $x1 = $badgeX; $y1 = $badgeY; $x2 = $badgeX + $badgeW; $y2 = $badgeY + $badgeH;
             
-            // Draw a rounded rectangle for the badge-like feel
-            $badgeWidth = $width - $playStoreX - $padding;
-            if ($badgeWidth > $bannerHeight * 1.5) $badgeWidth = $bannerHeight * 1.5;
-            
-            $badgeHeight = $bannerHeight * 0.45;
-            $badgeY = $vCenter - ($badgeHeight / 2);
-            
-            // Draw Badge Border
-            imagerectangle($canvas, $playStoreX, $badgeY, $playStoreX + $badgeWidth, $badgeY + $badgeHeight, $white);
-            
+            // Draw lines for rounded rectangle
+            imageline($canvas, $x1+$radius, $y1, $x2-$radius, $y1, $white);
+            imageline($canvas, $x1+$radius, $y2, $x2-$radius, $y2, $white);
+            imageline($canvas, $x1, $y1+$radius, $x1, $y2-$radius, $white);
+            imageline($canvas, $x2, $y1+$radius, $x2, $y2-$radius, $white);
+            // Draw arcs for corners
+            imagearc($canvas, $x1+$radius, $y1+$radius, $radius*2, $radius*2, 180, 270, $white);
+            imagearc($canvas, $x2-$radius, $y1+$radius, $radius*2, $radius*2, 270, 360, $white);
+            imagearc($canvas, $x1+$radius, $y2-$radius, $radius*2, $radius*2, 90, 180, $white);
+            imagearc($canvas, $x2-$radius, $y2-$radius, $radius*2, $radius*2, 0, 90, $white);
+            imagesetthickness($canvas, 1);
+
+            // Play Logo (Triangle)
+            $pSize = $badgeH * 0.4;
+            $pX = $badgeX + ($badgeH * 0.25);
+            $pY = $vCenter;
+            $pPoints = [
+                $pX, $pY - ($pSize/2),
+                $pX, $pY + ($pSize/2),
+                $pX + ($pSize * 0.8), $pY
+            ];
+            imagefilledpolygon($canvas, $pPoints, 3, $white);
+
             // Badge Text
-            $fsPlay1 = $badgeHeight * 0.25;
-            $fsPlay2 = $badgeHeight * 0.4;
-            imagettftext($canvas, $fsPlay1, 0, $playStoreX + ($badgeWidth * 0.3), $badgeY + ($badgeHeight * 0.4), $white, $fontReg, "Download on");
-            imagettftext($canvas, $fsPlay2, 0, $playStoreX + ($badgeWidth * 0.3), $badgeY + ($badgeHeight * 0.85), $white, $fontBold, "Play Store");
-            
-            // Simple triangle as play logo
-            $point1 = ['x' => $playStoreX + ($badgeWidth * 0.1), 'y' => $badgeY + ($badgeHeight * 0.25)];
-            $point2 = ['x' => $playStoreX + ($badgeWidth * 0.1), 'y' => $badgeY + ($badgeHeight * 0.75)];
-            $point3 = ['x' => $playStoreX + ($badgeWidth * 0.25), 'y' => $badgeY + ($badgeHeight * 0.5)];
-            imagefilledpolygon($canvas, [$point1['x'], $point1['y'], $point2['x'], $point2['y'], $point3['x'], $point3['y']], 3, $white);
+            $fsDownload = $badgeH * 0.18;
+            $fsStore = $badgeH * 0.32;
+            $textStartX = $pX + ($pSize) + 5;
+            imagettftext($canvas, $fsDownload, 0, $textStartX, $badgeY + ($badgeH * 0.42), $white, $fontReg, "Download on");
+            imagettftext($canvas, $fsStore, 0, $textStartX, $badgeY + ($badgeH * 0.82), $white, $fontBold, "Play Store");
 
         } else {
-            // High-quality fallback if fonts are missing
-            imagestring($canvas, 5, 20, $height + 25, "MARU MEHSANA", $white);
-            imagestring($canvas, 3, 20, $height + 55, "Your City in Your Pocket", $white);
+            // High-quality fallback
+            imagestring($canvas, 5, 20, $height + 30, "MARU MEHSANA", $white);
+            imagestring($canvas, 3, 20, $height + 60, "Your City in Your Pocket", $white);
         }
 
-        // Output image to buffer at max quality
+        // Output image to buffer at 100% Quality
         ob_start();
         imagejpeg($canvas, null, 100);
         $imageData = ob_get_clean();
