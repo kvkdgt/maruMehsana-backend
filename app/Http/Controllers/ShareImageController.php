@@ -41,6 +41,37 @@ class ShareImageController extends Controller
 
     private function generateShareImage($sourcePath, $title, $type)
     {
+        // Define output path
+        $fileName = 'share_' . md5($sourcePath . time()) . '.jpg';
+        $outputPath = storage_path('app/public/share_images/' . $fileName);
+        
+        // Ensure directory exists
+        if (!file_exists(dirname($outputPath))) {
+            mkdir(dirname($outputPath), 0755, true);
+        }
+
+        // Try Node.js HTML Rendering first (High Quality)
+        try {
+            $scriptPath = base_path('image-generator/render.js');
+            // Escape arguments
+            $cmd = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($sourcePath) . " " . escapeshellarg("MARU MEHSANA") . " " . escapeshellarg($outputPath) . " 2>&1";
+            
+            $output = [];
+            $returnVar = 0;
+            exec($cmd, $output, $returnVar);
+
+            if ($returnVar === 0 && file_exists($outputPath)) {
+                return response()->file($outputPath);
+            }
+            
+            // Log error if node failed
+            \Illuminate\Support\Facades\Log::error("Node Render Failed: " . implode("\n", $output));
+        } catch (\Throwable $e) {
+             \Illuminate\Support\Facades\Log::error("Node Render Exception: " . $e->getMessage());
+        }
+
+        // Fallback to GD (PHP Canvas) if Node fails
+        
         // Load original image
         $info = getimagesize($sourcePath);
         $mime = $info['mime'];
