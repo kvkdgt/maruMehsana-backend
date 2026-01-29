@@ -14,6 +14,7 @@ use App\Http\Controllers\BannerAdController;
 use App\Http\Controllers\FcmController;
 use App\Http\Controllers\BusinessReviewController;
 use App\Http\Controllers\TouristPlaceReviewController;
+use App\Http\Controllers\ShareImageController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -71,6 +72,9 @@ Route::put('/place-reviews/{id}', [TouristPlaceReviewController::class, 'update'
 Route::delete('/place-reviews/{id}', [TouristPlaceReviewController::class, 'destroy']);
 
 
+// Share Images
+Route::get('/share/place/{id}', [ShareImageController::class, 'sharePlace']);
+Route::get('/share/news/{id}', [ShareImageController::class, 'shareNews']);
 
 // News API Routes for Mobile App
 Route::prefix('news')->group(function () {
