@@ -159,13 +159,12 @@ class ShareImageController extends Controller
             // 2. Text Section
             $textX = $iconX + $headSize + $margin;
             $fsMain = $bannerHeight * 0.20;
-            $fsTag = $bannerHeight * 0.12;
-
+            
+            // Vertically centered Brand Name
             imagettftext($canvas, $fsMain, 0, $textX, $vCenter + ($fsMain / 3), $white, $fontBold, "MARU MEHSANA");
-            // Tagline removed as per request
 
-            // 3. Vertical Separator
-            $sepX = $width * 0.68;
+            // 3. Vertical Separator (Moved left to give space to badge)
+            $sepX = $width * 0.60;
             imagesetthickness($canvas, 2);
             imageline($canvas, $sepX, $height + ($bannerHeight * 0.2), $sepX, $newHeight - ($bannerHeight * 0.2), $white);
             imagesetthickness($canvas, 1);
@@ -173,21 +172,23 @@ class ShareImageController extends Controller
             // 4. Play Store Badge
             $badgeX = $sepX + $margin;
             $badgeH = $bannerHeight * 0.5;
-            $badgeW = $width - $badgeX - ($margin * 2);
-            if ($badgeW > $badgeH * 2.8) $badgeW = $badgeH * 2.8;
+            $badgeW = $width - $badgeX - $margin;
+            // Ensure aspect ratio isn't too wide or too narrow
+            if ($badgeW > $badgeH * 3.5) $badgeW = $badgeH * 3.5;
+            
             $badgeY = $vCenter - ($badgeH / 2);
 
-            // Draw Rounded Rectangle for Badge (using thickness for border)
+            // Draw Rounded Rectangle for Badge
             imagesetthickness($canvas, 2);
             $radius = 12;
             $x1 = $badgeX; $y1 = $badgeY; $x2 = $badgeX + $badgeW; $y2 = $badgeY + $badgeH;
             
-            // Draw lines for rounded rectangle
+            // Draw lines
             imageline($canvas, $x1+$radius, $y1, $x2-$radius, $y1, $white);
             imageline($canvas, $x1+$radius, $y2, $x2-$radius, $y2, $white);
             imageline($canvas, $x1, $y1+$radius, $x1, $y2-$radius, $white);
             imageline($canvas, $x2, $y1+$radius, $x2, $y2-$radius, $white);
-            // Draw arcs for corners
+            // Draw arcs
             imagearc($canvas, $x1+$radius, $y1+$radius, $radius*2, $radius*2, 180, 270, $white);
             imagearc($canvas, $x2-$radius, $y1+$radius, $radius*2, $radius*2, 270, 360, $white);
             imagearc($canvas, $x1+$radius, $y2-$radius, $radius*2, $radius*2, 90, 180, $white);
@@ -208,14 +209,29 @@ class ShareImageController extends Controller
             // Badge Text
             $fsDownload = $badgeH * 0.18;
             $fsStore = $badgeH * 0.32;
-            $textStartX = $pX + ($pSize) + 5;
+            $textStartX = $pX + ($pSize) + 8;
             imagettftext($canvas, $fsDownload, 0, $textStartX, $badgeY + ($badgeH * 0.42), $white, $fontReg, "Download on");
             imagettftext($canvas, $fsStore, 0, $textStartX, $badgeY + ($badgeH * 0.82), $white, $fontBold, "Play Store");
 
         } else {
-            // High-quality fallback
-            imagestring($canvas, 5, 20, $height + 30, "MARU MEHSANA", $white);
-            imagestring($canvas, 3, 20, $height + 60, "Your City in Your Pocket", $white);
+            // High-quality fallback (No fonts found, use built-in fonts)
+            
+            // 1. Text
+            imagestring($canvas, 5, 20, $height + ($bannerHeight/2) - 8, "MARU MEHSANA", $white);
+            
+            // 2. Separator
+            $sepX = $width * 0.60;
+            imageline($canvas, $sepX, $height + 20, $sepX, $newHeight - 20, $white);
+            
+            // 3. Simple Badge
+            $badgeX = $sepX + 20;
+            $badgeY = $height + ($bannerHeight * 0.25);
+            $badgeW = 180;
+            $badgeH = $bannerHeight * 0.5;
+            
+            imagerectangle($canvas, $badgeX, $badgeY, $badgeX + $badgeW, $badgeY + $badgeH, $white);
+            imagestring($canvas, 2, $badgeX + 10, $badgeY + 5, "Download from", $white);
+            imagestring($canvas, 4, $badgeX + 10, $badgeY + 25, "Play Store", $white);
         }
 
         // Output image to buffer at 100% Quality
