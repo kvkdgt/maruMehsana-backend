@@ -161,8 +161,8 @@ class ShareImageController extends Controller
             $fsMain = $bannerHeight * 0.20;
             $fsTag = $bannerHeight * 0.12;
 
-            imagettftext($canvas, $fsMain, 0, $textX, $vCenter - ($bannerHeight * 0.05), $white, $fontBold, "MARU MEHSANA");
-            imagettftext($canvas, $fsTag, 0, $textX, $vCenter + ($bannerHeight * 0.15), $white, $fontReg, "Your City in Your Pocket");
+            imagettftext($canvas, $fsMain, 0, $textX, $vCenter + ($fsMain / 3), $white, $fontBold, "MARU MEHSANA");
+            // Tagline removed as per request
 
             // 3. Vertical Separator
             $sepX = $width * 0.68;
