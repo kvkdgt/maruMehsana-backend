@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Google\Client as GoogleClient;
 use App\Models\AppUser;
 use App\Models\NotificationLog;
+use Illuminate\Support\Facades\Cache;
 
 class SendFcmNotificationJob implements ShouldQueue
 {
@@ -83,15 +84,17 @@ class SendFcmNotificationJob implements ShouldQueue
             $projectId = 'marumehsana-49741';
             $credentialsFilePath = Storage::path('json/firebaseCreds.json');
 
-            $client = new GoogleClient();
-            $client->setAuthConfig($credentialsFilePath);
-            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
-            $client->refreshTokenWithAssertion();
-            $token = $client->getAccessToken();
-            $access_token = $token['access_token'];
+            $accessToken = Cache::remember('fcm_access_token', 3500, function () use ($credentialsFilePath) {
+                $client = new GoogleClient();
+                $client->setAuthConfig($credentialsFilePath);
+                $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+                $client->refreshTokenWithAssertion();
+                $token = $client->getAccessToken();
+                return $token['access_token'];
+            });
 
             $headers = [
-                "Authorization: Bearer $access_token",
+                "Authorization: Bearer $accessToken",
                 'Content-Type: application/json'
             ];
 

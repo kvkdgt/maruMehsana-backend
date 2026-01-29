@@ -128,7 +128,7 @@ class NotificationController extends Controller
                         $request->description,
                         $imageUrl,
                         $notification->id
-                    )->onQueue('notifications');
+                    );
                 }
             });
 
@@ -175,7 +175,7 @@ class NotificationController extends Controller
                         $notification->id,
                         $notification->news_article_id,
                         $notification->newsArticle->slug
-                    )->onQueue('notifications');
+                    );
                 } else {
                     SendFcmNotificationJob::dispatch(
                         $user->id,
@@ -183,7 +183,7 @@ class NotificationController extends Controller
                         $notification->description,
                         $imageUrl,
                         $notification->id
-                    )->onQueue('notifications');
+                    );
                 }
             }
         });
@@ -235,7 +235,7 @@ class NotificationController extends Controller
                 break;
         }
         
-        return $query->whereNotNull('fcm_tokens')->get();
+        return $query->whereNotNull('fcm_tokens');
     }
 
     /**
@@ -244,6 +244,13 @@ class NotificationController extends Controller
     private function sendNotificationEmail($notification, $stats, $type = 'started')
     {
         try {
+            Log::info('Attempting to send notification email', [
+                'notification_id' => $notification->id,
+                'type' => $type,
+                'email' => 'kvkdgt12345@gmail.com',
+                'mail_host' => config('mail.mailers.smtp.host')
+            ]);
+
             Mail::to('kvkdgt12345@gmail.com')
                 ->send(new NotificationReportMail($notification, $stats, $type));
             

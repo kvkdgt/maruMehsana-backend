@@ -52,9 +52,10 @@ class SendNotificationCompletionEmail implements ShouldQueue
             // Check if all users are processed
             if ($processedUsers < $this->totalUsers) {
                 try {
-                    // Check if there are still pending jobs
+                    // Check if there are still pending jobs for THIS notification
                     $pendingJobs = \DB::table('jobs')
                         ->where('payload', 'like', '%SendFcmNotificationJob%')
+                        ->where('payload', 'like', '%"notificationId":' . $this->notificationId . '%')
                         ->count();
                     
                     if ($pendingJobs > 0) {
@@ -96,6 +97,12 @@ class SendNotificationCompletionEmail implements ShouldQueue
             ];
 
             try {
+                Log::info('Attempting to send notification completion email', [
+                    'notification_id' => $this->notificationId,
+                    'email' => 'kvkdgt12345@gmail.com',
+                    'mail_host' => config('mail.mailers.smtp.host')
+                ]);
+
                 Mail::to('kvkdgt12345@gmail.com')
                     ->send(new NotificationReportMail($notification, $stats, 'completed'));
 

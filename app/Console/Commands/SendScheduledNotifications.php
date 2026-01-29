@@ -109,33 +109,35 @@ class SendScheduledNotifications extends Command
             // Get image URL
             $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
             
-            // Dispatch jobs for each user (background processing)
+            // Dispatch jobs for each user in chunks (background processing)
             $jobCount = 0;
             
-            foreach ($appUsers as $user) {
-                if ($notification->type === 'news' && $notification->newsArticle) {
-                    // Dispatch news notification job
-                    SendFcmNotificationJob::dispatch(
-                        $user->id,
-                        $notification->title,
-                        $notification->description,
-                        $imageUrl,
-                        $notification->id,
-                        $notification->news_article_id,
-                        $notification->newsArticle->slug
-                    );
-                } else {
-                    // Dispatch regular notification job
-                    SendFcmNotificationJob::dispatch(
-                        $user->id,
-                        $notification->title,
-                        $notification->description,
-                        $imageUrl,
-                        $notification->id
-                    );
+            $appUsers->chunk(100, function ($userChunk) use ($notification, $imageUrl, &$jobCount) {
+                foreach ($userChunk as $user) {
+                    if ($notification->type === 'news' && $notification->newsArticle) {
+                        // Dispatch news notification job
+                        SendFcmNotificationJob::dispatch(
+                            $user->id,
+                            $notification->title,
+                            $notification->description,
+                            $imageUrl,
+                            $notification->id,
+                            $notification->news_article_id,
+                            $notification->newsArticle->slug
+                        );
+                    } else {
+                        // Dispatch regular notification job
+                        SendFcmNotificationJob::dispatch(
+                            $user->id,
+                            $notification->title,
+                            $notification->description,
+                            $imageUrl,
+                            $notification->id
+                        );
+                    }
+                    $jobCount++;
                 }
-                $jobCount++;
-            }
+            });
             
             $this->info("Notification ID {$notification->id}: Dispatched {$jobCount} jobs to queue");
             
@@ -190,7 +192,7 @@ class SendScheduledNotifications extends Command
             // Add more audience types as needed
         }
         
-        return $query->whereNotNull('fcm_tokens')->get();
+        return $query->whereNotNull('fcm_tokens');
     }
 
     /**
@@ -199,6 +201,13 @@ class SendScheduledNotifications extends Command
     private function sendNotificationEmail($notification, $stats, $type = 'started')
     {
         try {
+            Log::info('Attempting to send notification email', [
+                'notification_id' => $notification->id,
+                'type' => $type,
+                'email' => 'kvkdgt12345@gmail.com',
+                'mail_host' => config('mail.mailers.smtp.host')
+            ]);
+            
             Mail::to('kvkdgt12345@gmail.com')
                 ->send(new NotificationReportMail($notification, $stats, $type));
             
