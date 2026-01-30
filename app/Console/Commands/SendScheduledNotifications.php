@@ -36,7 +36,12 @@ class SendScheduledNotifications extends Command
         $type = $this->option('type');
         
         $this->info("Starting scheduled notification process...");
-        Log::info('Scheduled notification cron started', ['type' => $type]);
+        Log::info('Scheduled notification cron started', [
+            'type' => $type,
+            'current_time' => now()->format('Y-m-d H:i:s T'),
+            'current_time_utc' => now()->utc()->format('Y-m-d H:i:s T'),
+            'timezone' => config('app.timezone')
+        ]);
         
         // Get notifications based on type
         $notifications = collect();
@@ -192,7 +197,10 @@ class SendScheduledNotifications extends Command
             // Add more audience types as needed
         }
         
-        return $query->whereNotNull('fcm_tokens');
+        // Filter for users with valid FCM tokens (non-empty JSON arrays)
+        // This checks that fcm_tokens is not null AND has at least one token
+        return $query->whereNotNull('fcm_tokens')
+                     ->whereRaw('JSON_LENGTH(fcm_tokens) > 0');
     }
 
     /**

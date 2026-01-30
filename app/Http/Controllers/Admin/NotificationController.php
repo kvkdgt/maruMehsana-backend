@@ -107,9 +107,25 @@ class NotificationController extends Controller
                 'scheduled_time' => 'required',
             ]);
             
-            $scheduledDateTime = Carbon::parse($request->scheduled_date . ' ' . $request->scheduled_time);
+            // Parse the datetime in the application's timezone (Asia/Kolkata)
+            $scheduledDateTime = Carbon::parse(
+                $request->scheduled_date . ' ' . $request->scheduled_time,
+                config('app.timezone')
+            );
+            
             $notification->scheduled_at = $scheduledDateTime;
             $notification->save();
+            
+            // Log the scheduled time for debugging
+            Log::info('Notification scheduled', [
+                'notification_id' => $notification->id,
+                'input_date' => $request->scheduled_date,
+                'input_time' => $request->scheduled_time,
+                'scheduled_at_ist' => $scheduledDateTime->format('Y-m-d H:i:s T'),
+                'scheduled_at_utc' => $scheduledDateTime->utc()->format('Y-m-d H:i:s T'),
+                'current_time_ist' => now()->format('Y-m-d H:i:s T'),
+                'timezone' => config('app.timezone')
+            ]);
         } else {
             // Send immediately for manual notifications
             $notification->is_sent = true;
@@ -235,7 +251,10 @@ class NotificationController extends Controller
                 break;
         }
         
-        return $query->whereNotNull('fcm_tokens');
+        // Filter for users with valid FCM tokens (non-empty JSON arrays)
+        // This checks that fcm_tokens is not null AND has at least one token
+        return $query->whereNotNull('fcm_tokens')
+                     ->whereRaw('JSON_LENGTH(fcm_tokens) > 0');
     }
 
     /**
