@@ -127,42 +127,18 @@ class NotificationController extends Controller
                 'timezone' => config('app.timezone')
             ]);
         } else {
-            // Send immediately for manual notifications
-            $notification->is_sent = true;
+            // For shared hosting, we schedule it for NOW so the cron job picks it up
+            // This prevents the page from timing out while processing users
+            $notification->scheduled_at = now();
+            $notification->is_sent = false; // Mark as pending
             $notification->save();
             
-            // Get users based on audience
-            $appUsers = $this->getUsersByAudience($request->audience);
-            $totalUsers = $appUsers->count();
-
-            // Process users in chunks to prevent memory issues
-            $appUsers->chunk(100, function ($userChunk) use ($request, $imageUrl, $notification) {
-                foreach ($userChunk as $user) {
-                    SendFcmNotificationJob::dispatch(
-                        $user->id,
-                        $request->title,
-                        $request->description,
-                        $imageUrl,
-                        $notification->id
-                    );
-                }
-            });
-
-            // Send start email report
-            $this->sendNotificationEmail($notification, [
-                'total_users' => $totalUsers,
-                'jobs_dispatched' => $totalUsers,
-                'sent' => 0,
-                'failed' => 0,
-            ], 'started');
-
-            // Dispatch completion email job (will wait and check for completion)
-            SendNotificationCompletionEmail::dispatch($notification->id, $totalUsers)
-                ->delay(now()->addSeconds(30));
+            Log::info("Notification {$notification->id} scheduled for immediate background processing");
+        }
         }
         
         return redirect()->route('admin.notifications', ['tab' => $request->has('schedule') && $request->schedule === 'yes' ? 'scheduled' : 'send'])
-            ->with('success', 'Notification ' . ($notification->is_sent ? 'sent' : 'scheduled') . ' successfully!');
+            ->with('success', 'Notification queued for background sending! It will start processing within 1 minute.');
     }
 
     /**
@@ -171,54 +147,19 @@ class NotificationController extends Controller
     public function sendNow($id)
     {
         $notification = Notification::findOrFail($id);
-        $notification->is_sent = true;
+        
+        // Schedule for immediate background processing
+        $notification->scheduled_at = now();
+        $notification->is_sent = false;
         $notification->save();
         
-        // Get users based on audience
-        $appUsers = $this->getUsersByAudience($notification->audience);
-        $imageUrl = $notification->banner ? asset('storage/' . $notification->banner) : null;
-        $totalUsers = $appUsers->count();
-        
-        // Process users in chunks to prevent memory issues and timeouts
-        $appUsers->chunk(100, function ($userChunk) use ($notification, $imageUrl) {
-            foreach ($userChunk as $user) {
-                if ($notification->type === 'news' && $notification->newsArticle) {
-                    SendFcmNotificationJob::dispatch(
-                        $user->id,
-                        $notification->title,
-                        $notification->description,
-                        $imageUrl,
-                        $notification->id,
-                        $notification->news_article_id,
-                        $notification->newsArticle->slug
-                    );
-                } else {
-                    SendFcmNotificationJob::dispatch(
-                        $user->id,
-                        $notification->title,
-                        $notification->description,
-                        $imageUrl,
-                        $notification->id
-                    );
-                }
-            }
-        });
-
-        // Send start email report
-        $this->sendNotificationEmail($notification, [
-            'total_users' => $totalUsers,
-            'jobs_dispatched' => $totalUsers,
-            'sent' => 0,
-            'failed' => 0,
-        ], 'started');
-
-        // Dispatch completion email job
-        SendNotificationCompletionEmail::dispatch($notification->id, $totalUsers)
-            ->delay(now()->addSeconds(30));
+        Log::info("Notification {$notification->id} manually triggered for background processing");
         
         return redirect()->route('admin.notifications', ['tab' => 'scheduled'])
-            ->with('success', 'Notification sent successfully!');
+            ->with('success', 'Notification queued! It will start sending within 1 minute.');
     }
+
+
 
     /**
      * Delete the specified notification.

@@ -71,7 +71,29 @@ class UserController extends Controller
         }
 
         // Add FCM token if not already in list
+        // Manage FCM Token: Ensure it belongs to this user and only this user
         if ($request->fcm_token) {
+            // 1. Remove this token from related other users (e.g. if I logged into another account on this device)
+            try {
+                // Find other users who have this token
+                $usersWithToken = AppUser::where('id', '!=', $user->id)
+                    ->where('fcm_tokens', 'like', '%"'.$request->fcm_token.'"%')
+                    ->get();
+                
+                foreach ($usersWithToken as $otherUser) {
+                    $otherTokens = $otherUser->fcm_tokens ?? [];
+                    if (in_array($request->fcm_token, $otherTokens)) {
+                        // Remove the token
+                        $newTokens = array_values(array_diff($otherTokens, [$request->fcm_token]));
+                        $otherUser->fcm_tokens = $newTokens;
+                        $otherUser->save();
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore errors during cleanup
+            }
+
+            // 2. Add to current user if not exists
             $tokens = $user->fcm_tokens ?? [];
             if (!in_array($request->fcm_token, $tokens)) {
                 $tokens[] = $request->fcm_token;
