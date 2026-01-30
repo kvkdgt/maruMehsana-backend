@@ -96,9 +96,10 @@ class SendScheduledNotifications extends Command
         try {
             // Get users based on audience
             $appUsers = $this->getUsersByAudience($notification->audience);
-            $this->info("Dispatching jobs for {$appUsers->count()} users");
+            $userCount = $appUsers->count();
+            $this->info("Dispatching jobs for {$userCount} users");
             
-            if ($appUsers->isEmpty()) {
+            if ($userCount === 0) {
                 $this->warn("No users found for audience: {$notification->audience}");
                 Log::warning('No users found for notification', [
                     'notification_id' => $notification->id,
