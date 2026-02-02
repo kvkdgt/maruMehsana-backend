@@ -135,7 +135,7 @@ class NotificationController extends Controller
             
             Log::info("Notification {$notification->id} scheduled for immediate background processing");
         }
-        }
+
         
         return redirect()->route('admin.notifications', ['tab' => $request->has('schedule') && $request->schedule === 'yes' ? 'scheduled' : 'send'])
             ->with('success', 'Notification queued for background sending! It will start processing within 1 minute.');
