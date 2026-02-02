@@ -713,6 +713,13 @@
         </li> -->
     </div>
     
+    <li class="@if(request()->is('admin/app-users')) active @endif">
+        <a href="{{ url('admin/app-users') }}">
+            <i class="fas fa-users"></i>
+            <span>App Users</span>
+        </a>
+    </li>
+    
     <li class="@if(request()->is('admin/marketing') || request()->is('admin/marketing/banner-ads')) active @endif">
         <a href="{{ url('admin/marketing') }}">
             <i class="fas fa-bullhorn"></i>

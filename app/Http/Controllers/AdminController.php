@@ -337,4 +337,34 @@ class AdminController extends Controller
 
         return response()->json($finalResults);
     }
+    public function appUsers(Request $request) {
+        $search = $request->get('search');
+        $sortBy = $request->get('sort_by');
+
+        $usersQuery = AppUser::query();
+
+        if ($search) {
+            $usersQuery->where('name', 'LIKE', "%$search%")
+                       ->orWhere('email', 'LIKE', "%$search%");
+        }
+
+        if ($sortBy == 'newest') {
+            $usersQuery->orderBy('created_at', 'desc');
+        } elseif ($sortBy == 'oldest') {
+            $usersQuery->orderBy('created_at', 'asc');
+        } else {
+            $usersQuery->orderBy('created_at', 'desc');
+        }
+
+        $appUsers = $usersQuery->paginate(10);
+
+        return view('admin.app-users', compact('appUsers'));
+    }
+
+    public function deleteAppUser($id) {
+        $user = AppUser::findOrFail($id);
+        $user->delete();
+
+        return redirect()->back()->with('success', 'User deleted successfully');
+    }
 }

@@ -58,6 +58,9 @@ Route::middleware(['is_admin'])->group(function () {
 
     Route::get('/admin/facts', [AdminController::class, 'facts'])->name('admin.facts');
     Route::get('/admin/marketing', [AdminController::class, 'marketing'])->name('admin.marketing');
+    
+    Route::get('/admin/app-users', [AdminController::class, 'appUsers'])->name('admin.app-users');
+    Route::delete('/admin/app-users/delete/{id}', [AdminController::class, 'deleteAppUser'])->name('admin.app-users.delete');
 
     Route::get('/admin/marketing/banner-ads', [AdminController::class, 'bannerAds'])->name('admin.banner-ads');
 
