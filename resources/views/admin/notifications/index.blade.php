@@ -191,15 +191,47 @@
       <div class="form-container">
         <form action="{{ route('notifications.store') }}" method="POST" enctype="multipart/form-data">
           @csrf
-          <div class="form-row">
-            <label for="title" class="form-label">Title</label>
-            <input type="text" name="title" id="title" class="form-control" required>
-          </div>
           
           <div class="form-row">
-            <label for="description" class="form-label">Description</label>
-            <textarea name="description" id="description" class="form-control" required></textarea>
+            <label for="notificationType" class="form-label">Notification Type</label>
+            <select name="type" id="notificationType" class="form-select" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+              <option value="general">General Notification</option>
+              <option value="news">News Article (Deep Link)</option>
+            </select>
           </div>
+          
+          <div class="form-row" id="newsSelectRow" style="display: none;">
+            <label for="newsArticleSelect" class="form-label">Select News Article</label>
+            <select name="news_article_id" id="newsArticleSelect" class="form-select" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+              <option value="">-- Select News Article --</option>
+              @if(isset($newsArticles))
+                @foreach($newsArticles as $article)
+                  <option value="{{ $article->id }}" 
+                          data-title="{{ $article->title }}" 
+                          data-desc="{{ $article->excerpt }}"
+                          data-image="{{ $article->image ? asset('storage/news/' . $article->image) : '' }}">
+                    {{ Str::limit($article->title, 60) }}
+                  </option>
+                @endforeach
+              @endif
+            </select>
+            <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Selecting a news article will auto-fill the Title, Description and Banner.</small>
+          </div>
+            <div class="form-row">
+              <label for="title" class="form-label">
+                Title 
+                <button type="button" class="emoji-trigger-btn" onclick="openEmojiPicker('title')">😀</button>
+              </label>
+              <input type="text" name="title" id="title" class="form-control" required>
+            </div>
+            
+            <div class="form-row">
+              <label for="description" class="form-label">
+                Description
+                <button type="button" class="emoji-trigger-btn" onclick="openEmojiPicker('description')">😀</button>
+              </label>
+              <textarea name="description" id="description" class="form-control" required></textarea>
+            </div>
           
           <div class="form-row">
             <label for="banner" class="form-label">Banner (Optional)</label>
@@ -322,6 +354,59 @@
   const titleInput = document.getElementById('title');
   const descriptionInput = document.getElementById('description');
   const bannerInput = document.getElementById('banner');
+  
+  // New Elements for Type/News
+  const notificationType = document.getElementById('notificationType');
+  const newsSelectRow = document.getElementById('newsSelectRow');
+  const newsArticleSelect = document.getElementById('newsArticleSelect');
+  
+  // Handle Type Change
+  if (notificationType) {
+    notificationType.addEventListener('change', function() {
+      if (this.value === 'news') {
+        newsSelectRow.style.display = 'block';
+      } else {
+        newsSelectRow.style.display = 'none';
+        newsArticleSelect.value = ''; // Reset selection
+      }
+    });
+  }
+  
+  // Handle News Selection (Auto-fill)
+  if (newsArticleSelect) {
+    newsArticleSelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      if (selectedOption.value) {
+        // Auto-fill Title
+        const title = selectedOption.getAttribute('data-title');
+        titleInput.value = title;
+        titleInput.dispatchEvent(new Event('input')); // Trigger preview update
+        
+        // Auto-fill Description
+        const desc = selectedOption.getAttribute('data-desc');
+        descriptionInput.value = desc;
+        descriptionInput.dispatchEvent(new Event('input')); // Trigger preview update
+        
+        // Auto-fill Banner Preview (Note: File input cannot be set programmatically due to security)
+        const imageUrl = selectedOption.getAttribute('data-image');
+        if (imageUrl) {
+           const previewBanner = document.getElementById('preview-banner');
+           const previewBannerContainer = document.getElementById('preview-banner-container');
+           
+           previewBanner.src = imageUrl;
+           previewBannerContainer.style.display = 'block';
+           
+           // Also update the small preview in the form if it exists
+           const smallPreview = document.getElementById('previewImage');
+           const smallPreviewContainer = document.getElementById('bannerPreview');
+           if (smallPreview && smallPreviewContainer) {
+             smallPreview.src = imageUrl;
+             smallPreviewContainer.style.display = 'block';
+           }
+        }
+      }
+    });
+  }
   
   // Get preview elements
   const previewTitle = document.getElementById('preview-title');
@@ -506,5 +591,136 @@ function checkActiveNotifications() {
     })
     .catch(error => console.error('Error checking active notifications:', error));
 }
+</script>
+<!-- Emoji Picker Modal -->
+<div id="emojiModal" class="modal">
+  <div class="modal-content emoji-modal-content">
+    <div class="emoji-header">
+      <h3>Select Emoji</h3>
+      <span class="close-btn" onclick="closeEmojiPicker()">&times;</span>
+    </div>
+    <div class="emoji-grid" id="emojiGrid"></div>
+  </div>
+</div>
+
+<style>
+.emoji-trigger-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.emoji-trigger-btn:hover {
+  transform: scale(1.2);
+}
+.emoji-modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+.emoji-item {
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+.emoji-item:hover {
+  background-color: #f0f0f0;
+}
+.emoji-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+</style>
+
+<script>
+  // Emoji Picker Logic
+  const commonEmojis = [
+    '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇',
+    '😍','🤩','😘','😗','😚','Vk','😋','😛','😜','🤪','😝','🤑','🤗',
+    '🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥',
+    '😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶',
+    '🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯',
+    '😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣',
+    '😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️',
+    '💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼',
+    '😽','🙀','😿','😾','👋','🤚','Mw','✋','🖖','👌','🤏','✌️','🤞',
+    '🤟','🤘','🤙','👈','👉','👆','🖕','👇','👍','👎','✊','👊','🤛',
+    '🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵',
+    '🦿','🦶','👣','👂','🦻','👃','🫀','🫁','🧠','🦷','🦴','👀','👁',
+    '👅','👄','💋','🩸','🔥','🌈','✨','⭐','🌟','💥','💯','💢','💬',
+    '📢','📣','🔔','🛑','🚧','🚨','🚩','🏳️','🏴','🏁','🏹','💘','💝',
+    '💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙',
+    '💜','🤎','🖤','🤍','🥘','🍕','🍔','🍟','🌭','🍿','🥞','🥐','🥯',
+    '🥖','🥨','🧀','🥚','🍳','🥓','🥩','🍗','🍖','🍬','🍭','🍫','🍩',
+    '🍪','🎂','🍰','🧁','🥧','🍨','🍦','🍧','🍮','🍯','🍼','🥛','☕',
+    '🍵','🧉','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🥤','🧊','🥣',
+    '🥡','🥢','🧂'
+  ];
+
+  let currentTargetInputId = null;
+
+  function openEmojiPicker(inputId) {
+    currentTargetInputId = inputId;
+    const modal = document.getElementById('emojiModal');
+    const grid = document.getElementById('emojiGrid');
+    
+    // Populate if empty
+    if (grid.children.length === 0) {
+      commonEmojis.forEach(emoji => {
+        const span = document.createElement('span');
+        span.textContent = emoji;
+        span.className = 'emoji-item';
+        span.onclick = () => insertEmoji(emoji);
+        grid.appendChild(span);
+      });
+    }
+    
+    modal.style.display = 'flex';
+  }
+
+  function closeEmojiPicker() {
+    document.getElementById('emojiModal').style.display = 'none';
+  }
+
+  function insertEmoji(emoji) {
+    if (currentTargetInputId) {
+      const input = document.getElementById(currentTargetInputId);
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const text = input.value;
+      const before = text.substring(0, start);
+      const after = text.substring(end, text.length);
+      
+      input.value = before + emoji + after;
+      input.selectionStart = input.selectionEnd = start + emoji.length;
+      input.focus();
+      
+      // Trigger input event for preview update
+      input.dispatchEvent(new Event('input'));
+    }
+    closeEmojiPicker();
+  }
+  
+  // Close emoji modal when clicking outside
+  window.addEventListener('click', function(event) {
+    const emojiModal = document.getElementById('emojiModal');
+    if (event.target == emojiModal) {
+      emojiModal.style.display = 'none';
+    }
+  });
 </script>
 @endsection

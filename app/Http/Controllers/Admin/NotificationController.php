@@ -71,7 +71,13 @@ class NotificationController extends Controller
         $notifications = $query->orderBy('created_at', 'desc')->paginate(10);
         $tab = $request->tab ?? 'send';
         
-        return view('admin.notifications.index', compact('notifications', 'tab'));
+        // Fetch active news articles for selection
+        $newsArticles = \App\Models\NewsArticle::where('is_active', true)
+                        ->select('id', 'title', 'slug', 'image', 'excerpt')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+        
+        return view('admin.notifications.index', compact('notifications', 'tab', 'newsArticles'));
     }
 
     /**
@@ -84,10 +90,15 @@ class NotificationController extends Controller
             'description' => 'required|string',
             'audience' => 'required|string',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'nullable|in:general,news',
+            'news_article_id' => 'required_if:type,news|nullable|exists:news_articles,id',
         ]);
         
         $data = $request->except('banner');
-        $data['type'] = 'general'; // Set default type
+        if (empty($data['type'])) {
+            $data['type'] = 'general'; 
+        }
+        
         $imageUrl = null;
         
         // Handle banner upload
