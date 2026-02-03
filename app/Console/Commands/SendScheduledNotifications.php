@@ -138,7 +138,11 @@ class SendScheduledNotifications extends Command
                             $notification->title,
                             $notification->description,
                             $imageUrl,
-                            $notification->id
+                            $notification->id,
+                            null,
+                            null,
+                            $notification->business_id,
+                            $notification->tourist_place_id
                         );
                     }
                     $jobCount++;

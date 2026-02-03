@@ -14,6 +14,8 @@ class BannerAdController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
             'link' => 'nullable|url',
             'status' => 'required|boolean',
+            'business_id' => 'nullable|exists:businesses,id',
+            'tourist_place_id' => 'nullable|exists:tourist_places,id',
         ]);
 
         $imagePath = $request->file('image')->store('banner_ads', 'public');
@@ -23,6 +25,8 @@ class BannerAdController extends Controller
             'image' => $imagePath,
             'link' => $request->link,
             'status' => $request->status,
+            'business_id' => $request->business_id,
+            'tourist_place_id' => $request->tourist_place_id,
             'touch' => 0
         ]);
 

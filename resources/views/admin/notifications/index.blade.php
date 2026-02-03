@@ -197,6 +197,8 @@
             <select name="type" id="notificationType" class="form-select" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
               <option value="general">General Notification</option>
               <option value="news">News Article (Deep Link)</option>
+              <option value="business">Business (Deep Link)</option>
+              <option value="tourist_place">Tourist Place (Deep Link)</option>
             </select>
           </div>
           
@@ -216,6 +218,42 @@
               @endif
             </select>
             <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Selecting a news article will auto-fill the Title, Description and Banner.</small>
+          </div>
+
+          <div class="form-row" id="businessSelectRow" style="display: none;">
+            <label for="businessSelect" class="form-label">Select Business</label>
+            <select name="business_id" id="businessSelect" class="form-select" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+              <option value="">-- Select Business --</option>
+              @if(isset($businesses))
+                @foreach($businesses as $business)
+                  <option value="{{ $business->id }}" 
+                          data-title="{{ $business->name }}" 
+                          data-desc="{{ $business->description }}"
+                          data-image="{{ $business->thumbnail ? asset('storage/' . $business->thumbnail) : '' }}">
+                    {{ Str::limit($business->name, 60) }}
+                  </option>
+                @endforeach
+              @endif
+            </select>
+            <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Selecting a business will auto-fill the Title, Description and Banner.</small>
+          </div>
+
+          <div class="form-row" id="touristPlaceSelectRow" style="display: none;">
+            <label for="touristPlaceSelect" class="form-label">Select Tourist Place</label>
+            <select name="tourist_place_id" id="touristPlaceSelect" class="form-select" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+              <option value="">-- Select Tourist Place --</option>
+              @if(isset($touristPlaces))
+                @foreach($touristPlaces as $place)
+                  <option value="{{ $place->id }}" 
+                          data-title="{{ $place->name }}" 
+                          data-desc="{{ $place->description }}"
+                          data-image="{{ $place->thumbnail ? asset('storage/' . $place->thumbnail) : '' }}">
+                    {{ Str::limit($place->name, 60) }}
+                  </option>
+                @endforeach
+              @endif
+            </select>
+            <small style="color: #666; font-size: 0.85em; display: block; margin-top: 5px;">Selecting a place will auto-fill the Title, Description and Banner.</small>
           </div>
             <div class="form-row">
               <label for="title" class="form-label">
@@ -355,27 +393,41 @@
   const descriptionInput = document.getElementById('description');
   const bannerInput = document.getElementById('banner');
   
-  // New Elements for Type/News
+  // New Elements for Type/News/Business/TouristPlace
   const notificationType = document.getElementById('notificationType');
   const newsSelectRow = document.getElementById('newsSelectRow');
   const newsArticleSelect = document.getElementById('newsArticleSelect');
+  const businessSelectRow = document.getElementById('businessSelectRow');
+  const businessSelect = document.getElementById('businessSelect');
+  const touristPlaceSelectRow = document.getElementById('touristPlaceSelectRow');
+  const touristPlaceSelect = document.getElementById('touristPlaceSelect');
   
   // Handle Type Change
   if (notificationType) {
     notificationType.addEventListener('change', function() {
+      // Reset all
+      newsSelectRow.style.display = 'none';
+      if(newsArticleSelect) newsArticleSelect.value = '';
+      
+      businessSelectRow.style.display = 'none';
+      if(businessSelect) businessSelect.value = '';
+
+      touristPlaceSelectRow.style.display = 'none';
+      if(touristPlaceSelect) touristPlaceSelect.value = '';
+
       if (this.value === 'news') {
         newsSelectRow.style.display = 'block';
-      } else {
-        newsSelectRow.style.display = 'none';
-        newsArticleSelect.value = ''; // Reset selection
+      } else if (this.value === 'business') {
+        businessSelectRow.style.display = 'block';
+      } else if (this.value === 'tourist_place') {
+        touristPlaceSelectRow.style.display = 'block';
       }
     });
   }
   
-  // Handle News Selection (Auto-fill)
-  if (newsArticleSelect) {
-    newsArticleSelect.addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
+  // Helper to autofill form
+  function autoFillForm(selectElement) {
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
       if (selectedOption.value) {
         // Auto-fill Title
         const title = selectedOption.getAttribute('data-title');
@@ -387,7 +439,7 @@
         descriptionInput.value = desc;
         descriptionInput.dispatchEvent(new Event('input')); // Trigger preview update
         
-        // Auto-fill Banner Preview (Note: File input cannot be set programmatically due to security)
+        // Auto-fill Banner Preview
         const imageUrl = selectedOption.getAttribute('data-image');
         if (imageUrl) {
            const previewBanner = document.getElementById('preview-banner');
@@ -405,6 +457,26 @@
            }
         }
       }
+  }
+
+  // Handle News Selection (Auto-fill)
+  if (newsArticleSelect) {
+    newsArticleSelect.addEventListener('change', function() {
+      autoFillForm(this);
+    });
+  }
+
+  // Handle Business Selection (Auto-fill)
+  if (businessSelect) {
+    businessSelect.addEventListener('change', function() {
+      autoFillForm(this);
+    });
+  }
+
+  // Handle Tourist Place Selection (Auto-fill)
+  if (touristPlaceSelect) {
+    touristPlaceSelect.addEventListener('change', function() {
+      autoFillForm(this);
     });
   }
   

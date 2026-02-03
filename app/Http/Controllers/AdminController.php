@@ -276,7 +276,18 @@ class AdminController extends Controller
         $bannerAds = BannerAd::when($search, function ($query, $search) {
             return $query->where('title', 'like', "%$search%");
         })->paginate(10);
-        return view("admin.bannerAds", compact('bannerAds'));
+        
+        // Fetch businesses
+        $businesses = \App\Models\Business::select('id', 'name', 'thumbnail', 'description')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        // Fetch tourist places
+        $touristPlaces = \App\Models\TouristPlace::select('id', 'name', 'thumbnail', 'description')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                        
+        return view("admin.bannerAds", compact('bannerAds', 'businesses', 'touristPlaces'));
     }
 
     public function search(Request $request)

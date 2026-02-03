@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class BannerAd extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'image', 'link', 'status', 'touch'];
+    protected $fillable = ['title', 'image', 'link', 'status', 'touch', 'business_id', 'tourist_place_id'];
 
     public function updateStatus($status)
     {

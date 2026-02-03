@@ -19,6 +19,8 @@ class Notification extends Model
         'scheduled_at',
         'auto_scheduled_at',
         'is_sent',
+        'business_id',
+        'tourist_place_id',
     ];
 
     protected $casts = [

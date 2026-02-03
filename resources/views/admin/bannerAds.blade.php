@@ -101,8 +101,56 @@
 
       <label for="banner-image" class="required-label">Image</label>
       <input type="file" id="banner-image" name="image" accept="image/*" required>
-      <label for="banner-title">Redirection Link</label>
+      <label for="banner-link">Redirection Link</label>
       <input type="text" id="banner-link" name="link">
+
+      <!-- Link Types -->
+      <label>Link To:</label>
+      <div style="margin-bottom: 15px;">
+        <label style="display:inline-block; margin-right: 15px;">
+          <input type="radio" name="link_type" value="custom" checked onchange="toggleLinkType(this.value)"> Custom Link
+        </label>
+        <label style="display:inline-block; margin-right: 15px;">
+          <input type="radio" name="link_type" value="business" onchange="toggleLinkType(this.value)"> Business
+        </label>
+        <label style="display:inline-block;">
+          <input type="radio" name="link_type" value="tourist_place" onchange="toggleLinkType(this.value)"> Tourist Place
+        </label>
+      </div>
+
+      <!-- Business Selection -->
+      <div id="businessSelectDiv" style="display:none; margin-bottom: 15px;">
+          <label for="businessSelect">Select Business</label>
+          <select name="business_id" id="businessSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="">-- Select Business --</option>
+            @if(isset($businesses))
+              @foreach($businesses as $business)
+                <option value="{{ $business->id }}" 
+                        data-title="{{ $business->name }}" 
+                        data-image="{{ $business->thumbnail ? asset('storage/' . $business->thumbnail) : '' }}">
+                  {{ Str::limit($business->name, 60) }}
+                </option>
+              @endforeach
+            @endif
+          </select>
+      </div>
+
+      <!-- Tourist Place Selection -->
+      <div id="touristPlaceSelectDiv" style="display:none; margin-bottom: 15px;">
+          <label for="touristPlaceSelect">Select Tourist Place</label>
+          <select name="tourist_place_id" id="touristPlaceSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="">-- Select Tourist Place --</option>
+            @if(isset($touristPlaces))
+              @foreach($touristPlaces as $place)
+                <option value="{{ $place->id }}" 
+                        data-title="{{ $place->name }}" 
+                        data-image="{{ $place->thumbnail ? asset('storage/' . $place->thumbnail) : '' }}">
+                  {{ Str::limit($place->name, 60) }}
+                </option>
+              @endforeach
+            @endif
+          </select>
+      </div>
       <label for="banner-status" class="required-label">Status</label>
       <select id="banner-status" name="status">
         <option value="1">Active</option>
@@ -166,7 +214,57 @@
           });
       });
     });
+
+    // Handle Business Selection
+    const businessSelect = document.getElementById('businessSelect');
+    if (businessSelect) {
+      businessSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+          document.getElementById('banner-title').value = selectedOption.getAttribute('data-title');
+          // Note: Image input cannot be set programmatically
+        }
+      });
+    }
+
+    // Handle Tourist Place Selection
+    const touristPlaceSelect = document.getElementById('touristPlaceSelect');
+    if (touristPlaceSelect) {
+      touristPlaceSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+          document.getElementById('banner-title').value = selectedOption.getAttribute('data-title');
+        }
+      });
+    }
   });
+
+  function toggleLinkType(type) {
+    const customLinkInput = document.getElementById('banner-link');
+    const businessSelectDiv = document.getElementById('businessSelectDiv');
+    const touristPlaceSelectDiv = document.getElementById('touristPlaceSelectDiv');
+    
+    // Reset selections
+    document.getElementById('businessSelect').value = '';
+    document.getElementById('touristPlaceSelect').value = '';
+
+    if (type === 'custom') {
+      customLinkInput.parentElement.style.display = 'block'; // Or however you want to handle it, maybe disable
+      customLinkInput.disabled = false;
+      businessSelectDiv.style.display = 'none';
+      touristPlaceSelectDiv.style.display = 'none';
+    } else if (type === 'business') {
+      customLinkInput.disabled = true;
+      customLinkInput.value = '';
+      businessSelectDiv.style.display = 'block';
+      touristPlaceSelectDiv.style.display = 'none';
+    } else if (type === 'tourist_place') {
+      customLinkInput.disabled = true;
+      customLinkInput.value = '';
+      businessSelectDiv.style.display = 'none';
+      touristPlaceSelectDiv.style.display = 'block';
+    }
+  }
 </script>
 
 

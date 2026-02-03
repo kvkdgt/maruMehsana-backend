@@ -31,6 +31,9 @@ class SendFcmNotificationJob implements ShouldQueue
     protected $newsSlug;
     protected $isNewsNotification;
 
+    protected $businessId;
+    protected $touristPlaceId;
+
     /**
      * Create a new job instance.
      */
@@ -41,7 +44,9 @@ class SendFcmNotificationJob implements ShouldQueue
         ?string $image = null,
         ?int $notificationId = null,
         ?int $newsId = null,
-        ?string $newsSlug = null
+        ?string $newsSlug = null,
+        ?int $businessId = null,
+        ?int $touristPlaceId = null
     ) {
         $this->userId = $userId;
         $this->title = $title;
@@ -51,6 +56,8 @@ class SendFcmNotificationJob implements ShouldQueue
         $this->newsId = $newsId;
         $this->newsSlug = $newsSlug;
         $this->isNewsNotification = !is_null($newsId);
+        $this->businessId = $businessId;
+        $this->touristPlaceId = $touristPlaceId;
     }
 
     /**
@@ -185,6 +192,26 @@ class SendFcmNotificationJob implements ShouldQueue
             $apnsData["payload"]["type"] = "news";
             $apnsData["payload"]["news_id"] = (string)$this->newsId;
             $apnsData["payload"]["news_slug"] = $this->newsSlug;
+        } elseif ($this->businessId) {
+            $customData = [
+                "type" => "business",
+                "business_id" => (string)$this->businessId,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+            $androidData["data"] = $customData;
+            $androidData["notification"]["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
+            $apnsData["payload"]["type"] = "business";
+            $apnsData["payload"]["business_id"] = (string)$this->businessId;
+        } elseif ($this->touristPlaceId) {
+            $customData = [
+                "type" => "tourist_place",
+                "tourist_place_id" => (string)$this->touristPlaceId,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+            $androidData["data"] = $customData;
+            $androidData["notification"]["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
+            $apnsData["payload"]["type"] = "tourist_place";
+            $apnsData["payload"]["tourist_place_id"] = (string)$this->touristPlaceId;
         }
 
         // Construct the full FCM message payload
@@ -203,6 +230,18 @@ class SendFcmNotificationJob implements ShouldQueue
                 "type" => "news",
                 "news_id" => (string)$this->newsId,
                 "news_slug" => $this->newsSlug,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+        } elseif ($this->businessId) {
+             $data["message"]["data"] = [
+                "type" => "business",
+                "business_id" => (string)$this->businessId,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+        } elseif ($this->touristPlaceId) {
+             $data["message"]["data"] = [
+                "type" => "tourist_place",
+                "tourist_place_id" => (string)$this->touristPlaceId,
                 "click_action" => "FLUTTER_NOTIFICATION_CLICK"
             ];
         }

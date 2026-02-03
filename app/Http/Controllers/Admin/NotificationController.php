@@ -76,8 +76,18 @@ class NotificationController extends Controller
                         ->select('id', 'title', 'slug', 'image', 'excerpt')
                         ->orderBy('created_at', 'desc')
                         ->get();
+
+        // Fetch businesses
+        $businesses = \App\Models\Business::select('id', 'name', 'thumbnail', 'description')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        // Fetch tourist places
+        $touristPlaces = \App\Models\TouristPlace::select('id', 'name', 'thumbnail', 'description')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
         
-        return view('admin.notifications.index', compact('notifications', 'tab', 'newsArticles'));
+        return view('admin.notifications.index', compact('notifications', 'tab', 'newsArticles', 'businesses', 'touristPlaces'));
     }
 
     /**
@@ -90,8 +100,10 @@ class NotificationController extends Controller
             'description' => 'required|string',
             'audience' => 'required|string',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'type' => 'nullable|in:general,news',
+            'type' => 'nullable|in:general,news,business,tourist_place',
             'news_article_id' => 'required_if:type,news|nullable|exists:news_articles,id',
+            'business_id' => 'required_if:type,business|nullable|exists:businesses,id',
+            'tourist_place_id' => 'required_if:type,tourist_place|nullable|exists:tourist_places,id',
         ]);
         
         $data = $request->except('banner');
