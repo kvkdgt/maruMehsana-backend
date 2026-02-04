@@ -169,18 +169,31 @@ class UserController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Notification marked as read']);
     }
 
-    public function getUnreadNotificationCount(Request $request)
+    public function deleteNotification(Request $request)
+    {
+        $userId = $request->user_id;
+        $id = $request->id; // This is the ID of UserNotificationStatus
+
+        if (!$userId || !$id) {
+            return response()->json(['error' => 'User ID and Item ID required'], 400);
+        }
+
+        \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->where('id', $id)
+            ->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Notification deleted']);
+    }
+
+    public function clearReadNotifications(Request $request)
     {
         $userId = $request->user_id;
         if (!$userId) return response()->json(['error' => 'User ID required'], 400);
 
-        $count = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
-            ->where('is_read', false)
-            ->count();
+        \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->where('is_read', 1)
+            ->delete();
 
-        return response()->json([
-            'status' => 'success',
-            'unread_count' => $count
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'All read notifications cleared']);
     }
 }
