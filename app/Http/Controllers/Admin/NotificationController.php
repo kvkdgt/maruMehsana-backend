@@ -459,7 +459,7 @@ class NotificationController extends Controller
             'audience' => 'all_users',
             'banner' => 'news/'.$newsArticle->image,
             'news_article_id' => $newsArticle->id,
-            'type' => 'general',
+            'type' => 'news',
             'auto_scheduled_at' => $autoScheduledAt,
             'is_sent' => false,
             'created_at' => now(),
