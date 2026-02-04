@@ -133,13 +133,22 @@ class UserController extends Controller
         $userId = $request->user_id;
         if (!$userId) return response()->json(['error' => 'User ID required'], 400);
 
-        $notifications = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+        $query = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
             ->with('notification')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc');
+
+        $status = $request->input('status', 'unread');
+        if ($status === 'read') {
+            $query->where('is_read', 1);
+        } else {
+            $query->where('is_read', 0);
+        }
+
+        $notifications = $query->paginate($request->get('limit', 20));
 
         return response()->json([
             'status' => 'success',
+            'requested_status' => $status,
             'data' => $notifications
         ]);
     }
