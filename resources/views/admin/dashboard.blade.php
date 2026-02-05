@@ -152,6 +152,9 @@
               <div class="user-status {{ $user->is_login ? 'online' : 'offline' }}">
                 {{ $user->is_login ? 'Online' : 'Not Loggedin' }}
               </div>
+              <div class="user-status {{ (!empty($user->fcm_tokens) && count($user->fcm_tokens) > 0) ? 'online' : 'offline' }}" style="margin-left: 5px;">
+                FCM: {{ (!empty($user->fcm_tokens) && count($user->fcm_tokens) > 0) ? 'Yes' : 'No' }}
+              </div>
             </div>
             @endforeach
           </div>

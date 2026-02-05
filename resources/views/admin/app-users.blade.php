@@ -59,6 +59,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Joined Date</th>
+          <th>FCM Token</th>
           <th>Valid Session</th>
           <th>Actions</th>
         </tr>
@@ -70,6 +71,13 @@
           <td>{{ $user->name }}</td>
           <td>{{ $user->email }}</td>
           <td>{{ $user->created_at->format('d M Y') }}</td>
+          <td>
+            @if(!empty($user->fcm_tokens) && count($user->fcm_tokens) > 0)
+              <span class="status-badge status-active">Yes</span>
+            @else
+              <span class="status-badge status-inactive">No</span>
+            @endif
+          </td>
           <td>
             @if($user->is_login)
               <span class="status-badge status-active">Yes</span>
