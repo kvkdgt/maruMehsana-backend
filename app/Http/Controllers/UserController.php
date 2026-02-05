@@ -41,6 +41,18 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // Delete guest accounts with the same FCM token
+        if ($request->fcm_token) {
+            try {
+                // Find guest users who have this token
+                AppUser::where('is_login', false)
+                    ->where('fcm_tokens', 'like', '%"'.$request->fcm_token.'"%')
+                    ->delete();
+            } catch (\Exception $e) {
+                // Ignore errors during guest cleanup
+            }
+        }
+
         $user = new AppUser();
         $user->name = $request->name;
         $user->email = $request->email;
@@ -70,13 +82,22 @@ class UserController extends Controller
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // Add FCM token if not already in list
         // Manage FCM Token: Ensure it belongs to this user and only this user
         if ($request->fcm_token) {
-            // 1. Remove this token from related other users (e.g. if I logged into another account on this device)
+            // Delete guest accounts with the same FCM token
             try {
-                // Find other users who have this token
+                AppUser::where('is_login', false)
+                    ->where('fcm_tokens', 'like', '%"'.$request->fcm_token.'"%')
+                    ->delete();
+            } catch (\Exception $e) {
+                // Ignore errors during guest cleanup
+            }
+
+            // 1. Remove this token from related other *logged-in* users
+            try {
+                // Find other logged-in users who have this token
                 $usersWithToken = AppUser::where('id', '!=', $user->id)
+                    ->where('is_login', true)
                     ->where('fcm_tokens', 'like', '%"'.$request->fcm_token.'"%')
                     ->get();
                 
