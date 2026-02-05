@@ -6,31 +6,21 @@
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/notifications.css'); }}">
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
 
-<div class="categories-container">
+<div class="notifications-container">
   <div class="header-container">
     <div>
-      <h3 class="categories-label">Notifications</h3>
-      <p class="categories-description">Send and manage notifications to users.</p>
+      <h3 class="categories-label" style="font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px;">Push Notifications</h3>
+      <p class="categories-description" style="color: #777; font-size: 0.95rem;">Broadcast messages and alerts to your app users</p>
     </div>
-    <button id="openFormButton" class="add-category-btn">Send Notification</button>
+    <button id="openFormButton" class="btn-add-premium">
+      <i class="fas fa-paper-plane"></i> Send Notification
+    </button>
   </div>
   
   @if (session('success'))
   <div class="alert alert-success">
     <span class="alert-icon">&#10004;</span>
-    <div class="alert-text">
-      {{ session('success') }}
-    </div>
-    <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
-  </div>
-  @endif
-
-  @if (session('error'))
-  <div class="alert alert-danger">
-    <span class="alert-icon">&#9888;</span>
-    <div class="alert-text">
-      {{ session('error') }}
-    </div>
+    <div class="alert-text">{{ session('success') }}</div>
     <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
   </div>
   @endif
@@ -38,76 +28,59 @@
   <!-- Live Progress Section -->
   <div id="progressSection" class="progress-section" style="display: none;">
     <div class="progress-header">
-      <h4><i class="fas fa-tasks"></i> Notification Progress</h4>
+      <h4><i class="fas fa-tasks"></i> Active Broadcast Progress</h4>
       <button class="close-progress-btn" onclick="hideProgressSection()"><i class="fas fa-times"></i></button>
     </div>
     <div id="progressCards"></div>
   </div>
-<!-- Filter Section -->
-<div class="filters-card">
-  <div class="filters-header">
-    <i class="fas fa-filter"></i>
-    <span>Filter Notifications</span>
-  </div>
-  
-  <form action="{{ route('admin.notifications') }}" method="GET" class="filters-form">
-    <div class="filters-body">
-      <div class="filter-group">
-        <label>
-          <span class="filter-label">Type</span>
-          <select name="type" class="filter-select">
+
+  <div class="filter-section">
+    <form action="{{ route('admin.notifications') }}" method="GET">
+      <div class="filter-grid">
+        <div class="filter-control">
+          <label>Type</label>
+          <select name="type" class="filter-input">
             <option value="">All Types</option>
             <option value="direct" {{ request('type') == 'direct' ? 'selected' : '' }}>Direct Sent</option>
             <option value="scheduled" {{ request('type') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
           </select>
-        </label>
-      </div>
-      
-      <div class="filter-group">
-        <label>
-          <span class="filter-label">Status</span>
-          <select name="status" class="filter-select">
+        </div>
+        
+        <div class="filter-control">
+          <label>Status</label>
+          <select name="status" class="filter-input">
             <option value="">All Status</option>
             <option value="sent" {{ request('status') == 'sent' ? 'selected' : '' }}>Sent</option>
             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
           </select>
-        </label>
-      </div>
-      
-      <div class="filter-group">
-        <label>
-          <span class="filter-label">Image</span>
-          <select name="image" class="filter-select">
-            <option value="">All</option>
+        </div>
+        
+        <div class="filter-control">
+          <label>Image Presence</label>
+          <select name="image" class="filter-input">
+            <option value="">Any</option>
             <option value="with" {{ request('image') == 'with' ? 'selected' : '' }}>With Image</option>
             <option value="without" {{ request('image') == 'without' ? 'selected' : '' }}>Without Image</option>
           </select>
-        </label>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="filter-btn">Apply</button>
+          <a href="{{ route('admin.notifications') }}" class="reset-btn">Reset</a>
+        </div>
       </div>
-      
-      <div class="filter-actions">
-        <button type="submit" class="filter-apply-btn">
-          <i class="fas fa-search"></i> Apply
-        </button>
-        <a href="{{ route('admin.notifications') }}" class="filter-reset-btn">
-          <i class="fas fa-redo"></i> Reset
-        </a>
-      </div>
-    </div>
-  </form>
-</div>
-  <!-- Notification Listing Table -->
-  <div class="table-container">
-    <table class="categories-table">
+    </form>
+  </div>
+
+  <div class="premium-table-container">
+    <table class="premium-table">
       <thead>
         <tr>
           <th>Sr. No.</th>
-          <th>Title</th>
-          <th>Description</th>
-          <th>Banner</th>
-          <th>Audience</th>
+          <th>Notification Info</th>
+          <th>Redirection / Banner</th>
           <th>Scheduled For</th>
-          <th>Status</th>
+          <th>Status / Analytics</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -115,60 +88,75 @@
         @if(count($notifications) > 0)
           @foreach($notifications as $index => $notification)
           <tr>
-            <td>{{ $index + 1 }}</td>
-            <td>{{ $notification->title }}</td>
-            <td>{{ Str::limit($notification->description, 50) }}</td>
+            <td>{{ $notifications->firstItem() + $index }}</td>
             <td>
-              @if($notification->banner)
-                <img src="{{ asset('storage/' . $notification->banner) }}" alt="Banner" width="50">
-              @else
-                N/A
-              @endif
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; color: #2c3e50;">{{ $notification->title }}</span>
+                    <span style="font-size: 0.8rem; color: #777;">{{ Str::limit($notification->description, 60) }}</span>
+                </div>
             </td>
             <td>
-              @if($notification->audience == 'all_users')
-                All Users
-              @endif
-            </td>
-            <td class="scheduled-date">
-              {{ $notification->scheduled_at ? $notification->scheduled_at->format('M d, Y h:i A') : 'Direct Sent' }}
-            </td>
-            <td class="status">
-              @if($notification->is_sent == 1)
-                <span class="status-sent">Sent</span>
-                <button class="btn-progress-view" onclick="showProgress({{ $notification->id }})" title="View Progress">
-                  <i class="fas fa-chart-line"></i>
-                </button>
-              @elseif($notification->is_sent == 0)
-                <span class="status-scheduled">Scheduled</span>
-              @endif
+              <div style="display: flex; align-items: center; gap: 10px;">
+                @if($notification->banner)
+                    <img src="{{ asset('storage/' . $notification->banner) }}" style="width: 50px; height: 35px; border-radius: 4px; object-fit: cover; border: 1px solid #eee;">
+                @endif
+                <span class="badge-premium badge-info" style="font-size: 0.7rem;">
+                    {{ ucfirst(str_replace('_', ' ', $notification->type ?? 'General')) }}
+                </span>
+              </div>
             </td>
             <td>
-  <form action="{{ route('notifications.send-now', $notification->id) }}" method="POST" class="send-now-form">
-    @csrf
-    <button type="submit" class="icon-btn edit-btn" title="Send Now">
-      <i class="fas fa-paper-plane"></i>
-    </button>
-  </form>
-  @if($notification->is_sent)
-    <a href="{{ route('admin.notifications.logs', $notification->id) }}" class="icon-btn btn-info" title="View Logs">
-      <i class="fas fa-list-alt"></i>
-    </a>
-  @endif
-  
-  <form action="{{ route('notifications.delete', $notification->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete()">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="icon-btn delete-btn" title="Delete">
-      <i class="fas fa-trash"></i>
-    </button>
-  </form>
-</td>
+                <div style="font-size: 0.85rem; color: #555;">
+                    @if($notification->scheduled_at)
+                        <i class="far fa-calendar-alt" style="margin-right: 5px;"></i> {{ $notification->scheduled_at->format('d M, h:i A') }}
+                    @else
+                        <span style="color: #999; font-style: italic;">Instant</span>
+                    @endif
+                </div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                @if($notification->is_sent == 1)
+                  <span class="badge-premium badge-success">Sent</span>
+                  <button class="icon-btn" onclick="showProgress({{ $notification->id }})" title="View Analytics" style="color: #3498db; background: none; border: none; cursor: pointer;">
+                    <i class="fas fa-chart-bar"></i>
+                  </button>
+                @else
+                  <span class="badge-premium badge-warning">Scheduled</span>
+                @endif
+              </div>
+            </td>
+            <td>
+               <div style="display: flex; gap: 8px;">
+                    @if(!$notification->is_sent)
+                        <form action="{{ route('notifications.send-now', $notification->id) }}" method="POST">
+                          @csrf
+                          <button type="submit" class="edit-btn" title="Send Now" style="background-color: #ebfbee; color: #2b8a3e; border-color: #b2f2bb;">
+                            <i class="fas fa-paper-plane"></i>
+                          </button>
+                        </form>
+                    @endif
+
+                    @if($notification->is_sent)
+                        <a href="{{ route('admin.notifications.logs', $notification->id) }}" class="edit-btn" title="View Logs">
+                          <i class="fas fa-history"></i> Logs
+                        </a>
+                    @endif
+                    
+                    <form action="{{ route('notifications.delete', $notification->id) }}" method="POST" onsubmit="return confirmDelete()">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="delete-btn" title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+               </div>
+            </td>
           </tr>
           @endforeach
         @else
           <tr>
-            <td colspan="8" class="text-center">No notifications found.</td>
+            <td colspan="6" style="text-align: center; padding: 40px; color: #999;">No notifications matching your filters.</td>
           </tr>
         @endif
       </tbody>
@@ -178,6 +166,15 @@
     </div>
   </div>
 </div>
+
+<style>
+    .notifications-container { padding: 20px; }
+    .icon-btn { font-size: 1.1rem; transition: transform 0.2s; padding: 5px; }
+    .icon-btn:hover { transform: scale(1.2); }
+    .progress-section { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #F2652D; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .close-progress-btn { background: none; border: none; cursor: pointer; color: #999; }
+</style>
 
 <!-- Send Notification Modal -->
 <!-- Modified Send Notification Modal -->

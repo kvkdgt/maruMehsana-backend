@@ -192,25 +192,42 @@ class AdminController extends Controller
     public function businesses(Request $request){
         $search = $request->get('search');
         $sortBy = $request->get('sort_by');
+        $categoryId = $request->get('category_id');
         
         // Build the query
         $businessesQuery = Business::with('category');
     
         // Apply search filter
         if ($search) {
-            $businessesQuery->where('name', 'LIKE', "%$search%")
-                            ->orWhere('description', 'LIKE', "%$search%");
+            $businessesQuery->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%")
+                  ->orWhere('description', 'LIKE', "%$search%")
+                  ->orWhere('products', 'LIKE', "%$search%")
+                  ->orWhere('services', 'LIKE', "%$search%");
+            });
+        }
+
+        // Apply category filter
+        if ($categoryId) {
+            $businessesQuery->where('category_id', $categoryId);
         }
         
-        // Apply sorting by visitors
+        // Apply sorting
         if ($sortBy == 'highest') {
             $businessesQuery->orderBy('visitors', 'desc');
         } elseif ($sortBy == 'lowest') {
             $businessesQuery->orderBy('visitors', 'asc');
+        } elseif ($sortBy == 'newest') {
+            $businessesQuery->orderBy('created_at', 'desc');
+        } elseif ($sortBy == 'oldest') {
+            $businessesQuery->orderBy('created_at', 'asc');
+        } else {
+            $businessesQuery->orderBy('created_at', 'desc');
         }
     
         $businesses = $businessesQuery->paginate(10);
-        return view("admin.businesses", compact('businesses'));
+        $categories = Category::all();
+        return view("admin.businesses", compact('businesses', 'categories'));
     }
 
     public function touristPlaces(Request $request)
@@ -227,11 +244,17 @@ class AdminController extends Controller
                                ->orWhere('description', 'LIKE', "%$search%");
         }
     
-        // Apply sorting by visitors
+        // Apply sorting
         if ($sortBy == 'highest') {
             $touristPlacesQuery->orderBy('visitors', 'desc');
         } elseif ($sortBy == 'lowest') {
             $touristPlacesQuery->orderBy('visitors', 'asc');
+        } elseif ($sortBy == 'newest') {
+            $touristPlacesQuery->orderBy('created_at', 'desc');
+        } elseif ($sortBy == 'oldest') {
+            $touristPlacesQuery->orderBy('created_at', 'asc');
+        } else {
+            $touristPlacesQuery->orderBy('created_at', 'desc');
         }
     
         $tourist_places = $touristPlacesQuery->paginate(10);
@@ -241,19 +264,39 @@ class AdminController extends Controller
 
     public function BusinessEnquiry(Request $request)
     {
-        $status = $request->get('status'); // Get status from request
-        $pageSize = $request->get('size', 10); // Default page size = 10
+        $status = $request->get('status');
+        $search = $request->get('search');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $pageSize = $request->get('size', 10);
     
         // Build the query
         $businessEnquiryQuery = BusinessEnquiry::query();
     
+        // Apply search filter
+        if ($search) {
+            $businessEnquiryQuery->where(function($q) use ($search) {
+                $q->where('business_name', 'LIKE', "%$search%")
+                  ->orWhere('owner_name', 'LIKE', "%$search%")
+                  ->orWhere('mobile_no', 'LIKE', "%$search%")
+                  ->orWhere('whatsapp_no', 'LIKE', "%$search%");
+            });
+        }
+
         // Apply status filter if provided
         if ($status) {
             $businessEnquiryQuery->where('status', $status);
         }
+
+        // Apply date range filter
+        if ($startDate) {
+            $businessEnquiryQuery->whereDate('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $businessEnquiryQuery->whereDate('created_at', '<=', $endDate);
+        }
     
-        // Paginate dynamically based on frontend input
-        $business_enquiries = $businessEnquiryQuery->paginate($pageSize);
+        $business_enquiries = $businessEnquiryQuery->orderBy('created_at', 'desc')->paginate($pageSize);
     
         return view("admin.business-enquiries", compact('business_enquiries'));
     }
@@ -351,12 +394,28 @@ class AdminController extends Controller
     public function appUsers(Request $request) {
         $search = $request->get('search');
         $sortBy = $request->get('sort_by');
+        $isLogin = $request->get('is_login');
+        $hasFcm = $request->get('has_fcm');
 
         $usersQuery = AppUser::query();
 
         if ($search) {
-            $usersQuery->where('name', 'LIKE', "%$search%")
-                       ->orWhere('email', 'LIKE', "%$search%");
+            $usersQuery->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%")
+                  ->orWhere('email', 'LIKE', "%$search%");
+            });
+        }
+
+        if ($isLogin !== null && $isLogin !== '') {
+            $usersQuery->where('is_login', $isLogin);
+        }
+
+        if ($hasFcm === 'yes') {
+            $usersQuery->whereNotNull('fcm_tokens')->whereRaw('JSON_LENGTH(fcm_tokens) > 0');
+        } elseif ($hasFcm === 'no') {
+            $usersQuery->where(function($q) {
+                $q->whereNull('fcm_tokens')->orWhereRaw('JSON_LENGTH(fcm_tokens) = 0');
+            });
         }
 
         if ($sortBy == 'newest') {

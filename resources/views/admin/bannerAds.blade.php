@@ -6,159 +6,205 @@
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/banner-ads.css') }}">
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
 
-<div class="categories-container">
+<div class="banner-container">
   <div class="header-container">
     <div>
-      <h3 class="categories-label">Banner Ads</h3>
-      <p class="categories-description">Manage all Banner Ads from here.</p>
+      <h3 class="categories-label" style="font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px;">Banner Advertisements</h3>
+      <p class="categories-description" style="color: #777; font-size: 0.95rem;">Manage homepage and section banner ads</p>
     </div>
-    <button class="add-category-btn" id="openModalBtn">+ Add New Banner Ad</button>
+    <button class="btn-add-premium" id="openModalBtn">
+      <i class="fas fa-plus-circle"></i> Add New Banner Ad
+    </button>
   </div>
 
-  <form action="{{ route('admin.banner-ads') }}" method="GET" class="filter-form">
-    <div class="filter-items">
-      <!-- Search Field -->
-      <input type="text" name="search" placeholder="Search banner ad" value="{{ request()->search }}" class="search-input">
+  <div class="filter-section">
+    <form action="{{ route('admin.banner-ads') }}" method="GET">
+      <div class="filter-grid">
+        <div class="filter-control">
+          <label>Search Banners</label>
+          <input type="text" name="search" placeholder="Search by title..." value="{{ request()->search }}" class="filter-input">
+        </div>
 
-      <button type="submit" class="filter-btn">Apply Filter</button>
-      <a href="{{ route('admin.banner-ads') }}" class="reset-btn">Reset Filter</a>
-    </div>
-  </form>
+        <div class="btn-group">
+          <button type="submit" class="filter-btn">Apply</button>
+          <a href="{{ route('admin.banner-ads') }}" class="reset-btn">Reset</a>
+        </div>
+      </div>
+    </form>
+  </div>
 
   @if (session('success'))
   <div class="alert alert-success">
     <span class="alert-icon">&#10004;</span>
-    <div class="alert-text">
-      {{ session('success') }}
-    </div>
+    <div class="alert-text">{{ session('success') }}</div>
     <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
   </div>
   @endif
 
-  @if (session('error'))
-  <div class="alert alert-danger">
-    <span class="alert-icon">&#9888;</span>
-    <div class="alert-text">
-      {{ session('error') }}
-    </div>
-    <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
-  </div>
-  @endif
-
-  <div class="table-container">
-    <table class="categories-table">
+  <div class="premium-table-container">
+    <table class="premium-table">
       <thead>
         <tr>
           <th>Sr. No.</th>
-
-          <th>Title</th>
+          <th>Banner Info</th>
           <th>Status</th>
-          <th>Total Touch</th>
+          <th>Analytics</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         @foreach($bannerAds as $index => $banner)
         <tr>
-          <td>{{ $index + 1 }}</td>
-
-          <td>{{ $banner->title }}</td>
+          <td>{{ $bannerAds->firstItem() + $index }}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                @if($banner->image)
+                    <img src="{{ asset('storage/' . $banner->image) }}" style="width: 120px; height: 60px; border-radius: 8px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                @else
+                    <div style="width: 120px; height: 60px; border-radius: 8px; background: #eee; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-image" style="color: #ccc;"></i>
+                    </div>
+                @endif
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; color: #2c3e50;">{{ $banner->title }}</span>
+                    <span style="font-size: 0.75rem; color: #3498db;">{{ $banner->link ?: 'No Link' }}</span>
+                </div>
+            </div>
+          </td>
           <td>
             <label class="switch">
               <input type="checkbox" class="status-toggle" data-id="{{ $banner->id }}" {{ $banner->status ? 'checked' : '' }}>
               <span class="slider round"></span>
             </label>
+            <span style="font-size: 0.8rem; margin-left: 10px; color: {{ $banner->status ? '#27ae60' : '#e74c3c' }}; font-weight: 600;">
+                {{ $banner->status ? 'Active' : 'Inactive' }}
+            </span>
           </td>
-          <td>{{ $banner->touch }}</td>
-
-
           <td>
-            <form action="{{ route('admin.banner-ads.destroy', $banner->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete()">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-premium badge-info">
+                    <i class="fas fa-mouse-pointer" style="margin-right: 5px;"></i> {{ number_format($banner->touch) }} Taps
+                </span>
+            </div>
+          </td>
+          <td>
+            <form action="{{ route('admin.banner-ads.destroy', $banner->id) }}" method="POST" onsubmit="return confirmDelete()">
               @csrf
               @method('DELETE')
-              <button type="submit" class="delete-btn">Delete</button>
+              <button type="submit" class="delete-btn">
+                <i class="fas fa-trash"></i> Delete
+              </button>
             </form>
           </td>
-
         </tr>
         @endforeach
       </tbody>
     </table>
-
+    <div class="pagination-container">
+        {{ $bannerAds->appends(request()->query())->links('vendor.pagination.custom') }}
+    </div>
   </div>
 </div>
 
+<style>
+    .banner-container { padding: 20px; }
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+    input:checked + .slider { background-color: #F2652D; }
+    input:checked + .slider:before { transform: translateX(22px); }
+    .slider.round { border-radius: 34px; }
+    .slider.round:before { border-radius: 50%; }
+</style>
+
 <div id="categoryModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModalBtn">&times;</span>
-    <h3 id="modal-title">Add New Banner Ad</h3>
-    <form action="{{ route('admin.banner-ads.store') }}" method="POST" enctype="multipart/form-data" id="categoryForm">
-      @csrf
-      <input type="hidden" id="category-id" name="id">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+        <h3 id="modal-title">Add New Banner Ad</h3>
+        <button type="button" class="close-btn" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+        <form action="{{ route('admin.banner-ads.store') }}" method="POST" enctype="multipart/form-data" id="categoryForm">
+          @csrf
+          <input type="hidden" id="category-id" name="id">
 
-      <label for="banner-title" class="required-label">Title</label>
-      <input type="text" id="banner-title" name="title" required>
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label class="required-label">Title</label>
+            <input type="text" id="banner-title" name="title" required class="filter-input" style="width: 100%;">
+          </div>
 
-      <label for="banner-image" class="required-label">Image</label>
-      <input type="file" id="banner-image" name="image" accept="image/*" required>
-      <label for="banner-link">Redirection Link</label>
-      <input type="text" id="banner-link" name="link">
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label class="required-label">Image</label>
+            <input type="file" id="banner-image" name="image" accept="image/*" required class="filter-input" style="width: 100%;">
+          </div>
 
-      <!-- Link Types -->
-      <label>Link To:</label>
-      <div style="margin-bottom: 15px;">
-        <label style="display:inline-block; margin-right: 15px;">
-          <input type="radio" name="link_type" value="custom" checked onchange="toggleLinkType(this.value)"> Custom Link
-        </label>
-        <label style="display:inline-block; margin-right: 15px;">
-          <input type="radio" name="link_type" value="business" onchange="toggleLinkType(this.value)"> Business
-        </label>
-        <label style="display:inline-block;">
-          <input type="radio" name="link_type" value="tourist_place" onchange="toggleLinkType(this.value)"> Tourist Place
-        </label>
-      </div>
+          <!-- Link Types -->
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Link To:</label>
+            <div style="display: flex; gap: 20px; margin-top: 5px;">
+                <label style="display:flex; align-items: center; gap: 5px; font-weight: normal; cursor: pointer;">
+                  <input type="radio" name="link_type" value="custom" checked onchange="toggleLinkType(this.value)"> Custom
+                </label>
+                <label style="display:flex; align-items: center; gap: 5px; font-weight: normal; cursor: pointer;">
+                  <input type="radio" name="link_type" value="business" onchange="toggleLinkType(this.value)"> Business
+                </label>
+                <label style="display:flex; align-items: center; gap: 5px; font-weight: normal; cursor: pointer;">
+                  <input type="radio" name="link_type" value="tourist_place" onchange="toggleLinkType(this.value)"> Tourist Place
+                </label>
+            </div>
+          </div>
 
-      <!-- Business Selection -->
-      <div id="businessSelectDiv" style="display:none; margin-bottom: 15px;">
-          <label for="businessSelect">Select Business</label>
-          <select name="business_id" id="businessSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-            <option value="">-- Select Business --</option>
-            @if(isset($businesses))
-              @foreach($businesses as $business)
-                <option value="{{ $business->id }}" 
-                        data-title="{{ $business->name }}" 
-                        data-image="{{ $business->thumbnail ? asset('storage/' . $business->thumbnail) : '' }}">
-                  {{ Str::limit($business->name, 60) }}
-                </option>
-              @endforeach
-            @endif
-          </select>
-      </div>
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label for="banner-link">Redirection Link / ID</label>
+            <input type="text" id="banner-link" name="link" class="filter-input" style="width: 100%;" placeholder="Enter URL or ID">
+          </div>
 
-      <!-- Tourist Place Selection -->
-      <div id="touristPlaceSelectDiv" style="display:none; margin-bottom: 15px;">
-          <label for="touristPlaceSelect">Select Tourist Place</label>
-          <select name="tourist_place_id" id="touristPlaceSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-            <option value="">-- Select Tourist Place --</option>
-            @if(isset($touristPlaces))
-              @foreach($touristPlaces as $place)
-                <option value="{{ $place->id }}" 
-                        data-title="{{ $place->name }}" 
-                        data-image="{{ $place->thumbnail ? asset('storage/' . $place->thumbnail) : '' }}">
-                  {{ Str::limit($place->name, 60) }}
-                </option>
-              @endforeach
-            @endif
-          </select>
-      </div>
-      <label for="banner-status" class="required-label">Status</label>
-      <select id="banner-status" name="status">
-        <option value="1">Active</option>
-        <option value="0">Inactive</option>
-      </select>
+          <!-- Business Selection -->
+          <div id="businessSelectDiv" style="display:none; margin-bottom: 15px;">
+              <label for="businessSelect">Select Business</label>
+              <select name="business_id" id="businessSelect" class="filter-input" style="width: 100%;">
+                <option value="">-- Select Business --</option>
+                @if(isset($businesses))
+                  @foreach($businesses as $business)
+                    <option value="{{ $business->id }}" 
+                            data-title="{{ $business->name }}" 
+                            data-image="{{ $business->thumbnail ? asset('storage/' . $business->thumbnail) : '' }}">
+                      {{ Str::limit($business->name, 60) }}
+                    </option>
+                  @endforeach
+                @endif
+              </select>
+          </div>
 
-      <button type="submit" class="submit-btn">Add Banner Ad</button>
-    </form>
+          <!-- Tourist Place Selection -->
+          <div id="touristPlaceSelectDiv" style="display:none; margin-bottom: 15px;">
+              <label for="touristPlaceSelect">Select Tourist Place</label>
+              <select name="tourist_place_id" id="touristPlaceSelect" class="filter-input" style="width: 100%;">
+                <option value="">-- Select Tourist Place --</option>
+                @if(isset($touristPlaces))
+                  @foreach($touristPlaces as $place)
+                    <option value="{{ $place->id }}" 
+                            data-title="{{ $place->name }}" 
+                            data-image="{{ $place->thumbnail ? asset('storage/' . $place->thumbnail) : '' }}">
+                      {{ Str::limit($place->name, 60) }}
+                    </option>
+                  @endforeach
+                @endif
+              </select>
+          </div>
+
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label for="banner-status" class="required-label">Status</label>
+            <select id="banner-status" name="status" class="filter-input" style="width: 100%;">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+          </div>
+
+          <button type="submit" class="submit-btn" style="margin-top: 20px;">Save Banner Ad</button>
+        </form>
+    </div>
   </div>
 </div>
 

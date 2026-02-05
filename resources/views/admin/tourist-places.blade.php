@@ -6,47 +6,57 @@
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/tourist_places.css'); }}">
 <link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
 
-<div class="categories-container">
-  <div class="header-container">
+<div class="tourist-container">
+  <div class="header-container" style="margin-bottom: 25px;">
     <div>
-      <h3 class="categories-label">Tourist Places</h3>
-      <p class="categories-description">Manage all tourist places from here</p>
+      <h3 class="categories-label" style="font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px;">Tourist Places</h3>
+      <p class="categories-description" style="color: #777; font-size: 0.95rem;">Explore and manage beautiful locations in Mehsana</p>
     </div>
-    <button class="add-category-btn" onclick="openModal()">+ Add New Place</button>
+    <button class="btn-add-premium" onclick="openModal()">
+      <i class="fas fa-plus-circle"></i> Add New Place
+    </button>
   </div>
 
-  <form action="{{ route('admin.tourist-places') }}" method="GET" class="filter-form">
-    <div class="filter-items">
-      <input type="text" name="search" placeholder="Search tourist place" value="{{ request()->search }}" class="search-input">
-      <select name="sort_by" class="sort-dropdown">
-        <option value="">Sort by Visitors</option>
-        <option value="highest" {{ request()->sort_by == 'highest' ? 'selected' : '' }}>Highest Visitors</option>
-        <option value="lowest" {{ request()->sort_by == 'lowest' ? 'selected' : '' }}>Lowest Visitors</option>
-      </select>
-      <button type="submit" class="filter-btn">Apply Filter</button>
-      <a href="{{ route('admin.tourist-places') }}" class="reset-btn">Reset Filter</a>
-    </div>
-  </form>
+  <div class="filter-section">
+    <form action="{{ route('admin.tourist-places') }}" method="GET">
+      <div class="filter-grid">
+        <div class="filter-control">
+          <label>Search</label>
+          <input type="text" name="search" placeholder="Place name or location" value="{{ request()->search }}" class="filter-input">
+        </div>
+
+        <div class="filter-control">
+          <label>Sort By</label>
+          <select name="sort_by" class="filter-input">
+            <option value="">Default Sorting</option>
+            <option value="highest" {{ request()->sort_by == 'highest' ? 'selected' : '' }}>Most Visitors</option>
+            <option value="lowest" {{ request()->sort_by == 'lowest' ? 'selected' : '' }}>Least Visitors</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="filter-btn">Apply</button>
+          <a href="{{ route('admin.tourist-places') }}" class="reset-btn">Reset</a>
+        </div>
+      </div>
+    </form>
+  </div>
 
   @if (session('success'))
   <div class="alert alert-success">
     <span class="alert-icon">&#10004;</span>
-    <div class="alert-text">
-      {{ session('success') }}
-    </div>
+    <div class="alert-text">{{ session('success') }}</div>
     <button class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
   </div>
   @endif
 
-  <div class="table-container">
-    <table class="categories-table">
+  <div class="premium-table-container">
+    <table class="premium-table">
       <thead>
         <tr>
           <th>Sr. No.</th>
-          <th>Place Name</th>
-          <th>Description</th>
-          <th>Location</th>
-          <th>Coordinates</th>
+          <th>Place Information</th>
+          <th>Location & Mapping</th>
           <th>Visitors</th>
           <th>Actions</th>
         </tr>
@@ -54,23 +64,44 @@
       <tbody>
         @foreach($tourist_places as $index => $place)
         <tr>
-          <td>{{ $index + 1 }}</td>
-          <td>{{ $place->name }}</td>
-          <td>{{ Str::limit($place->description, 50) }}</td>
-          <td>{{ $place->location ?? 'N/A' }}</td>
+          <td>{{ $tourist_places->firstItem() + $index }}</td>
           <td>
-            @if($place->hasCoordinates())
-              <span class="coordinates" title="Latitude: {{ $place->latitude }}, Longitude: {{ $place->longitude }}">
-                {{ $place->coordinates }}
-              </span>
-            @else
-              <span class="no-coordinates">No coordinates</span>
-            @endif
+            <div style="display: flex; align-items: center; gap: 15px;">
+                @if($place->thumbnail)
+                    <img src="{{ asset('storage/' . $place->thumbnail) }}" style="width: 55px; height: 55px; border-radius: 10px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                @else
+                    <div style="width: 55px; height: 55px; border-radius: 10px; background: #f0f2f5; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-map-marker-alt" style="color: #ccc;"></i>
+                    </div>
+                @endif
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; color: #2c3e50; font-size: 1rem;">{{ $place->name }}</span>
+                    <span style="font-size: 0.8rem; color: #777;">{{ Str::limit($place->description, 60) }}</span>
+                </div>
+            </div>
           </td>
-          <td>{{ $place->visitors }}</td>
           <td>
-            <!-- <button class="edit-btn" onclick="openEditModal({{ $place->id }})">Edit</button> -->
-            <button class="delete-btn" data-id="{{ $place->id }}">Delete</button>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 0.85rem; font-weight: 500;"><i class="fas fa-map-pin" style="color: #e74c3c; margin-right: 5px;"></i>{{ $place->location ?? 'No location added' }}</span>
+                @if($place->hasCoordinates())
+                    <span style="font-size: 0.75rem; color: #3498db; background: rgba(52, 152, 219, 0.1); padding: 2px 8px; border-radius: 20px; width: fit-content;">
+                        <i class="fas fa-compass" style="margin-right: 3px;"></i> {{ $place->coordinates }}
+                    </span>
+                @endif
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-eye" style="color: #9b59b6; font-size: 0.8rem;"></i>
+                <span style="font-weight: 600;">{{ number_format($place->visitors) }}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; gap: 10px;">
+                <button class="delete-btn" data-id="{{ $place->id }}">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
           </td>
         </tr>
         @endforeach
@@ -82,51 +113,61 @@
   </div>
 </div>
 
+<style>
+    /* No additional styles needed for container, using global utilities */
+</style>
+
 <!-- Add Tourist Place Modal -->
 <div id="addPlaceModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h3 class="modal-title">Add New Tourist Place</h3>
-    <form id="addPlaceForm" enctype="multipart/form-data">
-      @csrf
-      <div class="form-group">
-        <label>Place Name:</label>
-        <input type="text" name="name" required>
-      </div>
-      <div class="form-group">
-        <label>Description:</label>
-        <textarea name="description" required></textarea>
-      </div>
-      <div class="form-group">
-        <label>Location (Optional):</label>
-        <input type="text" name="location" placeholder="e.g., Times Square, New York">
-      </div>
-      <div class="coordinates-section">
-        <h4>Coordinates (Optional)</h4>
-        <div class="coordinates-inputs">
-          <div class="form-group">
-            <label>Latitude:</label>
-            <input type="number" name="latitude" step="any" min="-90" max="90" placeholder="e.g., 40.7580">
+    <div class="modal-header">
+        <h3 id="modal-title">Add New Tourist Place</h3>
+        <button type="button" class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <form id="addPlaceForm" enctype="multipart/form-data">
+          @csrf
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Place Name:</label>
+            <input type="text" name="name" required class="filter-input" style="width: 100%;">
           </div>
-          <div class="form-group">
-            <label>Longitude:</label>
-            <input type="number" name="longitude" step="any" min="-180" max="180" placeholder="e.g., -73.9855">
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Description:</label>
+            <textarea name="description" required class="filter-input" style="width: 100%;" rows="3"></textarea>
           </div>
-        </div>
-        <button type="button" class="get-location-btn" onclick="getCurrentLocation()">📍 Get Current Location</button>
-      </div>
-      <div class="form-group">
-        <label>Thumbnail:</label>
-        <input type="file" name="thumbnail" accept="image/*" required>
-        <img id="thumbnailPreview" class="preview-img" style="display:none; width:100px; margin-top:10px;">
-      </div>
-      <div class="form-group">
-        <label>Additional Images:</label>
-        <input type="file" name="images[]" accept="image/*" multiple>
-        <div id="additionalImagesPreview" class="preview-container"></div>
-      </div>
-      <button type="submit" class="submit-btn">Submit</button>
-    </form>
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Location (Optional):</label>
+            <input type="text" name="location" placeholder="e.g., Times Square, New York" class="filter-input" style="width: 100%;">
+          </div>
+          <div class="coordinates-section" style="padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; background: #fafafa;">
+            <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #333;">Coordinates (Optional)</h4>
+            <div class="coordinates-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div class="filter-control">
+                <label style="font-size: 0.75rem;">Latitude:</label>
+                <input type="number" name="latitude" step="any" min="-90" max="90" placeholder="e.g., 40.7580" class="filter-input">
+              </div>
+              <div class="filter-control">
+                <label style="font-size: 0.75rem;">Longitude:</label>
+                <input type="number" name="longitude" step="any" min="-180" max="180" placeholder="e.g., -73.9855" class="filter-input">
+              </div>
+            </div>
+            <button type="button" class="edit-btn" onclick="getCurrentLocation()" style="width: 100%; justify-content: center; background-color: #e3f2fd; color: #1976d2; border-color: #bbdefb;">
+                <i class="fas fa-location-arrow"></i> Get My Location
+            </button>
+          </div>
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Thumbnail Image:</label>
+            <input type="file" name="thumbnail" accept="image/*" required class="filter-input" style="width: 100%;">
+            <img id="thumbnailPreview" class="preview-img" style="display:none; width:100px; height: 100px; object-fit: cover; margin-top:10px; border-radius: 8px;">
+          </div>
+          <div class="filter-control" style="margin-bottom: 15px;">
+            <label>Additional Images (Multiple):</label>
+            <input type="file" name="images[]" accept="image/*" multiple class="filter-input" style="width: 100%;">
+            <div id="additionalImagesPreview" class="preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;"></div>
+          </div>
+          <button type="submit" class="submit-btn" style="margin-top: 10px;">Submit Place</button>
+        </form>
+    </div>
   </div>
 </div>
 
@@ -261,26 +302,7 @@
 </script>
 
 <style>
-  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
-  .modal-content { background: #fff; padding: 20px; border-radius: 8px; width: 500px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); }
-  .modal-title { margin-bottom: 15px; text-align: center; font-size: 20px; }
-  .close { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; }
-  .form-group { margin-bottom: 15px; }
-  .form-group label { font-weight: bold; display: block; margin-bottom: 5px; }
-  .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-  .coordinates-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 15px; background-color: #f9f9f9; }
-  .coordinates-section h4 { margin-top: 0; margin-bottom: 10px; color: #333; }
-  .coordinates-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .get-location-btn { background: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
-  .get-location-btn:hover { background: #218838; }
-  .submit-btn { background: #2596be; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
-  .submit-btn:hover { background: #1e7a9a; }
-  .preview-img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; margin: 5px; border: 1px solid #ddd; }
-  .preview-container { display: flex; gap: 10px; flex-wrap: wrap; }
-  .coordinates { font-size: 12px; color: #666; cursor: help; }
-  .no-coordinates { font-size: 12px; color: #999; font-style: italic; }
-  .edit-btn { background: #ffc107; color: #212529; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px; }
-  .delete-btn { background: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; }
+    /* Specific overrides for Tourist Places */
 </style>
 
 @endsection

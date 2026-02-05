@@ -32,39 +32,16 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
     }
 
     .page-title {
         font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text-dark);
+        font-weight: 700;
+        color: #2c3e50;
         margin: 0;
-    }
-
-    .back-button {
-        background-color: var(--neutral-light);
-        color: var(--neutral-color);
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .back-button:hover {
-        background-color: #e5e7eb;
-    }
-
-    .back-button::before {
-        content: "←";
-        margin-right: 0.5rem;
     }
 
     .stats-grid {
@@ -320,7 +297,7 @@
 <div class="notification-logs-container">
     <div class="page-header">
         <h1 class="page-title">Notification Logs: {{ $notification->title }}</h1>
-        <a href="{{ route('admin.notifications') }}" class="back-button">Back to Notifications</a>
+        <a href="{{ route('admin.notifications') }}" class="reset-btn"><i class="fas fa-arrow-left"></i> Back to Notifications</a>
     </div>
 
     <div class="stats-grid">
