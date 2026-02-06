@@ -70,7 +70,9 @@ Route::middleware(['is_admin'])->group(function () {
     Route::post('admin/facts/store', [FactsController::class, 'store'])->name('facts.store');
     Route::delete('admin/facts/delete/{id}', [FactsController::class, 'destroy'])->name('facts.delete');
 
+    Route::get('admin/tourist-places/{id}/data', [TouristPlaceController::class, 'show'])->name('tourist_place.data');
     Route::post('admin/tourist-place/store', [TouristPlaceController::class, 'store'])->name('tourist_place.store');
+    Route::post('admin/tourist-place/update/{id}', [TouristPlaceController::class, 'update'])->name('tourist_place.update');
     Route::delete('admin/tourist-places/delete/{id}', [TouristPlaceController::class, 'destroy'])->name('tourist_place.delete');
 
     Route::put('/admin/business-enquiry/update/{id}', [BusinessEnquiryController::class, 'updateStatus'])->name('admin.BusinessEnquery.updateStatus');
