@@ -81,11 +81,26 @@
             </div>
           </td>
           <td>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-size: 0.85rem; font-weight: 500;"><i class="fas fa-map-pin" style="color: #e74c3c; margin-right: 5px;"></i>{{ $place->location ?? 'No location added' }}</span>
+            <div style="display: flex; flex-direction: column; gap: 4px; max-width: 250px;">
+                @if($place->location)
+                    @if(str_starts_with($place->location, 'http'))
+                        <a href="{{ $place->location }}" target="_blank" style="font-size: 0.85rem; color: #3498db; text-decoration: none; display: flex; align-items: center; gap: 5px; font-weight: 500;" title="{{ $place->location }}">
+                            <i class="fas fa-map-marker-alt" style="color: #e74c3c;"></i>
+                            <span style="text-decoration: underline;">View on Google Maps</span>
+                        </a>
+                    @else
+                        <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: flex-start; gap: 5px;">
+                            <i class="fas fa-map-pin" style="color: #e74c3c; margin-top: 3px;"></i>
+                            <span>{{ $place->location }}</span>
+                        </span>
+                    @endif
+                @else
+                    <span style="font-size: 0.85rem; color: #999; font-style: italic;">No location added</span>
+                @endif
+
                 @if($place->hasCoordinates())
-                    <span style="font-size: 0.75rem; color: #3498db; background: rgba(52, 152, 219, 0.1); padding: 2px 8px; border-radius: 20px; width: fit-content;">
-                        <i class="fas fa-compass" style="margin-right: 3px;"></i> {{ $place->coordinates }}
+                    <span style="font-size: 0.75rem; color: #3498db; background: rgba(52, 152, 219, 0.1); padding: 2px 10px; border-radius: 20px; width: fit-content; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fas fa-compass"></i> {{ $place->coordinates }}
                     </span>
                 @endif
             </div>
@@ -137,7 +152,8 @@
           </div>
           <div class="filter-control" style="margin-bottom: 15px;">
             <label>Location (Optional):</label>
-            <input type="text" name="location" placeholder="e.g., Times Square, New York" class="filter-input" style="width: 100%;">
+            <input type="text" name="location" placeholder="Address or Google Maps link" class="filter-input" style="width: 100%;">
+            <small style="color: #777; font-size: 0.75rem; margin-top: 4px; display: block;">You can paste a full Google Maps URL here.</small>
           </div>
           <div class="coordinates-section" style="padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; background: #fafafa;">
             <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #333;">Coordinates (Optional)</h4>
