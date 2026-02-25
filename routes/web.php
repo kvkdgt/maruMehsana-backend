@@ -12,6 +12,7 @@ use App\Http\Controllers\ShareController;
 use App\Http\Controllers\NewsAgencyController;
 use App\Http\Controllers\AgencyAuthController;
 use App\Http\Controllers\NewsCategoryController;
+use App\Http\Controllers\QuizController;
 
 
 /*
@@ -107,11 +108,17 @@ Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->
     Route::delete('/admin/news-categories/delete/{id}', [NewsCategoryController::class, 'destroy'])->name('news-categories.delete');
     Route::post('/admin/news-categories/toggle-status/{id}', [NewsCategoryController::class, 'toggleStatus'])->name('news-categories.toggle-status');
 
+    // ── Daily Quiz Management ──────────────────────────────────────────────
+    Route::get('/admin/quiz',                    [QuizController::class, 'adminIndex'])->name('admin.quiz');
+    Route::post('/admin/quiz/store',             [QuizController::class, 'adminStore'])->name('admin.quiz.store');
+    Route::post('/admin/quiz/update/{id}',       [QuizController::class, 'adminUpdate'])->name('admin.quiz.update');
+    Route::post('/admin/quiz/toggle/{id}',       [QuizController::class, 'adminToggle'])->name('admin.quiz.toggle');
+    Route::delete('/admin/quiz/delete/{id}',     [QuizController::class, 'adminDestroy'])->name('admin.quiz.delete');
+    Route::get('/admin/quiz/get/{id}',           [QuizController::class, 'adminGetQuestion'])->name('admin.quiz.get');
+    Route::post('/admin/quiz/bulk-import',       [QuizController::class, 'adminBulkImport'])->name('admin.quiz.bulk-import');
+    Route::post('/admin/quiz/bulk-delete',       [QuizController::class, 'adminBulkDelete'])->name('admin.quiz.bulk-delete');
+    Route::get('/admin/quiz/sample-csv',         [QuizController::class, 'adminDownloadSampleCSV'])->name('admin.quiz.sample-csv');
 
-
-
-
-    
 });
 Route::prefix('agency')->name('agency.')->group(function () {
 

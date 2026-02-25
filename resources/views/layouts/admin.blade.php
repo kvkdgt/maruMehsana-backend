@@ -973,6 +973,12 @@
             <span>Facts</span>
         </a>
     </li>
+    <li class="@if(request()->is('admin/quiz')) active @endif">
+        <a href="{{ url('admin/quiz') }}">
+            <i class="fas fa-brain"></i>
+            <span>Daily Quiz</span>
+        </a>
+    </li>
     
     <!-- News Management Dropdown -->
     <li class="dropdown-toggle @if(request()->is('admin/news-agencies*') || request()->is('admin/news-categories*')) active @endif" 

@@ -15,6 +15,7 @@ use App\Http\Controllers\FcmController;
 use App\Http\Controllers\BusinessReviewController;
 use App\Http\Controllers\TouristPlaceReviewController;
 use App\Http\Controllers\ShareImageController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -77,6 +78,14 @@ Route::delete('/place-reviews/{id}', [TouristPlaceReviewController::class, 'dest
 // Share Images
 Route::get('/share/place/{id}', [ShareImageController::class, 'sharePlace']);
 Route::get('/share/news/{id}', [ShareImageController::class, 'shareNews']);
+
+// Daily Quiz Routes (logged-in users only — enforced in controller)
+Route::prefix('quiz')->group(function () {
+    Route::get('/today',       [QuizController::class, 'today']);
+    Route::post('/submit',     [QuizController::class, 'submit']);
+    Route::get('/stats',       [QuizController::class, 'stats']);
+    Route::get('/leaderboard', [QuizController::class, 'leaderboard']);
+});
 
 // News API Routes for Mobile App
 Route::prefix('news')->group(function () {
