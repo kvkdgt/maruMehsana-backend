@@ -12,8 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Add this line:
-        $schedule->command('notifications:send-scheduled')->everyMinute()->withoutOverlapping()->runInBackground();;
+        // Existing scheduled notifications
+        $schedule->command('notifications:send-scheduled')->everyMinute()->withoutOverlapping()->runInBackground();
+
+        // Automated random notifications from library (9 AM, 1 PM, 8 PM)
+        $schedule->command('notifications:send-random')->dailyAt('09:00')->withoutOverlapping()->runInBackground();
+        $schedule->command('notifications:send-random')->dailyAt('13:00')->withoutOverlapping()->runInBackground();
+        $schedule->command('notifications:send-random')->dailyAt('20:00')->withoutOverlapping()->runInBackground();
     }
 
     /**
