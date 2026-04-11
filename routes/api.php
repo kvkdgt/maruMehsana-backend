@@ -16,6 +16,8 @@ use App\Http\Controllers\BusinessReviewController;
 use App\Http\Controllers\TouristPlaceReviewController;
 use App\Http\Controllers\ShareImageController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\JobVacancyController;
+use App\Http\Controllers\AdminJobVacancyController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -488,3 +490,24 @@ Route::prefix('news')->group(function () {
     });
 
 });
+
+// ─── Job Vacancies ─────────────────────────────────────────────────────────
+
+// Public routes (guest + logged-in)
+Route::get('/jobs', [JobVacancyController::class, 'index']);
+Route::get('/jobs/my-posts', [JobVacancyController::class, 'myPosts']);
+Route::get('/jobs/saved', [JobVacancyController::class, 'savedJobs']);
+Route::get('/jobs/{id}', [JobVacancyController::class, 'show']);
+
+// Authenticated routes (user_id + is_login enforced in controller)
+Route::post('/jobs', [JobVacancyController::class, 'store']);
+Route::put('/jobs/{id}', [JobVacancyController::class, 'update']);
+Route::delete('/jobs/{id}', [JobVacancyController::class, 'destroy']);
+Route::patch('/jobs/{id}/status', [JobVacancyController::class, 'updateStatus']);
+Route::post('/jobs/{id}/save', [JobVacancyController::class, 'toggleSave']);
+Route::post('/jobs/{id}/report', [JobVacancyController::class, 'report']);
+
+// Admin routes
+Route::get('/admin/jobs', [AdminJobVacancyController::class, 'allJobs']);
+Route::get('/admin/jobs/reported', [AdminJobVacancyController::class, 'reportedJobs']);
+Route::delete('/admin/jobs/{id}', [AdminJobVacancyController::class, 'removeJob']);

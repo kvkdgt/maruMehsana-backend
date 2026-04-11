@@ -119,6 +119,12 @@ Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->
     Route::post('/admin/quiz/bulk-delete',       [QuizController::class, 'adminBulkDelete'])->name('admin.quiz.bulk-delete');
     Route::get('/admin/quiz/sample-csv',         [QuizController::class, 'adminDownloadSampleCSV'])->name('admin.quiz.sample-csv');
 
+    // Job Vacancy Management
+    Route::get('/admin/jobs', [AdminController::class, 'jobVacancies'])->name('admin.jobs');
+    Route::get('/admin/jobs/reported', [AdminController::class, 'reportedJobs'])->name('admin.jobs.reported');
+    Route::delete('/admin/jobs/delete/{id}', [AdminController::class, 'deleteJob'])->name('admin.jobs.delete');
+    Route::post('/admin/jobs/toggle/{id}', [AdminController::class, 'toggleJobStatus'])->name('admin.jobs.toggle');
+
 });
 Route::prefix('agency')->name('agency.')->group(function () {
 

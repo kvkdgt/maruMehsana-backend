@@ -930,6 +930,16 @@
                     newsToggle.classList.add('active');
                 }
             }
+
+            // Check if we're on job management pages
+            if (window.location.pathname.includes('/admin/jobs')) {
+                const jobDropdown = document.getElementById('jobDropdown');
+                const jobToggle = document.querySelector('[onclick*="jobDropdown"]');
+                if (jobDropdown && jobToggle) {
+                    jobDropdown.classList.add('show');
+                    jobToggle.classList.add('active');
+                }
+            }
         });
     </script>
 </head>
@@ -1001,6 +1011,29 @@
                 <span>News Categories</span>
             </a>
         </li> -->
+    </div>
+
+    <!-- Job Vacancy Management Dropdown -->
+    <li class="dropdown-toggle @if(request()->is('admin/jobs*')) active @endif" 
+        onclick="toggleDropdown('jobDropdown', this)">
+        <a href="javascript:void(0)">
+            <i class="fas fa-id-card"></i>
+            <span>Job Vacancies</span>
+        </a>
+    </li>
+    <div id="jobDropdown" class="dropdown-menu @if(request()->is('admin/jobs*')) show @endif">
+        <li class="dropdown-item @if(request()->is('admin/jobs') && !request()->is('admin/jobs/reported')) active @endif">
+            <a href="{{ route('admin.jobs') }}">
+                <i class="fas fa-list-ul"></i>
+                <span>All Vacancies</span>
+            </a>
+        </li>
+        <li class="dropdown-item @if(request()->is('admin/jobs/reported')) active @endif">
+            <a href="{{ route('admin.jobs.reported') }}">
+                <i class="fas fa-flag"></i>
+                <span>Reported Jobs</span>
+            </a>
+        </li>
     </div>
     
     <li class="@if(request()->is('admin/app-users')) active @endif">

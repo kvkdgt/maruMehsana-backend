@@ -16,6 +16,8 @@ use Illuminate\Support\Collection;
 use App\Models\AppUser;
 use App\Models\Notification;
 use App\Models\NotificationLog;
+use App\Models\JobVacancy;
+use App\Models\JobReport;
 use Carbon\Carbon;
 
 
@@ -436,5 +438,52 @@ class AdminController extends Controller
         $user->delete();
 
         return redirect()->back()->with('success', 'User deleted successfully');
+    }
+
+    public function jobVacancies(Request $request) {
+        $search = $request->get('search');
+        $status = $request->get('status');
+        
+        $query = JobVacancy::with('poster');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'LIKE', "%$search%")
+                  ->orWhere('company_name', 'LIKE', "%$search%")
+                  ->orWhere('location', 'LIKE', "%$search%");
+            });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $jobs = $query->latest()->paginate(10);
+        return view('admin.jobs.index', compact('jobs'));
+    }
+
+    public function reportedJobs(Request $request) {
+        $jobs = JobVacancy::withCount('reports')
+            ->having('reports_count', '>', 0)
+            ->with(['reports' => function($q) {
+                $q->with('reporter');
+            }, 'poster'])
+            ->orderByDesc('reports_count')
+            ->paginate(10);
+
+        return view('admin.jobs.reported', compact('jobs'));
+    }
+
+    public function deleteJob($id) {
+        $job = JobVacancy::findOrFail($id);
+        $job->delete();
+        return redirect()->back()->with('success', 'Job deleted successfully');
+    }
+
+    public function toggleJobStatus($id) {
+        $job = JobVacancy::findOrFail($id);
+        $job->is_active = !$job->is_active;
+        $job->save();
+        return redirect()->back()->with('success', 'Job status updated');
     }
 }
