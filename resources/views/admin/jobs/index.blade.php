@@ -64,45 +64,45 @@
                 @if(count($jobs) > 0)
                     @foreach($jobs as $job)
                     <tr>
-                        <td>#{{ $job->id }}</td>
+                        <td>#{{ $job->id ?? '?' }}</td>
                         <td>
                             <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 600; color: #2c3e50;">{{ $job->title }}</span>
-                                <span style="font-size: 0.8rem; color: #777;">{{ $job->company_name }} • {{ $job->location }}</span>
-                                <span style="font-size: 0.75rem; color: #999;">Posted: {{ $job->created_at->format('d M, Y') }}</span>
+                                <span style="font-weight: 600; color: #2c3e50;">{{ $job->title ?? 'Untitled' }}</span>
+                                <span style="font-size: 0.8rem; color: #777;">{{ $job->company_name ?? 'N/A' }} • {{ $job->location ?? 'N/A' }}</span>
+                                <span style="font-size: 0.75rem; color: #999;">Posted: {{ $job->created_at ? $job->created_at->format('d M, Y') : 'N/A' }}</span>
                             </div>
                         </td>
                         <td>
-                            <span class="badge-premium badge-info" style="text-transform: capitalize;">{{ str_replace('_', ' ', $job->job_type) }}</span>
+                            <span class="badge-premium badge-info" style="text-transform: capitalize;">{{ str_replace('_', ' ', $job->job_type ?? 'N/A') }}</span>
                         </td>
                         <td>
-                            @if($job->status == 'open')
+                            @if(($job->status ?? '') == 'open')
                                 <span class="badge-premium badge-success">Open</span>
-                            @elseif($job->status == 'filled')
+                            @elseif(($job->status ?? '') == 'filled')
                                 <span class="badge-premium badge-warning">Filled</span>
                             @else
                                 <span class="badge-premium badge-danger">Closed</span>
                             @endif
                             
-                            @if(!$job->is_active)
+                            @if(!($job->is_active ?? true))
                                 <span class="badge-premium" style="background: #64748b; color: #fff; margin-top: 5px; display: inline-block;">Hidden</span>
                             @endif
                         </td>
                         <td>
                             <div style="font-size: 0.85rem;">
-                                <strong>{{ $job->poster->name ?? 'Deleted User' }}</strong><br>
+                                <strong>{{ optional($job->poster)->name ?? 'Deleted User' }}</strong><br>
                                 <span style="color: #777;">ID: {{ $job->posted_by ?? 'N/A' }}</span>
                             </div>
                         </td>
                         <td>
                             <div style="display: flex; gap: 8px;">
-                                <form action="{{ route('admin.jobs.toggle', $job->id) }}" method="POST">
+                                <form action="{{ route('admin.jobs.toggle', $job->id ?? 0) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="edit-btn" style="background: {{ $job->is_active ? '#e0f2fe' : '#dcfce7' }}; color: {{ $job->is_active ? '#0369a1' : '#15803d' }}; border: 1px solid {{ $job->is_active ? '#bae6fd' : '#bbf7d0' }};">
-                                        <i class="fas {{ $job->is_active ? 'fa-eye-slash' : 'fa-eye' }}"></i> {{ $job->is_active ? 'Hide' : 'Show' }}
+                                    <button type="submit" class="edit-btn" style="background: {{ ($job->is_active ?? true) ? '#e0f2fe' : '#dcfce7' }}; color: {{ ($job->is_active ?? true) ? '#0369a1' : '#15803d' }}; border: 1px solid {{ ($job->is_active ?? true) ? '#bae6fd' : '#bbf7d0' }};">
+                                        <i class="fas {{ ($job->is_active ?? true) ? 'fa-eye-slash' : 'fa-eye' }}"></i> {{ ($job->is_active ?? true) ? 'Hide' : 'Show' }}
                                     </button>
                                 </form>
-                                <form action="{{ route('admin.jobs.delete', $job->id) }}" method="POST" onsubmit="return confirm('Permanent delete this job vacancy?')">
+                                <form action="{{ route('admin.jobs.delete', $job->id ?? 0) }}" method="POST" onsubmit="return confirm('Permanent delete this job vacancy?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn">

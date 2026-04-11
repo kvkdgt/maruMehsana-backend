@@ -59,15 +59,19 @@
                         </td>
                         <td>
                             <div style="max-width: 300px;">
-                                @foreach($job->reports->take(3) as $report)
-                                    <div style="margin-bottom: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #e74c3c;">
-                                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #c0392b;">{{ str_replace('_', ' ', $report->reason) }}</span>
-                                        <p style="font-size: 0.8rem; margin: 2px 0; color: #555;">{{ $report->description }}</p>
-                                        <span style="font-size: 0.7rem; color: #999;">By: {{ $report->reporter->name ?? 'User #'.($report->reported_by ?? '?') }}</span>
-                                    </div>
-                                @endforeach
-                                @if($job->reports_count > 3)
-                                    <span style="font-size: 0.8rem; color: #777; font-style: italic;">+ {{ $job->reports_count - 3 }} more reports...</span>
+                                @if(isset($job->reports) && count($job->reports) > 0)
+                                    @foreach($job->reports->take(3) as $report)
+                                        <div style="margin-bottom: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; border-left: 3px solid #e74c3c;">
+                                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #c0392b;">{{ str_replace('_', ' ', $report->reason ?? 'Spam') }}</span>
+                                            <p style="font-size: 0.8rem; margin: 2px 0; color: #555;">{{ $report->description ?? 'No description' }}</p>
+                                            <span style="font-size: 0.7rem; color: #999;">By: {{ optional($report->reporter)->name ?? 'User #'.($report->reported_by ?? '?') }}</span>
+                                        </div>
+                                    @endforeach
+                                    @if(($job->reports_count ?? 0) > 3)
+                                        <span style="font-size: 0.8rem; color: #777; font-style: italic;">+ {{ ($job->reports_count ?? 0) - 3 }} more reports...</span>
+                                    @endif
+                                @else
+                                    <span style="font-size: 0.8rem; color: #999;">No detailed report logs</span>
                                 @endif
                             </div>
                         </td>
