@@ -38,4 +38,11 @@ class ShareController extends Controller
         return view('share.news', compact('newsId', 'playStoreUrl', 'appDeepLink'));
     }
 
+    public function job($jobId)
+    {
+        $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
+        $appDeepLink = "marumehsana://job/{$jobId}";
+        
+        return view('share.job', compact('jobId', 'playStoreUrl', 'appDeepLink'));
+    }
 }

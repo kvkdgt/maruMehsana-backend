@@ -30,6 +30,7 @@ Route::get('/', [App\Http\Controllers\LandingPageController::class, 'index']);
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);
+Route::get('/job/{jobId}', [ShareController::class, 'job']);
 
 
 
