@@ -217,4 +217,19 @@ class UserController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'All read notifications cleared']);
     }
+
+    public function getUnreadNotificationCount(Request $request)
+    {
+        $userId = $request->user_id;
+        if (!$userId) return response()->json(['error' => 'User ID required'], 400);
+
+        $count = \App\Models\UserNotificationStatus::where('app_user_id', $userId)
+            ->where('is_read', 0)
+            ->count();
+
+        return response()->json([
+            'status' => 'success',
+            'unread_count' => $count
+        ]);
+    }
 }
