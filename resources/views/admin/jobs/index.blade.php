@@ -3,6 +3,7 @@
 @section('title', 'Job Vacancies')
 
 @section('content')
+<link rel="stylesheet" href="{{ URL::asset('assets/css/admin/pagination.css') }}">
 <div class="jobs-container">
     <div class="header-container">
         <div>
@@ -123,8 +124,8 @@
                 @endif
             </tbody>
         </table>
-        <div style="padding: 20px;">
-            {{ $jobs->appends(request()->query())->links() }}
+        <div class="pagination-container">
+            {{ $jobs->appends(request()->query())->links('vendor.pagination.custom') }}
         </div>
     </div>
 </div>
