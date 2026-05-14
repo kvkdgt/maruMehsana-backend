@@ -126,6 +126,10 @@ Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->
     Route::delete('/admin/jobs/delete/{id}', [AdminController::class, 'deleteJob'])->name('admin.jobs.delete');
     Route::post('/admin/jobs/toggle/{id}', [AdminController::class, 'toggleJobStatus'])->name('admin.jobs.toggle');
 
+    // AdMob Settings Route
+    Route::get('/admin/ad-settings', [\App\Http\Controllers\Admin\AdSettingController::class, 'index'])->name('admin.ad-settings');
+    Route::post('/admin/ad-settings/update', [\App\Http\Controllers\Admin\AdSettingController::class, 'update'])->name('admin.ad-settings.update');
+
 });
 Route::prefix('agency')->name('agency.')->group(function () {
 

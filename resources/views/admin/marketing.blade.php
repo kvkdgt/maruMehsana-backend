@@ -62,10 +62,26 @@
                     <p class="card-description">Design eye-catching banner advertisements and promotions to boost conversion rates.</p>
                     <div class="card-meta">
                         <span class="meta-stat"><i class="fas fa-image"></i> {{$activeBannerCount}} active</span>
-                        <!-- <span class="meta-stat"><i class="fas fa-chart-line"></i> 3.2% CTR</span> -->
                     </div>
                     <a href="marketing/banner-ads" class="card-btn">
                         Manage Banner Ads <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- AdMob Integration Tool -->
+            <div class="tool-card admob-card">
+                <div class="card-icon" style="background: linear-gradient(135deg, #4285F4, #34A853);">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">AdMob Settings</h3>
+                    <p class="card-description">Configure AdMob IDs and toggle reward/banner placements across the mobile application.</p>
+                    <div class="card-meta">
+                        <span class="meta-stat"><i class="fas fa-cog"></i> {{$adSettingsCount}} placements</span>
+                    </div>
+                    <a href="{{ route('admin.ad-settings') }}" class="card-btn">
+                        Manage AdMob <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>

@@ -177,6 +177,79 @@ class QuizController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────
+    //  API: POST /api/quiz/reset-attempt
+    // ─────────────────────────────────────────────────────────────────────
+
+    public function resetAttempt(Request $request)
+    {
+        try {
+            $user = $this->resolveLoggedInUser($request);
+
+            if (!$user) {
+                return response()->json([
+                    'status'  => 'unauthorized',
+                    'message' => 'Only registered users can reset their quiz attempt.',
+                ], 401);
+            }
+
+            $today = now()->toDateString();
+            $attempt = QuizAttempt::where('app_user_id', $user->id)
+                ->whereDate('quiz_date', $today)
+                ->first();
+
+            if ($attempt) {
+                $attempt->delete();
+                return response()->json(['status' => 'success', 'message' => 'Attempt reset! You can now play again.']);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'No attempt found to reset.'], 404);
+
+        } catch (\Throwable $e) {
+            Log::error('Quiz reset error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong.'], 500);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    //  API: POST /api/quiz/double-points
+    // ─────────────────────────────────────────────────────────────────────
+
+    public function doublePoints(Request $request)
+    {
+        try {
+            $user = $this->resolveLoggedInUser($request);
+
+            if (!$user) {
+                return response()->json([
+                    'status'  => 'unauthorized',
+                    'message' => 'Only registered users can double points.',
+                ], 401);
+            }
+
+            $today = now()->toDateString();
+            $attempt = QuizAttempt::where('app_user_id', $user->id)
+                ->whereDate('quiz_date', $today)
+                ->first();
+
+            if ($attempt && $attempt->is_correct) {
+                // Prevent infinite doubling by checking if reasonably high
+                if ($attempt->score > 200) {
+                     return response()->json(['status' => 'error', 'message' => 'Points already doubled.'], 400);
+                }
+                $attempt->score = $attempt->score * 2;
+                $attempt->save();
+                return response()->json(['status' => 'success', 'message' => 'Points doubled successfully!', 'new_score' => $attempt->score]);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'Cannot double points on an invalid or incorrect attempt.'], 400);
+
+        } catch (\Throwable $e) {
+            Log::error('Quiz double points error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong.'], 500);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
     //  API: GET /api/quiz/stats?user_id=xxx
     // ─────────────────────────────────────────────────────────────────────
 

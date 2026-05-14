@@ -32,9 +32,9 @@ class AdminController extends Controller
     {
         $scheduledCount = Notification::where('scheduled_at', '>', now())->count();
         $activeBannerCount = \App\Models\BannerAd::where('status', 1)->count();
+        $adSettingsCount = \App\Models\AdSetting::count();
 
-
-        return view('admin.marketing',compact('scheduledCount','activeBannerCount'));
+        return view('admin.marketing', compact('scheduledCount', 'activeBannerCount', 'adSettingsCount'));
     }
 
     public function login(Request $request)

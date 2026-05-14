@@ -64,6 +64,9 @@ Route::get('/banner-ads', [BannerAdController::class, 'getActiveBanners']);
 Route::post('/banner-ads/{id}/increment-touch', [BannerAdController::class, 'incrementTouch']);
 Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
 
+// AdMob App Settings
+Route::get('/ad-settings', [\App\Http\Controllers\Api\AdSettingController::class, 'index']);
+
 // Business Reviews
 Route::get('/businesses/{id}/reviews', [BusinessReviewController::class, 'getBusinessReviews']);
 Route::post('/reviews', [BusinessReviewController::class, 'store']);
@@ -85,6 +88,8 @@ Route::get('/share/news/{id}', [ShareImageController::class, 'shareNews']);
 Route::prefix('quiz')->group(function () {
     Route::get('/today',       [QuizController::class, 'today']);
     Route::post('/submit',     [QuizController::class, 'submit']);
+    Route::post('/reset-attempt', [QuizController::class, 'resetAttempt']);
+    Route::post('/double-points', [QuizController::class, 'doublePoints']);
     Route::get('/stats',       [QuizController::class, 'stats']);
     Route::get('/leaderboard', [QuizController::class, 'leaderboard']);
 });
