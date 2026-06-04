@@ -197,7 +197,9 @@ class AdminController extends Controller
         $categoryId = $request->get('category_id');
         
         // Build the query
-        $businessesQuery = Business::with('category');
+        $businessesQuery = Business::with('category')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating');
     
         // Apply search filter
         if ($search) {

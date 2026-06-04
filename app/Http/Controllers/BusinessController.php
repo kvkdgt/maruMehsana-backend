@@ -71,6 +71,25 @@ class BusinessController extends Controller
 
         // return redirect()->route('admin.businesses')->with('success', 'Business deleted successfully!');
     }
+
+    // Admin detail page for a single business
+    public function show($id)
+    {
+        $business = Business::with([
+            'category',
+            'businessImages',
+            'creator',
+            'updater',
+            'reviews' => function ($query) {
+                $query->with('user:id,name')->orderBy('created_at', 'desc');
+            },
+        ])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->findOrFail($id);
+
+        return view('admin.business-detail', compact('business'));
+    }
     public function destroy($id)
     {
         $business = Business::findOrFail($id);

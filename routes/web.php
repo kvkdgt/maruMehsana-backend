@@ -53,6 +53,7 @@ Route::middleware(['is_admin'])->group(function () {
     Route::get('/admin/businesses/create', [BusinessController::class, 'createView'])->name('business.create');
     Route::post('/admin/businesses/store', [BusinessController::class, 'store'])->name('business.store');
     Route::delete('admin/businesses/delete/{id}', [BusinessController::class, 'destroy'])->name('business.delete');
+    Route::get('admin/businesses/view/{id}', [BusinessController::class, 'show'])->name('business.show');
     Route::get('admin/businesses/edit/{id}', [BusinessController::class, 'getBusinessById'])->name('business.edit');
     Route::delete('/admin/business-image/{id}', [BusinessController::class, 'deleteImage'])->name('business.image.delete');
     Route::post('/admin/businesses/update', [BusinessController::class, 'update'])->name('business.update');

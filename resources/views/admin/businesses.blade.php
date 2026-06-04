@@ -70,6 +70,8 @@
           <th>Business Info</th>
           <th>Category</th>
           <th>Visitors</th>
+          <th>Avg. Rating</th>
+          <th>Total Reviews</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -87,7 +89,7 @@
                     </div>
                 @endif
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: 600; color: #2c3e50;">{{ $business->name }}</span>
+                    <a href="{{ route('business.show', $business->id) }}" style="font-weight: 600; color: #2c3e50; text-decoration: none;">{{ $business->name }}</a>
                     <span style="font-size: 0.8rem; color: #777;">{{ Str::limit($business->description, 50) }}</span>
                 </div>
             </div>
@@ -99,6 +101,18 @@
             <div style="display: flex; align-items: center; gap: 5px;">
                 <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
                 <span style="font-weight: 500;">{{ number_format($business->visitors) }}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-star" style="color: #f1c40f; font-size: 0.8rem;"></i>
+                <span style="font-weight: 500;">{{ $business->reviews_avg_rating ? number_format($business->reviews_avg_rating, 1) : '0.0' }}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-comment-dots" style="color: #9b59b6; font-size: 0.8rem;"></i>
+                <span style="font-weight: 500;">{{ number_format($business->reviews_count) }}</span>
             </div>
           </td>
           <td>
