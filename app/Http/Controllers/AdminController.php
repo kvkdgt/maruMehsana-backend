@@ -195,12 +195,13 @@ class AdminController extends Controller
         $search = $request->get('search');
         $sortBy = $request->get('sort_by');
         $categoryId = $request->get('category_id');
-        
+        $minRating = $request->get('min_rating');
+
         // Build the query
         $businessesQuery = Business::with('category')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating');
-    
+
         // Apply search filter
         if ($search) {
             $businessesQuery->where(function($q) use ($search) {
@@ -215,7 +216,12 @@ class AdminController extends Controller
         if ($categoryId) {
             $businessesQuery->where('category_id', $categoryId);
         }
-        
+
+        // Apply minimum average-rating filter
+        if (is_numeric($minRating)) {
+            $businessesQuery->having('reviews_avg_rating', '>=', (float) $minRating);
+        }
+
         // Apply sorting
         if ($sortBy == 'highest') {
             $businessesQuery->orderBy('visitors', 'desc');
@@ -225,10 +231,18 @@ class AdminController extends Controller
             $businessesQuery->orderBy('created_at', 'desc');
         } elseif ($sortBy == 'oldest') {
             $businessesQuery->orderBy('created_at', 'asc');
+        } elseif ($sortBy == 'rating_high') {
+            $businessesQuery->orderByDesc('reviews_avg_rating');
+        } elseif ($sortBy == 'rating_low') {
+            $businessesQuery->orderBy('reviews_avg_rating', 'asc');
+        } elseif ($sortBy == 'reviews_high') {
+            $businessesQuery->orderByDesc('reviews_count');
+        } elseif ($sortBy == 'reviews_low') {
+            $businessesQuery->orderBy('reviews_count', 'asc');
         } else {
             $businessesQuery->orderBy('created_at', 'desc');
         }
-    
+
         $businesses = $businessesQuery->paginate(10);
         $categories = Category::all();
         return view("admin.businesses", compact('businesses', 'categories'));

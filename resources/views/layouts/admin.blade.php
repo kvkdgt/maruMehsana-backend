@@ -983,7 +983,7 @@
             <span>Facts</span>
         </a>
     </li>
-    <li class="@if(request()->is('admin/quiz')) active @endif">
+    <li class="@if(request()->is('admin/quiz*')) active @endif">
         <a href="{{ url('admin/quiz') }}">
             <i class="fas fa-brain"></i>
             <span>Daily Quiz</span>

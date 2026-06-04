@@ -37,12 +37,27 @@
         </div>
 
         <div class="filter-control">
+          <label>Min. Rating</label>
+          <select name="min_rating" class="filter-input">
+            <option value="">Any Rating</option>
+            <option value="4" {{ request()->min_rating == '4' ? 'selected' : '' }}>4★ &amp; above</option>
+            <option value="3" {{ request()->min_rating == '3' ? 'selected' : '' }}>3★ &amp; above</option>
+            <option value="2" {{ request()->min_rating == '2' ? 'selected' : '' }}>2★ &amp; above</option>
+            <option value="1" {{ request()->min_rating == '1' ? 'selected' : '' }}>1★ &amp; above</option>
+          </select>
+        </div>
+
+        <div class="filter-control">
           <label>Sort By</label>
           <select name="sort_by" class="filter-input">
             <option value="newest" {{ request()->sort_by == 'newest' ? 'selected' : '' }}>Newest First</option>
+            <option value="oldest" {{ request()->sort_by == 'oldest' ? 'selected' : '' }}>Oldest First</option>
             <option value="highest" {{ request()->sort_by == 'highest' ? 'selected' : '' }}>Most Visitors</option>
             <option value="lowest" {{ request()->sort_by == 'lowest' ? 'selected' : '' }}>Least Visitors</option>
-            <option value="oldest" {{ request()->sort_by == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+            <option value="rating_high" {{ request()->sort_by == 'rating_high' ? 'selected' : '' }}>Highest Rating</option>
+            <option value="rating_low" {{ request()->sort_by == 'rating_low' ? 'selected' : '' }}>Lowest Rating</option>
+            <option value="reviews_high" {{ request()->sort_by == 'reviews_high' ? 'selected' : '' }}>Most Reviews</option>
+            <option value="reviews_low" {{ request()->sort_by == 'reviews_low' ? 'selected' : '' }}>Least Reviews</option>
           </select>
         </div>
 

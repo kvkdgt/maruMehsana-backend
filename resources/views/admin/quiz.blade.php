@@ -199,11 +199,14 @@
             <h2>Daily Quiz Management</h2>
             <p>Engage your users with daily trivia about Mehsana city and culture.</p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-cancel" onclick="document.getElementById('importModal').classList.add('open')" style="background: #fff; border: 1px solid #ddd; height: 100%; padding: 10px 20px;">
+        <div style="display: flex; gap: 10px; align-items: stretch;">
+            <a href="{{ route('admin.quiz.analytics') }}" class="btn-cancel" style="background: #fff; border: 1px solid #ddd; padding: 0 20px; text-decoration: none; color: var(--primary-color); display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+            <button class="btn-cancel" onclick="document.getElementById('importModal').classList.add('open')" style="background: #fff; border: 1px solid #ddd; padding: 0 20px; display: inline-flex; align-items: center; gap: 8px;">
                 <i class="fas fa-file-import"></i> Import CSV
             </button>
-            <button class="btn-add-premium" id="openAdd">
+            <button class="btn-add-premium" id="openAdd" style="display: inline-flex; align-items: center; gap: 8px;">
                 <i class="fas fa-plus-circle"></i> Add Question
             </button>
         </div>

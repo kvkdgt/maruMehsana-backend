@@ -552,4 +552,92 @@ class QuizController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    //  ADMIN: GET /admin/quiz/analytics
+    //  Player engagement + leaderboards
+    // ─────────────────────────────────────────────────────────────────────
+    public function adminAnalytics(Request $request)
+    {
+        $today = now()->toDateString();
+
+        // Selected month for the month-wise leaderboard (defaults to current month)
+        $month = $request->input('month', now()->format('Y-m'));
+        try {
+            $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        } catch (\Exception $e) {
+            $monthStart = now()->startOfMonth();
+            $month = now()->format('Y-m');
+        }
+        $monthEnd = (clone $monthStart)->endOfMonth();
+
+        // ── Top-line stats ────────────────────────────────────────────────
+        $stats = [
+            'total_players'  => QuizAttempt::distinct('app_user_id')->count('app_user_id'),
+            'today_players'  => QuizAttempt::where('quiz_date', $today)->distinct('app_user_id')->count('app_user_id'),
+            'today_attempts' => QuizAttempt::where('quiz_date', $today)->count(),
+            'total_attempts' => QuizAttempt::count(),
+        ];
+
+        // ── Who answered TODAY ────────────────────────────────────────────
+        $todayPlayers = QuizAttempt::with(['user:id,name', 'question:id,question'])
+            ->where('quiz_date', $today)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // ── Daily activity (last 14 days) ─────────────────────────────────
+        $dailyActivity = QuizAttempt::select(
+                'quiz_date',
+                DB::raw('COUNT(DISTINCT app_user_id) as players'),
+                DB::raw('COUNT(*) as attempts'),
+                DB::raw('SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct')
+            )
+            ->where('quiz_date', '>=', now()->subDays(13)->toDateString())
+            ->groupBy('quiz_date')
+            ->orderByDesc('quiz_date')
+            ->get();
+
+        // ── Month-wise leaderboard ────────────────────────────────────────
+        $monthlyLeaderboard = QuizAttempt::select(
+                'app_user_id',
+                DB::raw('SUM(score) as total_score'),
+                DB::raw('COUNT(*) as total_attempts'),
+                DB::raw('SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_answers')
+            )
+            ->whereBetween('quiz_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->groupBy('app_user_id')
+            ->orderByDesc('total_score')
+            ->limit(20)
+            ->with('user:id,name')
+            ->get();
+
+        // ── Overall (all-time) leaderboard ────────────────────────────────
+        $overallLeaderboard = QuizAttempt::select(
+                'app_user_id',
+                DB::raw('SUM(score) as total_score'),
+                DB::raw('COUNT(*) as total_attempts'),
+                DB::raw('SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_answers')
+            )
+            ->groupBy('app_user_id')
+            ->orderByDesc('total_score')
+            ->limit(20)
+            ->with('user:id,name')
+            ->get();
+
+        // Months available for the filter dropdown (distinct months with attempts)
+        $availableMonths = QuizAttempt::select(DB::raw("DATE_FORMAT(quiz_date, '%Y-%m') as ym"))
+            ->distinct()
+            ->orderByDesc('ym')
+            ->pluck('ym');
+
+        return view('admin.quiz-analytics', compact(
+            'stats',
+            'todayPlayers',
+            'dailyActivity',
+            'monthlyLeaderboard',
+            'overallLeaderboard',
+            'availableMonths',
+            'month'
+        ));
+    }
 }

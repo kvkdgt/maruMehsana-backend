@@ -112,6 +112,7 @@ Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->
 
     // ── Daily Quiz Management ──────────────────────────────────────────────
     Route::get('/admin/quiz',                    [QuizController::class, 'adminIndex'])->name('admin.quiz');
+    Route::get('/admin/quiz/analytics',          [QuizController::class, 'adminAnalytics'])->name('admin.quiz.analytics');
     Route::post('/admin/quiz/store',             [QuizController::class, 'adminStore'])->name('admin.quiz.store');
     Route::post('/admin/quiz/update/{id}',       [QuizController::class, 'adminUpdate'])->name('admin.quiz.update');
     Route::post('/admin/quiz/toggle/{id}',       [QuizController::class, 'adminToggle'])->name('admin.quiz.toggle');
