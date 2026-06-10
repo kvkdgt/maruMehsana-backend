@@ -459,7 +459,9 @@ class AdminController extends Controller
     public function jobVacancies(Request $request) {
         $search = $request->get('search');
         $status = $request->get('status');
-        
+        $sortBy = $request->get('sort_by');
+        $minViews = $request->get('min_views');
+
         $query = JobVacancy::with('poster');
 
         if ($search) {
@@ -474,7 +476,23 @@ class AdminController extends Controller
             $query->where('status', $status);
         }
 
-        $jobs = $query->latest()->paginate(10);
+        // Minimum view-count filter
+        if (is_numeric($minViews)) {
+            $query->where('views_count', '>=', (int) $minViews);
+        }
+
+        // Sorting
+        if ($sortBy == 'views_high') {
+            $query->orderByDesc('views_count');
+        } elseif ($sortBy == 'views_low') {
+            $query->orderBy('views_count', 'asc');
+        } elseif ($sortBy == 'oldest') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        $jobs = $query->paginate(10)->appends($request->query());
         return view('admin.jobs.index', compact('jobs'));
     }
 

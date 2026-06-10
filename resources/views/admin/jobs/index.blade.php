@@ -34,6 +34,28 @@
                     </select>
                 </div>
 
+                <div class="filter-control">
+                    <label>Min. Views</label>
+                    <select name="min_views" class="filter-input">
+                        <option value="">Any Views</option>
+                        <option value="10" {{ request()->min_views == '10' ? 'selected' : '' }}>10+</option>
+                        <option value="50" {{ request()->min_views == '50' ? 'selected' : '' }}>50+</option>
+                        <option value="100" {{ request()->min_views == '100' ? 'selected' : '' }}>100+</option>
+                        <option value="500" {{ request()->min_views == '500' ? 'selected' : '' }}>500+</option>
+                        <option value="1000" {{ request()->min_views == '1000' ? 'selected' : '' }}>1000+</option>
+                    </select>
+                </div>
+
+                <div class="filter-control">
+                    <label>Sort By</label>
+                    <select name="sort_by" class="filter-input">
+                        <option value="newest" {{ request()->sort_by == 'newest' ? 'selected' : '' }}>Newest First</option>
+                        <option value="oldest" {{ request()->sort_by == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                        <option value="views_high" {{ request()->sort_by == 'views_high' ? 'selected' : '' }}>Most Viewed</option>
+                        <option value="views_low" {{ request()->sort_by == 'views_low' ? 'selected' : '' }}>Least Viewed</option>
+                    </select>
+                </div>
+
                 <div class="btn-group">
                     <button type="submit" class="filter-btn">Apply Filter</button>
                     <a href="{{ route('admin.jobs') }}" class="reset-btn">Reset</a>
@@ -57,6 +79,7 @@
                     <th>Job Information</th>
                     <th>Type</th>
                     <th>Status</th>
+                    <th>Views</th>
                     <th>Posted By</th>
                     <th>Actions</th>
                 </tr>
@@ -90,6 +113,12 @@
                             @endif
                         </td>
                         <td>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
+                                <span style="font-weight: 600;">{{ number_format($job->views_count ?? 0) }}</span>
+                            </div>
+                        </td>
+                        <td>
                             <div style="font-size: 0.85rem;">
                                 <strong>{{ optional($job->poster)->name ?? 'Deleted User' }}</strong><br>
                                 <span style="color: #777;">ID: {{ $job->posted_by ?? 'N/A' }}</span>
@@ -116,7 +145,7 @@
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
                             <i class="fas fa-briefcase" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
                             No job vacancies found.
                         </td>
