@@ -35,6 +35,7 @@ class JobVacancy extends Model
         'status',
         'is_active',
         'views_count',
+        'last_notified_views_milestone',
     ];
 
     protected $casts = [
@@ -44,6 +45,7 @@ class JobVacancy extends Model
         'vacancies_count' => 'integer',
         'views_count' => 'integer',
         'is_active' => 'integer',
+        'last_notified_views_milestone' => 'integer',
     ];
 
     // Relationships

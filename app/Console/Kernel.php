@@ -19,6 +19,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('notifications:send-random')->dailyAt('09:00')->withoutOverlapping()->runInBackground();
         $schedule->command('notifications:send-random')->dailyAt('13:00')->withoutOverlapping()->runInBackground();
         $schedule->command('notifications:send-random')->dailyAt('20:00')->withoutOverlapping()->runInBackground();
+
+        // Notify job posters when their job crosses a views milestone (10+, 30+, 50+, ...)
+        $schedule->command('jobs:notify-view-milestones')->everyTenMinutes()->withoutOverlapping()->runInBackground();
     }
 
     /**

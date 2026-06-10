@@ -33,6 +33,7 @@ class SendFcmNotificationJob implements ShouldQueue
 
     protected $businessId;
     protected $touristPlaceId;
+    protected $jobId;
 
     /**
      * Create a new job instance.
@@ -46,7 +47,8 @@ class SendFcmNotificationJob implements ShouldQueue
         ?int $newsId = null,
         ?string $newsSlug = null,
         ?int $businessId = null,
-        ?int $touristPlaceId = null
+        ?int $touristPlaceId = null,
+        ?int $jobId = null
     ) {
         $this->userId = $userId;
         $this->title = $title;
@@ -58,6 +60,7 @@ class SendFcmNotificationJob implements ShouldQueue
         $this->isNewsNotification = !is_null($newsId);
         $this->businessId = $businessId;
         $this->touristPlaceId = $touristPlaceId;
+        $this->jobId = $jobId;
     }
 
     /**
@@ -212,6 +215,16 @@ class SendFcmNotificationJob implements ShouldQueue
             $androidData["notification"]["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
             $apnsData["payload"]["type"] = "tourist_place";
             $apnsData["payload"]["tourist_place_id"] = (string)$this->touristPlaceId;
+        } elseif ($this->jobId) {
+            $customData = [
+                "type" => "job",
+                "job_id" => (string)$this->jobId,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+            $androidData["data"] = $customData;
+            $androidData["notification"]["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
+            $apnsData["payload"]["type"] = "job";
+            $apnsData["payload"]["job_id"] = (string)$this->jobId;
         }
 
         // Construct the full FCM message payload
@@ -242,6 +255,12 @@ class SendFcmNotificationJob implements ShouldQueue
              $data["message"]["data"] = [
                 "type" => "tourist_place",
                 "tourist_place_id" => (string)$this->touristPlaceId,
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ];
+        } elseif ($this->jobId) {
+             $data["message"]["data"] = [
+                "type" => "job",
+                "job_id" => (string)$this->jobId,
                 "click_action" => "FLUTTER_NOTIFICATION_CLICK"
             ];
         }
