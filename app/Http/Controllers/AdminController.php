@@ -81,10 +81,17 @@ class AdminController extends Controller
     $totalTouristVisitors = TouristPlace::sum('visitors');
     
     // App users statistics
-    $activeUsers = AppUser::where('is_login', true)->count();
+    $loggedInUsers = AppUser::where('is_login', true)->count();   // currently logged-in
+    $activeUsers = $loggedInUsers; // kept for backward compatibility
     $newUsersToday = AppUser::whereDate('created_at', today())->count();
     $recentUsers = AppUser::orderBy('created_at', 'desc')->take(5)->get();
-    
+
+    // Job vacancy statistics
+    $totalJobs = JobVacancy::count();
+    $activeJobs = JobVacancy::where('is_active', 1)->count();
+    $totalJobViews = (int) JobVacancy::sum('views_count');
+    $topJobs = JobVacancy::orderByDesc('views_count')->take(5)->get();
+
     // Business enquiries
     $pendingEnquiries = BusinessEnquiry::where('status', 'Pending')->count();
     $recentEnquiries = BusinessEnquiry::orderBy('created_at', 'desc')->take(3)->get();
@@ -123,6 +130,9 @@ class AdminController extends Controller
             'data' => $weeklyNotifications->pluck('count')->toArray(),
         ];
     
+    // NOTE: 'admin.dashboard' = new professional dashboard (created 2026-06-10).
+    // To revert to the classic dashboard, change the view name below to
+    // 'admin.dashboard-2026-06-10' (the backup of the old dashboard).
     return view('admin.dashboard', compact(
         'totalCategories',
         'totalBusinesses',
@@ -132,8 +142,13 @@ class AdminController extends Controller
         'totalBusinessVisitors',
         'totalTouristVisitors',
         'activeUsers',
+        'loggedInUsers',
         'newUsersToday',
         'recentUsers',
+        'totalJobs',
+        'activeJobs',
+        'totalJobViews',
+        'topJobs',
         'pendingEnquiries',
         'recentEnquiries',
         'activeBannerAds',
