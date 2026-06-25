@@ -18,6 +18,7 @@ use App\Models\Notification;
 use App\Models\NotificationLog;
 use App\Models\JobVacancy;
 use App\Models\JobReport;
+use App\Models\QuizAttempt;
 use Carbon\Carbon;
 
 
@@ -130,6 +131,49 @@ class AdminController extends Controller
             'data' => $weeklyNotifications->pluck('count')->toArray(),
         ];
     
+    // ── Quiz statistics ────────────────────────────────────────────────
+    $quizAttemptsToday   = QuizAttempt::whereDate('quiz_date', today())->count();
+    $quizPlayersToday    = QuizAttempt::whereDate('quiz_date', today())->distinct('app_user_id')->count('app_user_id');
+    $quizCorrectToday    = QuizAttempt::whereDate('quiz_date', today())->where('is_correct', true)->count();
+    $quizAccuracyToday   = $quizAttemptsToday > 0 ? round($quizCorrectToday / $quizAttemptsToday * 100) : 0;
+
+    // ── Logged-in vs Logged-out ratio ──────────────────────────────────
+    $loggedOutUsers   = max(0, ($totalAppUsers ?? 0) - ($loggedInUsers ?? 0));
+    $loggedInPercent  = ($totalAppUsers ?? 0) > 0 ? round($loggedInUsers / $totalAppUsers * 100) : 0;
+    $loggedOutPercent = ($totalAppUsers ?? 0) > 0 ? round($loggedOutUsers / $totalAppUsers * 100) : 0;
+
+    // ── New-user comparisons (day / week / month) ──────────────────────
+    // Helper: returns [current, previous, change%, direction] for a period.
+    $compare = function ($current, $previous) {
+        $change = $previous > 0
+            ? round((($current - $previous) / $previous) * 100, 1)
+            : ($current > 0 ? 100 : 0);
+        return [
+            'current'   => $current,
+            'previous'  => $previous,
+            'change'    => abs($change),
+            'direction' => $current >= $previous ? 'up' : 'down',
+        ];
+    };
+
+    // Day: today vs yesterday
+    $usersDayCompare = $compare(
+        AppUser::whereDate('created_at', today())->count(),
+        AppUser::whereDate('created_at', today()->copy()->subDay())->count()
+    );
+
+    // Week: this week vs last week
+    $usersWeekCompare = $compare(
+        AppUser::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        AppUser::whereBetween('created_at', [now()->copy()->subWeek()->startOfWeek(), now()->copy()->subWeek()->endOfWeek()])->count()
+    );
+
+    // Month: this month vs last month
+    $usersMonthCompare = $compare(
+        AppUser::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
+        AppUser::whereBetween('created_at', [now()->copy()->subMonth()->startOfMonth(), now()->copy()->subMonth()->endOfMonth()])->count()
+    );
+
     // NOTE: 'admin.dashboard' = new professional dashboard (created 2026-06-10).
     // To revert to the classic dashboard, change the view name below to
     // 'admin.dashboard-2026-06-10' (the backup of the old dashboard).
@@ -153,7 +197,10 @@ class AdminController extends Controller
         'recentEnquiries',
         'activeBannerAds',
         'randomFacts',
-        'notificationStats', 'recentNotifications', 'chartData'
+        'notificationStats', 'recentNotifications', 'chartData',
+        'quizAttemptsToday', 'quizPlayersToday', 'quizCorrectToday', 'quizAccuracyToday',
+        'loggedOutUsers', 'loggedInPercent', 'loggedOutPercent',
+        'usersDayCompare', 'usersWeekCompare', 'usersMonthCompare'
     ));
 }
 

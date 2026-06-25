@@ -68,6 +68,13 @@
   .pd-kpi-lbl { font-size: 0.82rem; color: var(--muted); margin-top: 5px; }
   .pd-kpi-sub { font-size: 0.72rem; margin-top: 6px; font-weight: 600; }
   .pd-up { color: #16a34a; } .pd-mut { color: var(--muted); }
+  .pd-down { color: #dc2626; }
+
+  /* ── Comparison delta pill ──────────────── */
+  .pd-delta { display:inline-flex; align-items:center; gap:5px; font-size:0.74rem; font-weight:700; padding:4px 9px; border-radius:20px; }
+  .pd-delta.up { background:#e8f8f0; color:#15803d; }
+  .pd-delta.down { background:#fdecec; color:#b91c1c; }
+  .pd-cmp-prev { font-size:0.74rem; color:var(--muted); margin-top:8px; }
 
   /* ── Mini visitor stats ─────────────────── */
   .pd-vis { display: flex; align-items: center; justify-content: space-between; }
@@ -219,6 +226,106 @@
         <div class="h"><div class="v" style="color:#8b5cf6;">{{ number_format($totalAppUsers ?? 0) }}</div><div class="l">Total</div></div>
         <div class="h"><div class="v" style="color:#10b981;">{{ number_format($loggedInUsers ?? 0) }}</div><div class="l">Logged-in</div></div>
         <div class="h"><div class="v" style="color:#0ea5e9;">{{ number_format($newUsersToday ?? 0) }}</div><div class="l">New Today</div></div>
+      </div>
+    </div>
+  </div>
+
+  {{-- ── Quiz engagement ──────────────────── --}}
+  <div class="pd-sec-title">Quiz Engagement (Today)</div>
+  <div class="pd-grid pd-grid-4">
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#f59e0b;"><i class="fas fa-question-circle"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($quizAttemptsToday ?? 0) }}</div>
+        <div class="pd-kpi-lbl">Quiz Attempts Today</div>
+        <div class="pd-kpi-sub pd-mut">{{ now()->format('d M Y') }}</div>
+      </div>
+    </div>
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#8b5cf6;"><i class="fas fa-user-check"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($quizPlayersToday ?? 0) }}</div>
+        <div class="pd-kpi-lbl">Unique Players</div>
+        <div class="pd-kpi-sub pd-mut">attempted today's quiz</div>
+      </div>
+    </div>
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#10b981;"><i class="fas fa-check-double"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($quizCorrectToday ?? 0) }}</div>
+        <div class="pd-kpi-lbl">Correct Answers</div>
+        <div class="pd-kpi-sub pd-up">{{ $quizAccuracyToday ?? 0 }}% accuracy</div>
+      </div>
+    </div>
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#0ea5e9;"><i class="fas fa-bullseye"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ $quizAccuracyToday ?? 0 }}%</div>
+        <div class="pd-kpi-lbl">Accuracy Rate</div>
+        <div class="pd-kpi-sub pd-mut">correct / attempts</div>
+      </div>
+    </div>
+  </div>
+
+  {{-- ── User growth comparison ───────────── --}}
+  <div class="pd-sec-title">New User Growth</div>
+  <div class="pd-grid pd-grid-3">
+    @php
+      $cmpCards = [
+        ['title' => 'vs Yesterday', 'icon' => 'fa-calendar-day', 'color' => '#3b82f6', 'data' => $usersDayCompare ?? null, 'prevLabel' => 'yesterday'],
+        ['title' => 'vs Last Week',  'icon' => 'fa-calendar-week','color' => '#F2652D', 'data' => $usersWeekCompare ?? null, 'prevLabel' => 'last week'],
+        ['title' => 'vs Last Month', 'icon' => 'fa-calendar-alt', 'color' => '#8b5cf6', 'data' => $usersMonthCompare ?? null, 'prevLabel' => 'last month'],
+      ];
+    @endphp
+    @foreach($cmpCards as $c)
+      @php $d = $c['data'] ?? ['current'=>0,'previous'=>0,'change'=>0,'direction'=>'up']; @endphp
+      <div class="pd-card">
+        <div class="pd-panel-head">
+          <h3>{{ $c['title'] }}</h3>
+          <span class="pd-delta {{ $d['direction'] }}">
+            <i class="fas fa-arrow-{{ $d['direction'] === 'up' ? 'up' : 'down' }}"></i> {{ $d['change'] }}%
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="pd-kpi-icon" style="background:{{ $c['color'] }};"><i class="fas {{ $c['icon'] }}"></i></div>
+          <div>
+            <div class="pd-kpi-val">{{ number_format($d['current']) }}</div>
+            <div class="pd-kpi-lbl">new users</div>
+          </div>
+        </div>
+        <div class="pd-cmp-prev">
+          {{ number_format($d['previous']) }} new users {{ $c['prevLabel'] }}
+        </div>
+      </div>
+    @endforeach
+  </div>
+
+  {{-- ── Logged-in vs Logged-out ──────────── --}}
+  <div class="pd-sec-title">Logged-in vs Logged-out Users</div>
+  <div class="pd-grid pd-grid-2">
+    <div class="pd-card">
+      <div class="pd-panel-head"><h3>Session Ratio</h3>
+        <span class="pd-badge default">{{ $loggedInPercent ?? 0 }}% online</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px;">
+        <span><i class="fas fa-circle" style="color:#10b981;font-size:0.6rem;"></i> Logged-in: <strong>{{ number_format($loggedInUsers ?? 0) }}</strong> ({{ $loggedInPercent ?? 0 }}%)</span>
+        <span><i class="fas fa-circle" style="color:#94a3b8;font-size:0.6rem;"></i> Logged-out: <strong>{{ number_format($loggedOutUsers ?? 0) }}</strong> ({{ $loggedOutPercent ?? 0 }}%)</span>
+      </div>
+      <div style="display:flex;height:16px;border-radius:10px;overflow:hidden;background:#eef2f7;">
+        <div style="height:100%;width:{{ $loggedInPercent ?? 0 }}%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
+        <div style="height:100%;width:{{ $loggedOutPercent ?? 0 }}%;background:linear-gradient(90deg,#94a3b8,#cbd5e1);"></div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-top:10px;">
+        {{ number_format($loggedInUsers ?? 0) }} logged-in vs {{ number_format($loggedOutUsers ?? 0) }} logged-out, out of {{ number_format($totalAppUsers ?? 0) }} total users.
+      </div>
+    </div>
+
+    <div class="pd-card">
+      <div class="pd-panel-head"><h3>Breakdown</h3></div>
+      <div class="pd-health">
+        <div class="h"><div class="v" style="color:#10b981;">{{ number_format($loggedInUsers ?? 0) }}</div><div class="l">Logged-in</div></div>
+        <div class="h"><div class="v" style="color:#94a3b8;">{{ number_format($loggedOutUsers ?? 0) }}</div><div class="l">Logged-out</div></div>
+        <div class="h"><div class="v" style="color:#8b5cf6;">{{ number_format($totalAppUsers ?? 0) }}</div><div class="l">Total</div></div>
       </div>
     </div>
   </div>
