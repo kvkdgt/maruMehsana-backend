@@ -128,6 +128,93 @@ class UserController extends Controller
         return response()->json(['message' => 'Login successful', 'user' => $user, 'status' => 200]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────
+    //  GET /api/user/profile?user_id=xxx  — fetch the latest profile
+    // ─────────────────────────────────────────────────────────────────────
+    public function profile(Request $request)
+    {
+        $userId = $request->user_id;
+        if (!$userId) {
+            return response()->json(['error' => 'user_id is required'], 422);
+        }
+
+        $user = AppUser::find($userId);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return response()->json(['user' => $user, 'status' => 200]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    //  POST /api/user/update-profile  (multipart)
+    //  Fields: user_id, name, phone (nullable), profile_picture (image, nullable)
+    // ─────────────────────────────────────────────────────────────────────
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id'         => 'required|integer',
+            'name'            => 'required|string|max:255',
+            'phone'           => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $user = AppUser::find($request->user_id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $user->name  = $request->name;
+        $user->phone = $request->phone;
+
+        if ($request->hasFile('profile_picture')) {
+            // Remove the previous picture if present
+            if ($user->profile_picture && \Storage::exists('public/' . $user->profile_picture)) {
+                \Storage::delete('public/' . $user->profile_picture);
+            }
+            $user->profile_picture = $request->file('profile_picture')->store('user_profiles', 'public');
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'Profile updated successfully', 'user' => $user, 'status' => 200]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    //  POST /api/user/change-password
+    //  Fields: user_id, current_password, new_password
+    // ─────────────────────────────────────────────────────────────────────
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id'          => 'required|integer',
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $user = AppUser::find($request->user_id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        if (!$user->password || !\Hash::check($request->current_password, $user->password)) {
+            return response()->json(['error' => 'Current password is incorrect'], 401);
+        }
+
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully', 'status' => 200]);
+    }
+
     public function upgradeGuest(Request $request)
     {
         $validator = Validator::make($request->all(), [

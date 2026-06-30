@@ -16,7 +16,9 @@ class AppUser extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'profile_picture',
         'fcm_tokens',
         'is_login',
     ];
