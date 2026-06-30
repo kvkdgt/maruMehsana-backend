@@ -146,13 +146,25 @@ class BusinessController extends Controller
             'business_id' => 'required|integer|exists:businesses,id',
         ]);
 
-        $business = Business::with(['category:id,name', 'businessImages'])->find($request->business_id);
+        $business = Business::with([
+                'category:id,name',
+                'businessImages',
+                'reviews' => function ($q) {
+                    $q->with('user:id,name,profile_picture')->orderByDesc('created_at');
+                },
+            ])
+            ->withCount('reviews')
+            ->find($request->business_id);
+
         if (!$business) {
             return response()->json(['status' => 'error', 'message' => 'Business not found'], 404);
         }
         if ((int) $business->owner_id !== (int) $request->user_id) {
             return response()->json(['status' => 'error', 'message' => 'You are not the owner of this business.'], 403);
         }
+
+        // Analytics
+        $business->avg_rating = round($business->reviews->avg('rating') ?? 0, 1);
 
         return response()->json(['status' => 'success', 'data' => $business]);
     }
