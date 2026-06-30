@@ -137,6 +137,63 @@ class BusinessController extends Controller
 
         return response()->json(['status' => 'success', 'data' => $businesses]);
     }
+
+    // API: owner's view of a single business they own (no visitor increment, ownership enforced)
+    public function ownedBusinessShow(Request $request)
+    {
+        $request->validate([
+            'user_id'     => 'required|integer',
+            'business_id' => 'required|integer|exists:businesses,id',
+        ]);
+
+        $business = Business::with(['category:id,name', 'businessImages'])->find($request->business_id);
+        if (!$business) {
+            return response()->json(['status' => 'error', 'message' => 'Business not found'], 404);
+        }
+        if ((int) $business->owner_id !== (int) $request->user_id) {
+            return response()->json(['status' => 'error', 'message' => 'You are not the owner of this business.'], 403);
+        }
+
+        return response()->json(['status' => 'success', 'data' => $business]);
+    }
+
+    // API: owner updates the editable fields of a business they own
+    public function updateOwnedBusiness(Request $request)
+    {
+        $request->validate([
+            'user_id'     => 'required|integer',
+            'business_id' => 'required|integer|exists:businesses,id',
+            'mobile'      => 'nullable|string|max:20',
+            'whatsapp'    => 'nullable|string|max:20',
+            'email'       => 'nullable|email|max:255',
+            'website'     => 'nullable|url|max:255',
+            'products'    => 'nullable|string',
+            'services'    => 'nullable|string',
+        ]);
+
+        $business = Business::find($request->business_id);
+        if (!$business) {
+            return response()->json(['status' => 'error', 'message' => 'Business not found'], 404);
+        }
+        if ((int) $business->owner_id !== (int) $request->user_id) {
+            return response()->json(['status' => 'error', 'message' => 'You are not allowed to edit this business.'], 403);
+        }
+
+        $business->update([
+            'mobile_no'   => $request->mobile,
+            'whatsapp_no' => $request->whatsapp,
+            'email_id'    => $request->email,
+            'website_url' => $request->website,
+            'products'    => $request->products,
+            'services'    => $request->services,
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Business updated successfully',
+            'data'    => $business->fresh(['category:id,name', 'businessImages']),
+        ]);
+    }
     public function destroy($id)
     {
         $business = Business::findOrFail($id);
