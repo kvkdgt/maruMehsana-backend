@@ -16,6 +16,7 @@ use App\Http\Controllers\BusinessReviewController;
 use App\Http\Controllers\TouristPlaceReviewController;
 use App\Http\Controllers\ShareImageController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\JobVacancyController;
 use App\Http\Controllers\AdminJobVacancyController;
 use Illuminate\Support\Facades\Log;
@@ -92,6 +93,14 @@ Route::prefix('quiz')->group(function () {
     Route::post('/double-points', [QuizController::class, 'doublePoints']);
     Route::get('/stats',       [QuizController::class, 'stats']);
     Route::get('/leaderboard', [QuizController::class, 'leaderboard']);
+});
+
+// Search History Routes (logged-in users only — enforced in controller)
+Route::prefix('search-history')->group(function () {
+    Route::get('/',        [SearchHistoryController::class, 'index']);
+    Route::post('/',       [SearchHistoryController::class, 'record']);
+    Route::delete('/clear', [SearchHistoryController::class, 'clear']);
+    Route::delete('/{id}', [SearchHistoryController::class, 'destroy'])->where('id', '[0-9]+');
 });
 
 // News API Routes for Mobile App
