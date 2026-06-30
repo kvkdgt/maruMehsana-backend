@@ -58,26 +58,40 @@
   </div>
 
   {{-- Contact / meta info --}}
-  <div style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px;">
-    <h4 style="margin:0 0 16px; color:#2c3e50;">Contact & Information</h4>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
-      <div><strong><i class="fas fa-phone" style="color:#3498db;"></i> Mobile:</strong> {{ $business->mobile_no ?: '—' }}</div>
-      <div><strong><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp:</strong> {{ $business->whatsapp_no ?: '—' }}</div>
-      <div><strong><i class="fas fa-envelope" style="color:#e74c3c;"></i> Email:</strong> {{ $business->email_id ?: '—' }}</div>
-      <div><strong><i class="fas fa-globe" style="color:#9b59b6;"></i> Website:</strong>
-        @if($business->website_url)
-          <a href="{{ $business->website_url }}" target="_blank">{{ $business->website_url }}</a>
-        @else — @endif
+  @php
+    $infoTile = function ($icon, $color, $label, $valueHtml) {
+        return '<div style="display:flex; align-items:flex-start; gap:14px; padding:16px; background:#f8f9fb; border:1px solid #eef1f5; border-radius:12px;">'
+            . '<div style="width:42px; height:42px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:' . $color . '1a;">'
+            . '<i class="' . $icon . '" style="color:' . $color . '; font-size:1.05rem;"></i></div>'
+            . '<div style="min-width:0;">'
+            . '<div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.6px; color:#9aa5b1; font-weight:700; margin-bottom:3px;">' . $label . '</div>'
+            . '<div style="font-size:0.95rem; color:#2c3e50; font-weight:600; word-break:break-word; line-height:1.45;">' . $valueHtml . '</div>'
+            . '</div></div>';
+    };
+    $dash = '<span style="color:#c3ccd6;">—</span>';
+  @endphp
+  <div style="background:#fff; border-radius:14px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px;">
+    <h4 style="margin:0 0 18px; color:#2c3e50; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-address-card" style="color:#3498db;"></i> Contact &amp; Information
+    </h4>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
+      {!! $infoTile('fas fa-phone', '#3498db', 'Mobile', $business->mobile_no ? e($business->mobile_no) : $dash) !!}
+      {!! $infoTile('fab fa-whatsapp', '#25D366', 'WhatsApp', $business->whatsapp_no ? e($business->whatsapp_no) : $dash) !!}
+      {!! $infoTile('fas fa-envelope', '#e74c3c', 'Email', $business->email_id ? '<a href="mailto:' . e($business->email_id) . '" style="color:#2c3e50; text-decoration:none;">' . e($business->email_id) . '</a>' : $dash) !!}
+      {!! $infoTile('fas fa-globe', '#9b59b6', 'Website', $business->website_url ? '<a href="' . e($business->website_url) . '" target="_blank" style="color:#9b59b6; text-decoration:none;">' . e($business->website_url) . '</a>' : $dash) !!}
+
+      <div style="grid-column:1/-1;">
+        {!! $infoTile('fas fa-box', '#f39c12', 'Products', $business->products ? nl2br(e($business->products)) : $dash) !!}
       </div>
-      <div style="grid-column:1/-1;"><strong><i class="fas fa-box" style="color:#f39c12;"></i> Products:</strong> {{ $business->products ?: '—' }}</div>
-      <div style="grid-column:1/-1;"><strong><i class="fas fa-concierge-bell" style="color:#1abc9c;"></i> Services:</strong> {{ $business->services ?: '—' }}</div>
-      <div style="grid-column:1/-1;"><strong><i class="fas fa-user-tie" style="color:#0077b6;"></i> Business Owner:</strong>
-        @if($business->owner)
-          {{ $business->owner->name }} <span style="color:#777;">({{ $business->owner->email ?: 'no email' }})</span>
-        @else — @endif
+      <div style="grid-column:1/-1;">
+        {!! $infoTile('fas fa-concierge-bell', '#1abc9c', 'Services', $business->services ? nl2br(e($business->services)) : $dash) !!}
       </div>
-      <div><strong><i class="fas fa-user" style="color:#777;"></i> Created By:</strong> {{ $business->creator->name ?? '—' }}</div>
-      <div><strong><i class="fas fa-calendar" style="color:#777;"></i> Created At:</strong> {{ $business->created_at?->format('d M Y, h:i A') }}</div>
+      <div style="grid-column:1/-1;">
+        {!! $infoTile('fas fa-user-tie', '#0077b6', 'Business Owner', $business->owner ? e($business->owner->name) . ' <span style="color:#9aa5b1; font-weight:500;">(' . e($business->owner->email ?: 'no email') . ')</span>' : $dash) !!}
+      </div>
+
+      {!! $infoTile('fas fa-user', '#7f8c9a', 'Created By', $business->creator->name ? e($business->creator->name) : $dash) !!}
+      {!! $infoTile('fas fa-calendar', '#7f8c9a', 'Created At', $business->created_at ? e($business->created_at->format('d M Y, h:i A')) : $dash) !!}
     </div>
   </div>
 
