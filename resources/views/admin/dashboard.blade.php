@@ -209,7 +209,7 @@
       </div>
       @php $pct = ($totalAppUsers ?? 0) > 0 ? min(100, ($loggedInUsers ?? 0) / $totalAppUsers * 100) : 0; @endphp
       <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px;">
-        <span><i class="fas fa-circle" style="color:#10b981;font-size:0.6rem;"></i> Logged-in: <strong>{{ number_format($loggedInUsers ?? 0) }}</strong></span>
+        <span><i class="fas fa-circle" style="color:#10b981;font-size:0.6rem;"></i> Logged-in: <strong>{{ number_format($loggedInUsers ?? 0) }}</strong> ({{ round($pct) }}%)</span>
         <span><i class="fas fa-circle" style="color:#e2e8f0;font-size:0.6rem;"></i> Total: <strong>{{ number_format($totalAppUsers ?? 0) }}</strong></span>
       </div>
       <div style="height:14px;background:#eef2f7;border-radius:10px;overflow:hidden;">
@@ -298,36 +298,6 @@
         </div>
       </div>
     @endforeach
-  </div>
-
-  {{-- ── Logged-in vs Logged-out ──────────── --}}
-  <div class="pd-sec-title">Logged-in vs Logged-out Users</div>
-  <div class="pd-grid pd-grid-2">
-    <div class="pd-card">
-      <div class="pd-panel-head"><h3>Session Ratio</h3>
-        <span class="pd-badge default">{{ $loggedInPercent ?? 0 }}% online</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px;">
-        <span><i class="fas fa-circle" style="color:#10b981;font-size:0.6rem;"></i> Logged-in: <strong>{{ number_format($loggedInUsers ?? 0) }}</strong> ({{ $loggedInPercent ?? 0 }}%)</span>
-        <span><i class="fas fa-circle" style="color:#94a3b8;font-size:0.6rem;"></i> Logged-out: <strong>{{ number_format($loggedOutUsers ?? 0) }}</strong> ({{ $loggedOutPercent ?? 0 }}%)</span>
-      </div>
-      <div style="display:flex;height:16px;border-radius:10px;overflow:hidden;background:#eef2f7;">
-        <div style="height:100%;width:{{ $loggedInPercent ?? 0 }}%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
-        <div style="height:100%;width:{{ $loggedOutPercent ?? 0 }}%;background:linear-gradient(90deg,#94a3b8,#cbd5e1);"></div>
-      </div>
-      <div style="font-size:0.78rem;color:var(--muted);margin-top:10px;">
-        {{ number_format($loggedInUsers ?? 0) }} logged-in vs {{ number_format($loggedOutUsers ?? 0) }} logged-out, out of {{ number_format($totalAppUsers ?? 0) }} total users.
-      </div>
-    </div>
-
-    <div class="pd-card">
-      <div class="pd-panel-head"><h3>Breakdown</h3></div>
-      <div class="pd-health">
-        <div class="h"><div class="v" style="color:#10b981;">{{ number_format($loggedInUsers ?? 0) }}</div><div class="l">Logged-in</div></div>
-        <div class="h"><div class="v" style="color:#94a3b8;">{{ number_format($loggedOutUsers ?? 0) }}</div><div class="l">Logged-out</div></div>
-        <div class="h"><div class="v" style="color:#8b5cf6;">{{ number_format($totalAppUsers ?? 0) }}</div><div class="l">Total</div></div>
-      </div>
-    </div>
   </div>
 
   {{-- ── Recent activity ──────────────────── --}}
