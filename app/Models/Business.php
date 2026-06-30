@@ -18,6 +18,9 @@ class Business extends Model
         'thumbnail',
         'category_id',
         'owner_id',
+        'delivery_status',
+        'delivery_requested_at',
+        'delivery_reject_reason',
         'visitors',
         'mobile_no',
         'whatsapp_no',
@@ -47,6 +50,16 @@ class Business extends Model
     public function owner()
     {
         return $this->belongsTo(AppUser::class, 'owner_id');
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function creator()

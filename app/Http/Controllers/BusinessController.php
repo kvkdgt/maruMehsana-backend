@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\Category;
 use App\Models\BusinessImages;
 use App\Models\AppUser;
+use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -136,6 +137,92 @@ class BusinessController extends Controller
             });
 
         return response()->json(['status' => 'success', 'data' => $businesses]);
+    }
+
+    // API: owner requests home-delivery access (requires owner to have a mobile number)
+    public function requestDelivery(Request $request)
+    {
+        $request->validate([
+            'user_id'     => 'required|integer',
+            'business_id' => 'required|integer|exists:businesses,id',
+        ]);
+
+        $business = Business::find($request->business_id);
+        if (!$business || (int) $business->owner_id !== (int) $request->user_id) {
+            return response()->json(['status' => 'error', 'message' => 'You are not the owner of this business.'], 403);
+        }
+
+        $user = AppUser::find($request->user_id);
+        if (!$user || empty($user->phone)) {
+            return response()->json([
+                'status'  => 'need_mobile',
+                'message' => 'Please add your mobile number in Edit Profile before requesting home delivery.',
+            ], 422);
+        }
+
+        if ($business->delivery_status === 'approved') {
+            return response()->json(['status' => 'error', 'message' => 'Home delivery is already enabled for this business.'], 422);
+        }
+        if ($business->delivery_status === 'pending') {
+            return response()->json(['status' => 'error', 'message' => 'Your delivery request is already pending review.'], 422);
+        }
+
+        $business->delivery_status = 'pending';
+        $business->delivery_requested_at = now();
+        $business->delivery_reject_reason = null;
+        $business->save();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Delivery request submitted. Our team will review it shortly.',
+            'data'    => $business,
+        ]);
+    }
+
+    // ADMIN (web): list delivery requests
+    public function adminDeliveryRequests(Request $request)
+    {
+        $status = $request->get('status');
+        $query = Business::with('owner:id,name,email,phone')->whereNotNull('delivery_status');
+        if ($status) {
+            $query->where('delivery_status', $status);
+        }
+        $requests = $query->orderByDesc('delivery_requested_at')->paginate(15);
+        return view('admin.delivery-requests', compact('requests'));
+    }
+
+    // ADMIN (web): approve / reject a delivery request
+    public function adminUpdateDeliveryStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status'        => 'required|in:approved,rejected',
+            'reject_reason' => 'nullable|string|max:255',
+        ]);
+
+        $business = Business::findOrFail($id);
+        $business->delivery_status = $request->status;
+        $business->delivery_reject_reason = $request->status === 'rejected' ? $request->reject_reason : null;
+        $business->save();
+
+        if ($business->owner_id) {
+            if ($request->status === 'approved') {
+                PushNotificationService::sendToUser(
+                    $business->owner_id,
+                    'Delivery Approved ✅',
+                    "\"{$business->name}\" can now accept orders. Start adding your products!",
+                    ['type' => 'delivery', 'business_id' => $business->id]
+                );
+            } else {
+                PushNotificationService::sendToUser(
+                    $business->owner_id,
+                    'Delivery Request Update',
+                    $request->reject_reason ?: "Your delivery request for \"{$business->name}\" was not approved.",
+                    ['type' => 'delivery', 'business_id' => $business->id]
+                );
+            }
+        }
+
+        return redirect()->back()->with('success', 'Delivery request ' . $request->status . '.');
     }
 
     // API: owner's view of a single business they own (no visitor increment, ownership enforced)

@@ -17,6 +17,8 @@ use App\Http\Controllers\TouristPlaceReviewController;
 use App\Http\Controllers\ShareImageController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\SearchHistoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\JobVacancyController;
 use App\Http\Controllers\AdminJobVacancyController;
 use Illuminate\Support\Facades\Log;
@@ -48,6 +50,27 @@ Route::get('/getBusinessById', [BusinessController::class, 'getBusinessByIdAPI']
 Route::get('/user/businesses', [BusinessController::class, 'ownedBusinesses']);
 Route::get('/user/businesses/show', [BusinessController::class, 'ownedBusinessShow']);
 Route::post('/user/businesses/update', [BusinessController::class, 'updateOwnedBusiness']);
+Route::post('/user/businesses/request-delivery', [BusinessController::class, 'requestDelivery']);
+
+// Products — owner management
+Route::get('/user/businesses/products', [ProductController::class, 'ownerProducts']);
+Route::post('/user/businesses/products', [ProductController::class, 'storeProduct']);
+Route::post('/user/businesses/products/update', [ProductController::class, 'updateProduct']);
+Route::post('/user/businesses/products/delete', [ProductController::class, 'deleteProduct']);
+
+// Products — public / shop
+Route::get('/businesses/{businessId}/products', [ProductController::class, 'businessProducts']);
+Route::get('/shop/products', [ProductController::class, 'shop']);
+
+// Orders — customer
+Route::post('/orders', [OrderController::class, 'placeOrder']);
+Route::get('/user/orders', [OrderController::class, 'myOrders']);
+Route::post('/orders/cancel', [OrderController::class, 'cancelOrder']);
+Route::get('/orders/{id}', [OrderController::class, 'orderDetail']);
+
+// Orders — owner
+Route::get('/user/orders/received', [OrderController::class, 'receivedOrders']);
+Route::post('/user/orders/update-status', [OrderController::class, 'updateOrderStatus']);
 
 Route::post('/user/store', [UserController::class, 'store']);
 Route::post('/user/signup', [UserController::class, 'signup']);
