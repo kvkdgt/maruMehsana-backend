@@ -71,6 +71,11 @@
       </div>
       <div style="grid-column:1/-1;"><strong><i class="fas fa-box" style="color:#f39c12;"></i> Products:</strong> {{ $business->products ?: '—' }}</div>
       <div style="grid-column:1/-1;"><strong><i class="fas fa-concierge-bell" style="color:#1abc9c;"></i> Services:</strong> {{ $business->services ?: '—' }}</div>
+      <div style="grid-column:1/-1;"><strong><i class="fas fa-user-tie" style="color:#0077b6;"></i> Business Owner:</strong>
+        @if($business->owner)
+          {{ $business->owner->name }} <span style="color:#777;">({{ $business->owner->email ?: 'no email' }})</span>
+        @else — @endif
+      </div>
       <div><strong><i class="fas fa-user" style="color:#777;"></i> Created By:</strong> {{ $business->creator->name ?? '—' }}</div>
       <div><strong><i class="fas fa-calendar" style="color:#777;"></i> Created At:</strong> {{ $business->created_at?->format('d M Y, h:i A') }}</div>
     </div>

@@ -88,6 +88,26 @@
             <div class="form-row">
                 <div class="form-column">
                     <div class="form-group">
+                        <label for="owner_search">Business Owner <small style="color:#94a3b8;">(optional)</small></label>
+                        <div style="position:relative;">
+                            <input type="text" id="owner_search" class="form-control" autocomplete="off"
+                                placeholder="Search a registered user by name or email..."
+                                onfocus="document.getElementById('owner_options').style.display='block'"
+                                onkeyup="filterOwners()">
+                            <input type="hidden" name="owner_id" id="owner_id" value="{{ old('owner_id', isset($business) ? $business->owner_id : '') }}">
+                            <div id="owner_options" style="display:none; position:absolute; left:0; right:0; top:100%; background:#fff; border:1px solid #e2e8f0; border-radius:8px; max-height:220px; overflow:auto; z-index:50; box-shadow:0 6px 18px rgba(0,0,0,0.08);">
+                                <div class="owner-option" data-id="" data-label="" style="padding:10px 14px; cursor:pointer;">— No owner —</div>
+                                @foreach($appUsers as $u)
+                                    <div class="owner-option" data-id="{{ $u->id }}" data-label="{{ $u->name }} ({{ $u->email }})" style="padding:10px 14px; cursor:pointer;">
+                                        {{ $u->name }} <small style="color:#777;">({{ $u->email }})</small>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <small style="display:block;color:#64748b;margin-top:4px;">Links this business to a registered app user shown as the owner.</small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="name">Mobile No.</label>
                         <input type="text" id="mobile" name="mobile" value="{{ isset($business) ? $business->mobile_no : '' }}" class="form-control" placeholder="Enter Mobile No.">
                     </div>
@@ -175,6 +195,45 @@
 </div>
 
 <script>
+    // ── Searchable "Business Owner" dropdown ──
+    function filterOwners() {
+        const q = document.getElementById('owner_search').value.toLowerCase();
+        document.querySelectorAll('#owner_options .owner-option').forEach(opt => {
+            const label = (opt.getAttribute('data-label') || '').toLowerCase();
+            opt.style.display = (opt.getAttribute('data-id') === '' || label.includes(q)) ? 'block' : 'none';
+        });
+        document.getElementById('owner_options').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const options = document.querySelectorAll('#owner_options .owner-option');
+        const search = document.getElementById('owner_search');
+        const hidden = document.getElementById('owner_id');
+        const box = document.getElementById('owner_options');
+        if (!search) return;
+
+        options.forEach(opt => {
+            opt.addEventListener('click', function () {
+                hidden.value = this.getAttribute('data-id');
+                search.value = this.getAttribute('data-label');
+                box.style.display = 'none';
+            });
+            opt.addEventListener('mouseenter', function () { this.style.background = '#f1f5f9'; });
+            opt.addEventListener('mouseleave', function () { this.style.background = '#fff'; });
+        });
+
+        // Pre-fill the search box from the current owner (edit / validation redirect)
+        if (hidden.value) {
+            const match = Array.from(options).find(o => o.getAttribute('data-id') === String(hidden.value));
+            if (match) search.value = match.getAttribute('data-label');
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!box.contains(e.target) && e.target !== search) box.style.display = 'none';
+        });
+    });
+
     function previewImage(event) {
         const file = event.target.files[0];
         const reader = new FileReader();

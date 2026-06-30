@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Business;
 use App\Models\Category;
 use App\Models\BusinessImages;
+use App\Models\AppUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,7 +19,8 @@ class BusinessController extends Controller
     public function createView()
     {
         $categories = Category::get();
-        return view('admin.business-form', compact('categories'));
+        $appUsers = AppUser::orderBy('name')->get(['id', 'name', 'email']);
+        return view('admin.business-form', compact('categories', 'appUsers'));
     }
 
     /**
@@ -46,6 +48,7 @@ class BusinessController extends Controller
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg', // Optional additional images
             'category_id' => 'required|integer|exists:categories,id',
+            'owner_id' => 'nullable|integer|exists:app_users,id',
             'mobile' => 'nullable|string',
             'whatsapp' => 'nullable|string',
             'website' => 'nullable|url|max:255', // Optional website link
@@ -58,6 +61,7 @@ class BusinessController extends Controller
             'description' => $request->description,
             'thumbnail' => $thumbnailPath,
             'category_id' => $request->category_id,
+            'owner_id' => $request->owner_id ?: null,
             'visitors' => 0, // Initially set to 0
             'mobile_no' => $request->mobile, // Optional
             'whatsapp_no' => $request->whatsapp, // Optional
@@ -81,9 +85,10 @@ class BusinessController extends Controller
     }
     public function getBusinessById($id)
     {
-        $business = Business::with('businessImages')->findOrFail($id);
+        $business = Business::with(['businessImages', 'owner'])->findOrFail($id);
         $categories = Category::get();
-        return view('admin.business-form', compact('categories', 'business'));
+        $appUsers = AppUser::orderBy('name')->get(['id', 'name', 'email']);
+        return view('admin.business-form', compact('categories', 'business', 'appUsers'));
 
         // return redirect()->route('admin.businesses')->with('success', 'Business deleted successfully!');
     }
@@ -96,6 +101,7 @@ class BusinessController extends Controller
             'businessImages',
             'creator',
             'updater',
+            'owner',
             'reviews' => function ($query) {
                 $query->with('user:id,name')->orderBy('created_at', 'desc');
             },
@@ -105,6 +111,31 @@ class BusinessController extends Controller
             ->findOrFail($id);
 
         return view('admin.business-detail', compact('business'));
+    }
+
+    // API: businesses owned by a given app user (for the app's "My Businesses")
+    public function ownedBusinesses(Request $request)
+    {
+        $userId = $request->input('user_id');
+        if (!$userId) {
+            return response()->json(['status' => 'error', 'message' => 'user_id is required'], 422);
+        }
+
+        $businesses = Business::with('category:id,name')
+            ->where('owner_id', $userId)
+            ->orderByDesc('created_at')
+            ->get(['id', 'name', 'thumbnail', 'category_id', 'visitors'])
+            ->map(function ($b) {
+                return [
+                    'id'        => $b->id,
+                    'name'      => $b->name,
+                    'thumbnail' => $b->thumbnail,
+                    'category'  => $b->category?->name,
+                    'visitors'  => $b->visitors,
+                ];
+            });
+
+        return response()->json(['status' => 'success', 'data' => $businesses]);
     }
     public function destroy($id)
     {
@@ -149,6 +180,7 @@ class BusinessController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg', // Optional thumbnail
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg', // Optional additional images
             'category_id' => 'required|integer|exists:categories,id',
+            'owner_id' => 'nullable|integer|exists:app_users,id',
             'mobile' => 'nullable|string',
             'whatsapp' => 'nullable|string',
             'website' => 'nullable|url|max:255', // Optional website link
@@ -162,6 +194,7 @@ class BusinessController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'category_id' => $request->category_id,
+            'owner_id' => $request->owner_id ?: null,
             'mobile_no' => $request->mobile, // Optional
             'whatsapp_no' => $request->whatsapp, // Optional
             'website_url' => $request->website, // Optional

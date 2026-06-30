@@ -17,6 +17,7 @@ class Business extends Model
         'description',
         'thumbnail',
         'category_id',
+        'owner_id',
         'visitors',
         'mobile_no',
         'whatsapp_no',
@@ -41,6 +42,11 @@ class Business extends Model
     public function reviews()
     {
         return $this->hasMany(BusinessReview::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(AppUser::class, 'owner_id');
     }
 
     public function creator()
