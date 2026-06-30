@@ -32,6 +32,10 @@ class Business extends Model
         'updated_by',
     ];
 
+    protected $casts = [
+        'delivery_requested_at' => 'datetime',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
