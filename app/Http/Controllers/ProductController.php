@@ -5,11 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Business;
 use App\Models\Product;
 use App\Models\ProductOption;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    private const MAX_IMAGES = 5;
+
+    // Sync the product's primary thumbnail to its first gallery image
+    private function syncPrimaryImage(Product $product): void
+    {
+        $first = $product->images()->orderBy('id')->first();
+        $product->image = $first ? $first->image : null;
+        $product->save();
+    }
+
     // ── Helper: resolve a business the given user owns ───────────────────
     private function ownedBusiness($userId, $businessId): ?Business
     {
@@ -45,7 +56,7 @@ class ProductController extends Controller
             return response()->json(['status' => 'error', 'message' => 'You are not the owner of this business.'], 403);
         }
 
-        $products = Product::with('options')->where('business_id', $business->id)->orderByDesc('created_at')->get();
+        $products = Product::with('options', 'images')->where('business_id', $business->id)->orderByDesc('created_at')->get();
 
         return response()->json([
             'status' => 'success',
@@ -63,7 +74,8 @@ class ProductController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'images'      => 'nullable|array|max:' . self::MAX_IMAGES,
+            'images.*'    => 'image|mimes:jpeg,png,jpg,webp',
         ]);
 
         $business = $this->ownedBusiness($request->user_id, $request->business_id);
@@ -80,10 +92,14 @@ class ProductController extends Controller
         $product->description  = $request->description;
         $product->price        = $request->price;
         $product->is_available = $request->boolean('is_available', true);
-        if ($request->hasFile('image')) {
-            $product->image = $request->file('image')->store('user_products', 'public');
-        }
         $product->save();
+
+        if ($request->hasFile('images')) {
+            foreach (array_slice($request->file('images'), 0, self::MAX_IMAGES) as $img) {
+                $product->images()->create(['image' => $img->store('user_products', 'public')]);
+            }
+        }
+        $this->syncPrimaryImage($product);
 
         foreach ($this->parseOptions($request) as $opt) {
             if (empty($opt['name'])) continue;
@@ -98,7 +114,7 @@ class ProductController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Product added successfully',
-            'data'    => $product->load('options'),
+            'data'    => $product->load('options', 'images'),
         ]);
     }
 
@@ -111,7 +127,8 @@ class ProductController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'images'      => 'nullable|array',
+            'images.*'    => 'image|mimes:jpeg,png,jpg,webp',
         ]);
 
         $product = Product::find($request->product_id);
@@ -124,13 +141,28 @@ class ProductController extends Controller
         $product->description  = $request->description;
         $product->price        = $request->price;
         $product->is_available = $request->boolean('is_available', true);
-        if ($request->hasFile('image')) {
-            if ($product->image && Storage::exists('public/' . $product->image)) {
-                Storage::delete('public/' . $product->image);
-            }
-            $product->image = $request->file('image')->store('user_products', 'public');
-        }
         $product->save();
+
+        // Images: keep the ones the app sent back, delete the rest, then add new files (cap at 5)
+        $keep = json_decode($request->input('keep_images', '[]'), true);
+        $keep = is_array($keep) ? array_map('intval', $keep) : [];
+        foreach ($product->images as $img) {
+            if (!in_array($img->id, $keep)) {
+                if ($img->image && Storage::exists('public/' . $img->image)) {
+                    Storage::delete('public/' . $img->image);
+                }
+                $img->delete();
+            }
+        }
+        $remaining = $product->images()->count();
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $img) {
+                if ($remaining >= self::MAX_IMAGES) break;
+                $product->images()->create(['image' => $img->store('user_products', 'public')]);
+                $remaining++;
+            }
+        }
+        $this->syncPrimaryImage($product);
 
         // Replace options
         $product->options()->delete();
@@ -147,7 +179,7 @@ class ProductController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Product updated successfully',
-            'data'    => $product->load('options'),
+            'data'    => $product->load('options', 'images'),
         ]);
     }
 
@@ -165,10 +197,15 @@ class ProductController extends Controller
             return response()->json(['status' => 'error', 'message' => 'You are not allowed to delete this product.'], 403);
         }
 
+        foreach ($product->images as $img) {
+            if ($img->image && Storage::exists('public/' . $img->image)) {
+                Storage::delete('public/' . $img->image);
+            }
+        }
         if ($product->image && Storage::exists('public/' . $product->image)) {
             Storage::delete('public/' . $product->image);
         }
-        $product->delete(); // options cascade
+        $product->delete(); // options + images cascade
 
         return response()->json(['status' => 'success', 'message' => 'Product deleted successfully']);
     }
@@ -185,7 +222,7 @@ class ProductController extends Controller
 
         $products = Product::with(['options' => function ($q) {
                 $q->where('is_available', true);
-            }])
+            }, 'images'])
             ->where('business_id', $business->id)
             ->where('is_available', true)
             ->orderByDesc('created_at')
@@ -206,7 +243,7 @@ class ProductController extends Controller
 
         $query = Product::with(['options' => function ($q) {
                 $q->where('is_available', true);
-            }, 'business:id,name,category_id,delivery_status'])
+            }, 'images', 'business:id,name,category_id,delivery_status'])
             ->where('is_available', true)
             ->whereHas('business', function ($q) {
                 $q->where('delivery_status', 'approved');

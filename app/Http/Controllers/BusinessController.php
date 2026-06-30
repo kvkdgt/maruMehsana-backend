@@ -104,7 +104,8 @@ class BusinessController extends Controller
             'creator',
             'updater',
             'owner',
-            'products.options',
+            'shopProducts.options',
+            'shopProducts.images',
             'reviews' => function ($query) {
                 $query->with('user:id,name')->orderBy('created_at', 'desc');
             },

@@ -21,6 +21,7 @@ class Business extends Model
         'delivery_status',
         'delivery_requested_at',
         'delivery_reject_reason',
+        'delivery_strikes',
         'visitors',
         'mobile_no',
         'whatsapp_no',
@@ -56,7 +57,9 @@ class Business extends Model
         return $this->belongsTo(AppUser::class, 'owner_id');
     }
 
-    public function products()
+    // NOTE: named shopProducts (not products) to avoid colliding with the
+    // existing `products` string column on the businesses table.
+    public function shopProducts()
     {
         return $this->hasMany(Product::class);
     }

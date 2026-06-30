@@ -133,7 +133,7 @@ class OrderController extends Controller
         if ($request->filter === 'on_the_way') {
             $query->whereIn('status', self::ON_THE_WAY);
         } elseif ($request->filter === 'completed') {
-            $query->whereIn('status', array_merge(self::COMPLETED, ['cancelled', 'rejected']));
+            $query->whereIn('status', array_merge(self::COMPLETED, ['cancelled', 'rejected', 'expired']));
         }
 
         return response()->json([
@@ -201,7 +201,7 @@ class OrderController extends Controller
         } elseif ($request->filter === 'active') {
             $query->whereIn('status', ['confirmed', 'dispatched']);
         } elseif ($request->filter === 'completed') {
-            $query->whereIn('status', ['delivered', 'cancelled', 'rejected']);
+            $query->whereIn('status', ['delivered', 'cancelled', 'rejected', 'expired']);
         }
 
         return response()->json([

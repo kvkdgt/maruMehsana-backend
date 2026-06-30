@@ -110,15 +110,15 @@
   @endif
 
   {{-- Products (delivery) --}}
-  @if($business->delivery_status === 'approved' || $business->products->count())
+  @if($business->delivery_status === 'approved' || $business->shopProducts->count())
   <div style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-      <h4 style="margin:0; color:#2c3e50;"><i class="fas fa-box-open" style="color:#f39c12;"></i> Products ({{ $business->products->count() }})</h4>
+      <h4 style="margin:0; color:#2c3e50;"><i class="fas fa-box-open" style="color:#f39c12;"></i> Products ({{ $business->shopProducts->count() }})</h4>
       @php $dmap = ['approved'=>['#166534','#dcfce7'],'pending'=>['#92400e','#fef3c7'],'rejected'=>['#991b1b','#fee2e2']]; [$dfg,$dbg] = $dmap[$business->delivery_status] ?? ['#475569','#f1f5f9']; @endphp
       <span style="padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; color:{{ $dfg }}; background:{{ $dbg }};">Delivery: {{ ucfirst($business->delivery_status ?? 'none') }}</span>
     </div>
 
-    @forelse($business->products as $product)
+    @forelse($business->shopProducts as $product)
       <div style="display:flex; gap:16px; padding:16px 0; border-top:1px solid #eef1f5; align-items:flex-start;">
         @if($product->image)
           <img src="{{ $product->image && \Illuminate\Support\Str::startsWith($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}" style="width:70px; height:70px; border-radius:10px; object-fit:cover; flex-shrink:0;">
@@ -132,6 +132,14 @@
           </div>
           @if($product->description)
             <div style="font-size:0.85rem; color:#777; margin-top:3px;">{{ $product->description }}</div>
+          @endif
+          @if($product->images->count())
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+              @foreach($product->images as $pimg)
+                @php $psrc = \Illuminate\Support\Str::startsWith($pimg->image, 'http') ? $pimg->image : asset('storage/' . $pimg->image); @endphp
+                <a href="{{ $psrc }}" target="_blank"><img src="{{ $psrc }}" style="width:46px; height:46px; border-radius:8px; object-fit:cover; border:1px solid #eef1f5;"></a>
+              @endforeach
+            </div>
           @endif
           <div style="margin-top:6px;">
             <span style="font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:12px; color:{{ $product->is_available ? '#166534':'#991b1b' }}; background:{{ $product->is_available ? '#dcfce7':'#fee2e2' }};">{{ $product->is_available ? 'Available' : 'Hidden' }}</span>
