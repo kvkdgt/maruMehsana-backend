@@ -99,8 +99,8 @@
 
 <script>
   function setStatus(id, status, reason) {
-    fetch(`/admin/delivery-requests/update/${id}`, {
-      method: 'PUT',
+    fetch(`{{ url('admin/delivery-requests/update') }}/${id}`, {
+      method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         'Content-Type': 'application/json',

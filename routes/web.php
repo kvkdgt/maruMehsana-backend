@@ -58,7 +58,7 @@ Route::middleware(['is_admin'])->group(function () {
     Route::delete('/admin/business-image/{id}', [BusinessController::class, 'deleteImage'])->name('business.image.delete');
     Route::post('/admin/businesses/update', [BusinessController::class, 'update'])->name('business.update');
     Route::get('/admin/delivery-requests', [BusinessController::class, 'adminDeliveryRequests'])->name('admin.delivery-requests');
-    Route::put('/admin/delivery-requests/update/{id}', [BusinessController::class, 'adminUpdateDeliveryStatus'])->name('admin.delivery-requests.update');
+    Route::post('/admin/delivery-requests/update/{id}', [BusinessController::class, 'adminUpdateDeliveryStatus'])->name('admin.delivery-requests.update');
 
 
     Route::get('/admin/facts', [AdminController::class, 'facts'])->name('admin.facts');
