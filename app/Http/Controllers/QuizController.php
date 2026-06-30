@@ -333,7 +333,9 @@ class QuizController extends Controller
                     'leaderboard' => $leaderboard->map(function ($item, $index) {
                         return [
                             'rank'            => $index + 1,
+                            'id'              => $item->app_user_id,
                             'name'            => $item->user?->name ?? 'Player',
+                            'profile_picture' => $item->user?->profile_picture,
                             'total_score'     => $item->total_score,
                             'total_attempts'  => $item->total_attempts,
                             'correct_answers' => $item->correct_answers,

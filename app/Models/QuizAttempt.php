@@ -75,7 +75,7 @@ class QuizAttempt extends Model
             ->groupBy('app_user_id')
             ->orderByDesc('total_score')
             ->limit(10)
-            ->with('user:id,name')
+            ->with('user:id,name,profile_picture')
             ->get();
     }
 }
