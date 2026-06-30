@@ -1055,6 +1055,12 @@
             <span>Business Enquiry</span>
         </a>
     </li>
+    <li class="@if(request()->is('admin/orders')) active @endif">
+        <a href="{{ url('admin/orders') }}">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Orders</span>
+        </a>
+    </li>
     <li class="@if(request()->is('admin/delivery-requests')) active @endif">
         <a href="{{ url('admin/delivery-requests') }}">
             <i class="fa-solid fa-truck"></i>

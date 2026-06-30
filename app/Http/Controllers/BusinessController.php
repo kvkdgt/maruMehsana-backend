@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\Category;
 use App\Models\BusinessImages;
 use App\Models\AppUser;
+use App\Models\Order;
 use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -103,6 +104,7 @@ class BusinessController extends Controller
             'creator',
             'updater',
             'owner',
+            'products.options',
             'reviews' => function ($query) {
                 $query->with('user:id,name')->orderBy('created_at', 'desc');
             },
@@ -252,6 +254,12 @@ class BusinessController extends Controller
 
         // Analytics
         $business->avg_rating = round($business->reviews->avg('rating') ?? 0, 1);
+
+        // Order analytics
+        $business->orders_total     = Order::where('business_id', $business->id)->count();
+        $business->orders_delivered = Order::where('business_id', $business->id)->where('status', 'delivered')->count();
+        $business->orders_active    = Order::where('business_id', $business->id)->whereIn('status', ['requested', 'confirmed', 'dispatched'])->count();
+        $business->orders_revenue   = Order::where('business_id', $business->id)->where('status', 'delivered')->sum('total_amount');
 
         return response()->json(['status' => 'success', 'data' => $business]);
     }

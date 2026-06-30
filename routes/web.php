@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BusinessEnquiryController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\TouristPlaceController;
@@ -57,6 +58,7 @@ Route::middleware(['is_admin'])->group(function () {
     Route::get('admin/businesses/edit/{id}', [BusinessController::class, 'getBusinessById'])->name('business.edit');
     Route::delete('/admin/business-image/{id}', [BusinessController::class, 'deleteImage'])->name('business.image.delete');
     Route::post('/admin/businesses/update', [BusinessController::class, 'update'])->name('business.update');
+    Route::get('/admin/orders', [OrderController::class, 'adminOrders'])->name('admin.orders');
     Route::get('/admin/delivery-requests', [BusinessController::class, 'adminDeliveryRequests'])->name('admin.delivery-requests');
     Route::post('/admin/delivery-requests/update/{id}', [BusinessController::class, 'adminUpdateDeliveryStatus'])->name('admin.delivery-requests.update');
 

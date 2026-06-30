@@ -261,4 +261,44 @@ class OrderController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Order status updated', 'data' => $order]);
     }
+
+    // ═════════════════════════ ADMIN (web) ═════════════════════════
+
+    public function adminOrders(Request $request)
+    {
+        $query = Order::with(['business:id,name', 'customer:id,name,phone'])->withCount('items');
+
+        if ($s = $request->get('search')) {
+            $query->where(function ($q) use ($s) {
+                $q->where('order_number', 'like', "%{$s}%")
+                  ->orWhere('customer_name', 'like', "%{$s}%")
+                  ->orWhere('customer_mobile', 'like', "%{$s}%")
+                  ->orWhereHas('business', function ($b) use ($s) {
+                      $b->where('name', 'like', "%{$s}%");
+                  });
+            });
+        }
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+        if ($request->get('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
+        }
+        if ($request->get('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $orders = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+
+        $stats = [
+            'total'     => Order::count(),
+            'requested' => Order::where('status', 'requested')->count(),
+            'active'    => Order::whereIn('status', ['confirmed', 'dispatched'])->count(),
+            'delivered' => Order::where('status', 'delivered')->count(),
+            'cancelled' => Order::whereIn('status', ['cancelled', 'rejected'])->count(),
+            'revenue'   => Order::where('status', 'delivered')->sum('total_amount'),
+        ];
+
+        return view('admin.orders', compact('orders', 'stats'));
+    }
 }
