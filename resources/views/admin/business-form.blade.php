@@ -8,7 +8,29 @@
 
 <div class="business-form-container">
 
-    <form action="{{isset($business) ? url('admin/businesses/update') : url('admin/businesses/store') }}" method="POST" enctype="multipart/form-data">
+    {{-- Flash / validation messages --}}
+    @if (session('error'))
+        <div style="background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if (session('success'))
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if ($errors->any())
+        <div style="background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+            <strong>Please fix the following:</strong>
+            <ul style="margin:8px 0 0;padding-left:20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form id="business-form" action="{{isset($business) ? url('admin/businesses/update') : url('admin/businesses/store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <!-- Basic Details Section -->
@@ -22,12 +44,12 @@
                         <input type="hidden" id="id" name="id" class="form-control" value="{{ isset($business) ? $business->id : '' }}" required>
 
                         <label for="name" class="required-label">Business Name</label>
-                        <input type="text" id="name" name="name" class="form-control" placeholder="Enter business name" value="{{ isset($business) ? $business->name : '' }}" required>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Enter business name" value="{{ old('name', isset($business) ? $business->name : '') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="description" class="required-label">Business Description</label>
-                        <textarea id="description" name="description" class="form-control" placeholder="Enter business description" rows="5" required>{{ isset($business) ? $business->description : '' }}</textarea>
+                        <textarea id="description" name="description" class="form-control" placeholder="Enter business description" rows="5" required>{{ old('description', isset($business) ? $business->description : '') }}</textarea>
                     </div>
                 </div>
 
@@ -37,7 +59,7 @@
                         <select id="category" name="category_id" class="form-control" required>
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ isset($business) && $business->category_id == $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" {{ (string) old('category_id', isset($business) ? $business->category_id : '') === (string) $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
                             </option>
                             @endforeach

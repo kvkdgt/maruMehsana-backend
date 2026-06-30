@@ -46,5 +46,19 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        // When the uploaded files exceed PHP's post_max_size, PHP drops the whole
+        // request before validation runs. Turn that hard crash into a friendly message.
+        $this->renderable(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            $limit = ini_get('post_max_size');
+            $message = "The images you tried to upload are too large (server limit is {$limit} per submit). "
+                . "Please choose smaller images or upload fewer images at a time.";
+
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $message], 413);
+            }
+
+            return redirect()->back()->with('error', $message);
+        });
     }
 }

@@ -21,21 +21,37 @@ class BusinessController extends Controller
         return view('admin.business-form', compact('categories'));
     }
 
+    /**
+     * Friendly, user-facing messages for thumbnail / image validation.
+     */
+    private function imageValidationMessages(): array
+    {
+        return [
+            'thumbnail.required' => 'Please select a thumbnail image.',
+            'thumbnail.image'    => 'The thumbnail must be an image file.',
+            'thumbnail.mimes'    => 'The thumbnail must be a JPG, PNG, GIF or SVG file.',
+            'thumbnail.max'      => 'The thumbnail is too large. Please use an image of :max KB (about 5 MB) or smaller.',
+            'images.*.image'     => 'Each business image must be a valid image file.',
+            'images.*.mimes'     => 'Each business image must be a JPG, PNG, GIF or SVG file.',
+            'images.*.max'       => 'One of the business images is too large. Each image must be :max KB (about 5 MB) or smaller — please remove or replace it.',
+        ];
+    }
+
     public function store(Request $request)
     {
 
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Optional additional images
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg', // Optional additional images
             'category_id' => 'required|integer|exists:categories,id',
             'mobile' => 'nullable|string',
             'whatsapp' => 'nullable|string',
             'website' => 'nullable|url|max:255', // Optional website link
             'email' => 'nullable|email|max:255',
             'products' => 'nullable|string',
-        ]);
+        ], $this->imageValidationMessages());
         $thumbnailPath = $request->file('thumbnail')->store('business_thumbnails', 'public');
         $business = Business::create([
             'name' => $request->name,
@@ -130,8 +146,8 @@ class BusinessController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional thumbnail
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional additional images
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg', // Optional thumbnail
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg', // Optional additional images
             'category_id' => 'required|integer|exists:categories,id',
             'mobile' => 'nullable|string',
             'whatsapp' => 'nullable|string',
@@ -139,7 +155,7 @@ class BusinessController extends Controller
             'email' => 'nullable|email|max:255',
             'services' => 'nullable|string',
             'products' => 'nullable|string',
-    ]);
+    ], $this->imageValidationMessages());
 
         // Update basic fields
         $business->update([
