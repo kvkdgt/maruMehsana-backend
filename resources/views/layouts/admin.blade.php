@@ -91,6 +91,33 @@
             margin-top: 10px;
         }
 
+        /* Scrollable menu list (logo stays fixed at top) */
+        .sidebar > ul {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+        }
+
+        .sidebar > ul::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar > ul::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar > ul::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+        }
+
+        .sidebar > ul::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
         .sidebar ul li {
             padding: 0;
             transition: var(--transition);
@@ -132,6 +159,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            overflow-x: auto;
             overflow-y: auto;
             position: relative;
         }
