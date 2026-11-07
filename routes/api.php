@@ -132,6 +132,10 @@ Route::prefix('search-history')->group(function () {
     Route::delete('/{id}', [SearchHistoryController::class, 'destroy'])->where('id', '[0-9]+');
 });
 
+// External "add news" API: public route, protected by the X-API-Key header.
+Route::post('/external/news', [\App\Http\Controllers\Api\ExternalNewsController::class, 'store'])
+    ->middleware(['news.api.key', 'throttle:30,1']);
+
 // News API Routes for Mobile App
 Route::prefix('news')->group(function () {
 

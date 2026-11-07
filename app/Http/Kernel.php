@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'is_admin' => \App\Http\Middleware\IsAdmin::class,
         'agency.auth' => \App\Http\Middleware\AgencyAuth::class,
+        'news.api.key' => \App\Http\Middleware\VerifyNewsApiKey::class,
 'agency.guest' => \App\Http\Middleware\RedirectIfAgencyAuthenticated::class,
 
     ];

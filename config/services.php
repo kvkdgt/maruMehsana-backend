@@ -31,4 +31,17 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    | External "add news" API (POST /api/external/news).
+    | The key is sent by callers in the X-API-Key header and checked against the
+    | SHA-256 hash below (or a plain NEWS_API_KEY in .env, if one is set).
+    */
+    'news_api' => [
+        // Optional plain key from .env (overrides nothing; either key style is accepted).
+        'key'             => env('NEWS_API_KEY'),
+        // Static key: only the SHA-256 hash is stored here, so the repository never contains the real key.
+        'key_sha256'      => env('NEWS_API_KEY_SHA256', 'bc86aa2226173b216d79a231c622a59ef3f17e300f2f6d00f2edc0de9b4cb16c'),
+        'agency_username' => env('NEWS_API_AGENCY_USERNAME', 'MaruMehsana'),
+    ],
+
 ];
