@@ -556,6 +556,80 @@ class QuizController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────
+    //  ADMIN: GET /admin/quiz/export
+    //  Exports filtered (or selected via ?ids=1,2,3) questions as CSV.
+    //  First 9 columns match the import template so the file can be re-imported.
+    // ─────────────────────────────────────────────────────────────────────
+    public function adminExport(Request $request)
+    {
+        $query = QuizQuestion::query();
+
+        if ($ids = $request->ids) {
+            $query->whereIn('id', array_filter(array_map('intval', explode(',', $ids))));
+        } else {
+            if ($s = $request->search) {
+                $query->where('question', 'like', "%{$s}%");
+            }
+            if ($c = $request->category) {
+                $query->where('category', $c);
+            }
+            if ($d = $request->difficulty) {
+                $query->where('difficulty', $d);
+            }
+        }
+
+        $questions = $query->withCount('attempts')
+            ->addSelect([
+                'correct_count' => QuizAttempt::selectRaw('count(*)')
+                    ->whereColumn('question_id', 'quiz_questions.id')
+                    ->where('is_correct', true)
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $filename = 'maru_mehsana_quiz_' . now()->format('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($questions) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM so Excel shows Gujarati text correctly
+            fwrite($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, [
+                'Question', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Answer',
+                'Category', 'Difficulty', 'Explanation',
+                'Scheduled Date', 'Status', 'Plays', 'Success %', 'Created At',
+            ]);
+
+            foreach ($questions as $q) {
+                fputcsv($file, [
+                    $q->question,
+                    $q->option_a,
+                    $q->option_b,
+                    $q->option_c,
+                    $q->option_d,
+                    $q->correct_answer,
+                    $q->category,
+                    $q->difficulty,
+                    $q->explanation,
+                    $q->scheduled_date?->format('Y-m-d'),
+                    $q->is_active ? 'Published' : 'Draft',
+                    $q->attempts_count,
+                    $q->attempts_count > 0 ? round(($q->correct_count / $q->attempts_count) * 100, 1) : 0,
+                    $q->created_at?->format('Y-m-d H:i'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
     //  ADMIN: GET /admin/quiz/analytics
     //  Player engagement + leaderboards
     // ─────────────────────────────────────────────────────────────────────

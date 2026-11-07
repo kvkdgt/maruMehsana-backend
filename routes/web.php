@@ -125,6 +125,7 @@ Route::get('/admin/news-categories', [NewsCategoryController::class, 'index'])->
     Route::post('/admin/quiz/bulk-import',       [QuizController::class, 'adminBulkImport'])->name('admin.quiz.bulk-import');
     Route::post('/admin/quiz/bulk-delete',       [QuizController::class, 'adminBulkDelete'])->name('admin.quiz.bulk-delete');
     Route::get('/admin/quiz/sample-csv',         [QuizController::class, 'adminDownloadSampleCSV'])->name('admin.quiz.sample-csv');
+    Route::get('/admin/quiz/export',             [QuizController::class, 'adminExport'])->name('admin.quiz.export');
 
     // Job Vacancy Management
     Route::get('/admin/jobs', [AdminController::class, 'jobVacancies'])->name('admin.jobs');

@@ -206,6 +206,9 @@
             <button class="btn-cancel" onclick="document.getElementById('importModal').classList.add('open')" style="background: #fff; border: 1px solid #ddd; padding: 0 20px; display: inline-flex; align-items: center; gap: 8px;">
                 <i class="fas fa-file-import"></i> Import CSV
             </button>
+            <a href="{{ route('admin.quiz.export', request()->only(['search', 'category', 'difficulty'])) }}" class="btn-cancel" style="background: #fff; border: 1px solid #ddd; padding: 0 20px; text-decoration: none; color: var(--primary-color); display: inline-flex; align-items: center; gap: 8px;" title="Export questions matching current filters">
+                <i class="fas fa-file-export"></i> Export CSV
+            </a>
             <button class="btn-add-premium" id="openAdd" style="display: inline-flex; align-items: center; gap: 8px;">
                 <i class="fas fa-plus-circle"></i> Add Question
             </button>
@@ -219,6 +222,9 @@
             <span id="selectedCount" style="font-weight: 700;">0 Questions Selected</span>
         </div>
         <div style="display: flex; gap: 12px;">
+            <button onclick="exportSelected()" style="background: #10b981; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                <i class="fas fa-file-export"></i> Export Selected
+            </button>
             <button onclick="confirmBulkDelete()" class="delete-btn" style="background: #ef4444; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 700;">
                 <i class="fas fa-trash-alt"></i> Delete Selected
             </button>
@@ -596,6 +602,12 @@
         questionCheckboxes.forEach(cb => cb.checked = false);
         selectAll.checked = false;
         updateBulkBar();
+    }
+
+    function exportSelected() {
+        const selected = Array.from(document.querySelectorAll('.question-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) return;
+        window.location.href = "{{ route('admin.quiz.export') }}?ids=" + selected.join(',');
     }
 
     function confirmBulkDelete() {
