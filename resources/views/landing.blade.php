@@ -1,863 +1,437 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>maruMehsana - Explore Mehsana like never before</title>
-    <meta name="description" content="Discover local businesses, read breaking news, explore tourist spots and connect with the Mehsana community through maruMehsana app.">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
-            --primary-light: #caf0f8;
-            --secondary: #48cae4;
-            --accent: #f59e0b;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --bg-body: #ffffff;
-            --bg-card: #ffffff;
-            --bg-alt: #f1f5f9;
-            --border: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            --radius: 1rem;
-            --container-width: 1200px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
-            background-color: var(--bg-body);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: 0.3s ease;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        /* Header & Nav */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 4.5rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            z-index: 1001;
-        }
-
-        .logo i {
-            font-size: 1.75rem;
-        }
-
-        .logo span {
-            color: var(--text-main);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            font-weight: 600;
-            color: var(--text-main);
-            font-size: 0.95rem;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .mobile-toggle {
-            display: none;
-            font-size: 1.5rem;
-            color: var(--text-main);
-            cursor: pointer;
-            z-index: 1001;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            gap: 0.5rem;
-            cursor: pointer;
-            border: none;
-            font-size: 0.95rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary-light);
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 10rem 0 6rem;
-            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-            position: relative;
-        }
-
-        .hero-content {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .hero-text h1 {
-            font-size: 3.5rem;
-            line-height: 1.2;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            color: var(--text-main);
-        }
-
-        .hero-text h1 span {
-            color: var(--primary);
-        }
-
-        .hero-text p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 3.5rem;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 4rem;
-        }
-
-        .stat-item h3 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .stat-item p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hero-image {
-            position: relative;
-            background: #fff;
-            padding: 1rem;
-            border-radius: 2rem;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .hero-image img {
-            width: 100%;
-            height: auto;
-            border-radius: 1.5rem;
-        }
-
-        /* Sections General */
-        section {
-            padding: 6rem 0;
-        }
-
-        .section-header {
-            margin-bottom: 4rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .section-header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 1rem;
-        }
-
-        .category-card {
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 1.25rem;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: 0.3s ease;
-        }
-
-        .category-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .category-icon {
-            width: 3.5rem;
-            height: 3.5rem;
-            background: var(--bg-alt);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .category-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
-        /* Horizontal List Style (Like App) */
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 1.25rem;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            transition: 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow);
-            border-color: var(--primary-light);
-        }
-
-        .card-image {
-            height: 200px;
-            position: relative;
-        }
-
-        .card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .badge {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: var(--primary);
-            color: white;
-            padding: 0.35rem 0.85rem;
-            border-radius: 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .card-content {
-            padding: 1.5rem;
-            flex: 1;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--text-main);
-        }
-
-        .card-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-
-        .card-footer-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        /* Tourist Grid */
-        .tourist-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1rem;
-        }
-
-        .tourist-card {
-            display: flex;
-            background: #fff;
-            border-radius: 1.25rem;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            min-height: 140px;
-        }
-
-        .tourist-card img {
-            width: 140px;
-            height: 100%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .tourist-info {
-            padding: 1rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .tourist-info h3 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        .tourist-info p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Facts Slider */
-        .facts-bar {
-            background: var(--primary);
-            color: white;
-            padding: 0.75rem 0;
-            margin-bottom: 0;
-            overflow: hidden;
-            position: relative;
-            z-index: 10;
-        }
-
-        .fact-slider {
-            position: relative;
-            height: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fact-item {
-            position: absolute;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-            width: 100%;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-        }
-
-        .fact-item.active {
-            opacity: 1;
-            position: relative;
-            pointer-events: auto;
-        }
-
-        .fact-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.3px;
-        }
-
-        .fact-content i {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        /* Newsletter */
-        .cta-section {
-            background: var(--bg-alt);
-            border-radius: 2rem;
-            padding: 5rem;
-            text-align: center;
-        }
-
-        /* Footer */
-        footer {
-            background: #fff;
-            border-top: 1px solid var(--border);
-            padding: 5rem 0 2rem;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1fr;
-            gap: 3rem;
-            margin-bottom: 4rem;
-        }
-
-        .footer-logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .footer-title {
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.75rem;
-        }
-
-        .footer-links a {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
-        }
-
-        .footer-bottom {
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 1024px) {
-            .hero-content { grid-template-columns: 1fr; text-align: center; }
-            .hero-actions { justify-content: center; }
-            .hero-stats { justify-content: center; gap: 2rem;}
-            .footer-grid { grid-template-columns: 1fr 1fr; }
-            .hero-image { max-width: 500px; margin: 0 auto; }
-        }
-
-        @media (max-width: 768px) {
-            .mobile-toggle { display: block; }
-            .nav-links { 
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 80%;
-                height: 100vh;
-                background: white;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                transition: 0.3s ease;
-                box-shadow: -10px 0 20px rgba(0,0,0,0.05);
-                z-index: 1000;
-            }
-            .nav-links.active { right: 0; }
-            .nav-actions { display: none; }
-            
-            .hero-text h1 { font-size: 2.5rem; }
-            .hero-stats { flex-wrap: wrap; }
-            .section-header h2 { font-size: 1.75rem; }
-            .footer-grid { grid-template-columns: 1fr; }
-            .cta-section { padding: 3rem 1.5rem; }
-            .tourist-card { flex-direction: column; min-height: auto; }
-            .tourist-card img { width: 100%; height: 180px; }
-        }
-    </style>
-</head>
-<body>
-    <header id="header">
-        <div class="container">
-            <nav>
-                <a href="/" class="logo">
-                    <i class="fas fa-compass"></i>
-                    maru<span>Mehsana</span>
-                </a>
-                <ul class="nav-links" id="navLinks">
-                    <li><a href="#categories">Categories</a></li>
-                    <li><a href="#businesses">Featured</a></li>
-                    <li><a href="#news">News</a></li>
-                    <li><a href="#tourist">Places</a></li>
+@extends('layouts.site')
+
+@section('title', __('home.meta_title'))
+@section('description', __('home.meta_desc'))
+
+@php
+    $playStore = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
+    $logo      = asset('assets/site/logo-128.png');
+
+    // Resolve an uploaded image (storage path) or an absolute URL; null when missing.
+    $img = function ($path) {
+        if (!$path) return null;
+        return \Illuminate\Support\Str::startsWith($path, ['http://', 'https://']) ? $path : asset('storage/' . ltrim($path, '/'));
+    };
+
+    // Hero photo: drop public/assets/site/hero.jpg (+ optional hero-mobile.jpg) and it is used automatically.
+    $heroFile   = public_path('assets/site/hero.jpg');
+    $heroMobile = public_path('assets/site/hero-mobile.jpg');
+    $hasHero    = file_exists($heroFile);
+    $hasHeroMob = file_exists($heroMobile);
+    $heroUrl    = $hasHero ? asset('assets/site/hero.jpg') . '?v=' . filemtime($heroFile) : null;
+    $heroMobUrl = $hasHeroMob ? asset('assets/site/hero-mobile.jpg') . '?v=' . filemtime($heroMobile) : null;
+
+    $salary = function ($j) {
+        if ($j->salary_type === 'not_disclosed' || (!$j->salary_min && !$j->salary_max)) return null;
+        $per = ['monthly' => 'per_month', 'yearly' => 'per_year', 'hourly' => 'per_hour'][$j->salary_type] ?? null;
+        $min = (float) $j->salary_min;
+        $max = (float) $j->salary_max;
+        $range = ($min && $max && $min != $max)
+            ? '₹' . number_format($min) . ' – ' . number_format($max)
+            : '₹' . number_format($max ?: $min);
+        return $range . ($per ? ' / ' . __('home.' . $per) : '');
+    };
+
+    $factsId = $facts->count() ? '#facts' : '#app';
+
+    $searchI18n = [
+        'api'     => url('/api'),
+        'base'    => url('/'),
+        'minHint' => __('home.search_hint'),
+        'loading' => __('home.search_loading'),
+        'none'    => __('home.search_none'),
+        'error'   => __('home.search_error'),
+        'found'   => __('home.search_found'),
+        'catBack' => __('home.category_back'),
+        'catTitle'=> __('home.category_title'),
+        'catEmpty'=> __('home.category_empty'),
+        'catLabel'=> __('home.category_open'),
+        'groups'  => [
+            'category' => __('home.group_category'),
+            'business' => __('home.group_business'),
+            'place'    => __('home.group_place'),
+            'news'     => __('home.group_news'),
+            'job'      => __('home.group_job'),
+        ],
+    ];
+@endphp
+
+@push('head')
+    @if ($hasHero)
+        <link rel="preload" as="image" href="{{ $heroMobUrl ?: $heroUrl }}" @if ($hasHeroMob) media="(max-width: 720px)" @endif fetchpriority="high">
+        @if ($hasHeroMob)<link rel="preload" as="image" href="{{ $heroUrl }}" media="(min-width: 721px)" fetchpriority="high">@endif
+    @endif
+@endpush
+
+@section('content')
+
+{{-- ============================ HERO ============================ --}}
+<section class="hero" id="home" aria-labelledby="hero-title">
+    <div class="hero-bg" aria-hidden="{{ $hasHero ? 'false' : 'true' }}">
+        @if ($hasHero)
+            <picture>
+                @if ($hasHeroMob)<source media="(max-width: 720px)" srcset="{{ $heroMobUrl }}">@endif
+                <img src="{{ $heroUrl }}" alt="" width="1920" height="640" fetchpriority="high" decoding="async">
+            </picture>
+        @else
+            {{-- Brand-coloured illustrated fallback, shown until hero.jpg is added --}}
+            <svg class="hero-art" viewBox="0 0 1440 640" preserveAspectRatio="xMaxYMax slice" focusable="false">
+                <defs>
+                    <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#9fd0f5"/><stop offset=".55" stop-color="#d8ecfb"/><stop offset="1" stop-color="#fdf1dc"/>
+                    </linearGradient>
+                    <radialGradient id="g-sun" cx=".5" cy=".5" r=".5">
+                        <stop offset="0" stop-color="#fff6d6" stop-opacity="1"/><stop offset=".45" stop-color="#ffe9b0" stop-opacity=".55"/><stop offset="1" stop-color="#ffe9b0" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="g-tower" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#e3c389"/><stop offset=".55" stop-color="#d4a967"/><stop offset="1" stop-color="#b88a4a"/>
+                    </linearGradient>
+                    <linearGradient id="g-ground" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#8cc37a"/><stop offset="1" stop-color="#cfe6c2"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1440" height="640" fill="url(#g-sky)"/>
+                <circle cx="1010" cy="170" r="230" fill="url(#g-sun)"/>
+                <g fill="#fff" opacity=".85">
+                    <ellipse cx="260" cy="110" rx="110" ry="26"/><ellipse cx="330" cy="92" rx="70" ry="26"/>
+                    <ellipse cx="900" cy="70" rx="120" ry="24"/><ellipse cx="970" cy="54" rx="64" ry="22"/>
+                    <ellipse cx="1330" cy="120" rx="100" ry="22"/>
+                </g>
+                {{-- distant skyline --}}
+                <g fill="#b9cfe3" opacity=".75">
+                    <rect x="470" y="470" width="60" height="90"/><rect x="535" y="450" width="44" height="110"/><rect x="585" y="482" width="80" height="78"/>
+                    <rect x="680" y="462" width="52" height="98"/><rect x="740" y="488" width="90" height="72"/><rect x="840" y="470" width="50" height="90"/>
+                    <rect x="1250" y="440" width="70" height="120"/><rect x="1330" y="460" width="60" height="100"/>
+                </g>
+                {{-- clock tower --}}
+                <g>
+                    <rect x="1050" y="520" width="170" height="60" fill="#c79d5d"/>
+                    <rect x="1066" y="470" width="138" height="56" fill="url(#g-tower)"/>
+                    <rect x="1082" y="250" width="106" height="226" fill="url(#g-tower)"/>
+                    <rect x="1074" y="236" width="122" height="22" fill="#c49a55"/>
+                    <rect x="1090" y="150" width="90" height="90" fill="url(#g-tower)"/>
+                    <rect x="1084" y="140" width="102" height="14" fill="#c49a55"/>
+                    <path d="M1096 140 q39 -70 78 0z" fill="#b88a4a"/>
+                    <rect x="1133" y="64" width="4" height="30" fill="#8a6430"/>
+                    <circle cx="1135" cy="104" r="12" fill="#c49a55"/>
+                    <circle cx="1135" cy="196" r="30" fill="#fff"/><circle cx="1135" cy="196" r="30" fill="none" stroke="#7a5524" stroke-width="5"/>
+                    <path d="M1135 176v22l14 8" fill="none" stroke="#1d2b44" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="1135" cy="312" r="24" fill="#fff"/><circle cx="1135" cy="312" r="24" fill="none" stroke="#7a5524" stroke-width="5"/>
+                    <path d="M1135 296v17l11 6" fill="none" stroke="#1d2b44" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M1112 560v-60q23 -26 46 0v60z" fill="#7a5524" opacity=".75"/>
+                    <path d="M1090 400h90M1090 430h90" stroke="#b88a4a" stroke-width="4"/>
+                </g>
+                {{-- ground --}}
+                <rect y="552" width="1440" height="88" fill="url(#g-ground)"/>
+                {{-- trees --}}
+                <g>
+                    <rect x="1304" y="360" width="16" height="200" fill="#6b4a2b"/>
+                    <circle cx="1310" cy="330" r="86" fill="#3f8f4a"/><circle cx="1370" cy="290" r="70" fill="#2f7a3e"/><circle cx="1250" cy="380" r="58" fill="#56a653"/><circle cx="1400" cy="390" r="64" fill="#3f8f4a"/>
+                    <circle cx="1300" cy="270" r="52" fill="#56a653"/>
+                    <rect x="64" y="400" width="16" height="170" fill="#6b4a2b"/>
+                    <circle cx="70" cy="390" r="82" fill="#3f8f4a"/><circle cx="-10" cy="420" r="70" fill="#2f7a3e"/><circle cx="150" cy="430" r="60" fill="#56a653"/><circle cx="60" cy="330" r="54" fill="#56a653"/>
+                    <circle cx="960" cy="520" r="50" fill="#3f8f4a"/><circle cx="1010" cy="540" r="42" fill="#56a653"/>
+                    <circle cx="1255" cy="540" r="48" fill="#2f7a3e"/>
+                    <circle cx="620" cy="548" r="30" fill="#56a653"/><circle cx="660" cy="552" r="26" fill="#3f8f4a"/>
+                </g>
+            </svg>
+        @endif
+        <span class="hero-scrim"></span>
+    </div>
+
+    <div class="container hero-inner">
+        <p class="hello">
+            <span>{{ __('home.hello') }}</span>
+            <svg class="spark" viewBox="0 0 34 34" aria-hidden="true"><path d="M4 30 17 17M18 8l6-6M22 16h10" stroke="#f59e0b" stroke-width="3.4" stroke-linecap="round" fill="none"/></svg>
+        </p>
+
+        <h1 id="hero-title">
+            <span class="h1-line">{{ __('home.h1_a') }}</span>
+            <span class="h1-line">{{ __('home.h1_b') }}
+                <span class="u">{{ __('home.h1_u') }}<svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9C40 2 90 2 130 5c24 2 44 3 67 0" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg></span>
+            </span>
+        </h1>
+
+        <p class="hero-lead">{{ __('home.lead') }}</p>
+
+        <form class="search" id="search" role="search" autocomplete="off" onsubmit="return false">
+            <div class="search-box">
+                <svg class="icon search-ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <input id="search-input" class="search-input" type="search" name="q" maxlength="80" enterkeyhint="search"
+                       role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results" aria-haspopup="listbox"
+                       aria-label="{{ __('home.search_label') }}" placeholder="{{ __('home.search_placeholder') }}"
+                       autocomplete="off" autocapitalize="off" spellcheck="false">
+                <button type="button" class="search-clear" id="search-clear" hidden aria-label="{{ __('home.search_clear') }}">
+                    <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+                </button>
+                <button type="submit" class="search-btn" id="search-go">{{ __('home.search_btn') }}</button>
+            </div>
+            <div class="search-panel" id="search-panel" hidden>
+                <p class="search-msg" id="search-msg" hidden></p>
+                <ul class="search-results" id="search-results" role="listbox" aria-label="{{ __('home.search_label') }}"></ul>
+            </div>
+            <p class="sr-only" id="search-status" role="status" aria-live="polite"></p>
+        </form>
+        <script type="application/json" id="search-i18n">{!! json_encode($searchI18n, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+
+        @if ($chipCategories->count())
+            <div class="chips">
+                <span class="chips-label">{{ __('home.popular') }}</span>
+                <ul class="chips-list">
+                    @foreach ($chipCategories as $c)
+                        <li><button type="button" class="chip" data-q="{{ $c->name }}" data-category="{{ $c->id }}">{{ $c->name }}</button></li>
+                    @endforeach
                 </ul>
-                <div class="nav-actions">
-                    <a href="#download" class="btn btn-primary">
-                        <i class="fab fa-google-play"></i>
-                        Get App
-                    </a>
-                </div>
-                <div class="mobile-toggle" onclick="toggleMenu()">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </nav>
-        </div>
-    </header>
-
-    <section class="hero">
-        <div class="container hero-content">
-            <div class="hero-text">
-                <h1>The Heart of <span>Mehsana</span><br>in Your Pocket</h1>
-                <p>Stay connected with your community. Discover local businesses, read real-time news, and explore the heritage of Mehsana city.</p>
-                <div class="hero-actions">
-                    <a href="#download" class="btn btn-primary">Download Now</a>
-                    <a href="#categories" class="btn btn-outline">Browse Categories</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <h3>10K+</h3>
-                        <p>Downloads</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>500+</h3>
-                        <p>Businesses</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>150+</h3>
-                        <p>News Daily</p>
-                    </div>
-                </div>
             </div>
-            <div class="hero-image">
-                <img src="https://images.unsplash.com/photo-1524230572899-a752b3835840?q=80&w=1000&auto=format&fit=crop" alt="Mehsana Banner">
+        @endif
+    </div>
+</section>
+
+{{-- ========================= QUICK TILES ========================= --}}
+<div class="container quick-wrap">
+    <nav class="quick" aria-label="{{ __('home.tiles_aria') }}">
+        <ul class="quick-grid">
+            <li><a href="#businesses" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
+            <li><a href="#places" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
+            <li><a href="#news" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
+            <li><a href="#jobs" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
+            <li><a href="{{ $factsId }}" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="tile-label">{{ __('home.tile_facts') }}</span></a></li>
+            <li><a href="{{ $playStore }}" class="tile tile--add" target="_blank" rel="noopener"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></a></li>
+        </ul>
+    </nav>
+</div>
+
+{{-- ======================= CONTENT: ROW 1 ======================= --}}
+<div class="container home-rows">
+    <div class="duo">
+
+        {{-- ---- Top businesses ---- --}}
+        <section class="block" id="businesses" aria-labelledby="biz-title">
+            <header class="block-head">
+                <span class="badge badge--blue"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>
+                <div class="block-titles">
+                    <h2 id="biz-title">{{ __('home.biz_title') }}</h2>
+                    <p>{{ __('home.biz_sub') }}</p>
+                </div>
+                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </header>
+
+            @if ($topBusinesses->count())
+                <ul class="biz-grid">
+                    @foreach ($topBusinesses as $business)
+                        @php $reviews = (int) $business->reviews_count; $avg = $business->reviews_avg_rating; @endphp
+                        <li class="biz-card">
+                            <div class="media ph">
+                                <svg class="icon ph-ico" aria-hidden="true"><use href="#i-store"/></svg>
+                                @if ($business->thumbnail)
+                                    <img src="{{ $img($business->thumbnail) }}" alt="" width="400" height="260" loading="lazy" decoding="async" onerror="this.remove()">
+                                @endif
+                            </div>
+                            <button type="button" class="heart" data-save="{{ $business->id }}" aria-pressed="false" aria-label="{{ __('home.save_business') }}: {{ $business->name }}">
+                                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+                            </button>
+                            <div class="biz-body">
+                                <h3 class="clamp-1"><a class="stretched" href="{{ url('/business/' . $business->id) }}">{{ $business->name }}</a></h3>
+                                <p class="biz-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
+                                @if ($reviews > 0 && $avg)
+                                    <p class="rating" aria-label="{{ __('home.rating_aria', ['rating' => number_format((float) $avg, 1), 'count' => $reviews]) }}">
+                                        <svg class="icon icon--fill star" aria-hidden="true"><use href="#i-star"/></svg>
+                                        <b>{{ number_format((float) $avg, 1) }}</b>
+                                        <span>({{ number_format($reviews) }})</span>
+                                    </p>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="empty"><img src="{{ $logo }}" alt="" width="48" height="48" loading="lazy"><p>{{ __('home.empty_biz') }}</p></div>
+            @endif
+        </section>
+
+        {{-- ---- Latest news ---- --}}
+        <section class="block block--side" id="news" aria-labelledby="news-title">
+            <header class="block-head">
+                <span class="badge badge--saffron"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span>
+                <div class="block-titles">
+                    <h2 id="news-title">{{ __('home.news_title') }}</h2>
+                    <p>{{ __('home.news_sub') }}</p>
+                </div>
+                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </header>
+
+            @if ($latestNews->count())
+                <ul class="news-list">
+                    @foreach ($latestNews as $article)
+                        <li>
+                            <a class="news-row" href="{{ url('/news/' . $article->id) }}">
+                                <span class="news-thumb ph">
+                                    <svg class="icon ph-ico" aria-hidden="true"><use href="#i-news"/></svg>
+                                    @if ($article->imageUrl)
+                                        <img src="{{ $article->imageUrl }}" alt="" width="240" height="160" loading="lazy" decoding="async" onerror="this.remove()">
+                                    @endif
+                                </span>
+                                <span class="news-text">
+                                    <span class="news-title clamp-2">{{ $article->title }}</span>
+                                    <span class="news-meta">
+                                        <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>
+                                        <time datetime="{{ $article->created_at->toDateString() }}">{{ $article->created_at->translatedFormat('d M Y') }}</time>
+                                        @if ($article->agency)<span class="news-agency clamp-1">{{ $article->agency->name }}</span>@endif
+                                    </span>
+                                </span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="empty"><img src="{{ $logo }}" alt="" width="48" height="48" loading="lazy"><p>{{ __('home.empty_news') }}</p></div>
+            @endif
+        </section>
+    </div>
+
+    {{-- ======================= CONTENT: ROW 2 ======================= --}}
+    <div class="duo duo--second">
+
+        {{-- ---- Popular places ---- --}}
+        <section class="block" id="places" aria-labelledby="places-title">
+            <header class="block-head">
+                <span class="badge badge--blue badge--round"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span>
+                <div class="block-titles">
+                    <h2 id="places-title">{{ __('home.places_title') }}</h2>
+                    <p>{{ __('home.places_sub') }}</p>
+                </div>
+                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </header>
+
+            @if ($popularPlaces->count())
+                <ul class="place-grid">
+                    @foreach ($popularPlaces as $place)
+                        <li>
+                            <a class="place-card" href="{{ url('/place/' . $place->id) }}">
+                                <span class="media ph">
+                                    <svg class="icon ph-ico" aria-hidden="true"><use href="#i-pin"/></svg>
+                                    @if ($place->thumbnail)
+                                        <img src="{{ $img($place->thumbnail) }}" alt="" width="400" height="240" loading="lazy" decoding="async" onerror="this.remove()">
+                                    @endif
+                                </span>
+                                <span class="place-foot">
+                                    <span class="place-text">
+                                        <span class="place-name clamp-1">{{ $place->name }}</span>
+                                        @if ($place->location)
+                                            <span class="place-loc clamp-1"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ $place->location }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="go" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+                                </span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="empty"><img src="{{ $logo }}" alt="" width="48" height="48" loading="lazy"><p>{{ __('home.empty_places') }}</p></div>
+            @endif
+        </section>
+
+        {{-- ---- Latest jobs ---- --}}
+        <section class="block block--side" id="jobs" aria-labelledby="jobs-title">
+            <header class="block-head">
+                <span class="badge badge--blue"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span>
+                <div class="block-titles">
+                    <h2 id="jobs-title">{{ __('home.jobs_title') }}</h2>
+                    <p>{{ __('home.jobs_sub') }}</p>
+                </div>
+                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </header>
+
+            @if ($latestJobs->count())
+                <ul class="job-list">
+                    @foreach ($latestJobs as $job)
+                        @php $pay = $salary($job); @endphp
+                        <li>
+                            <a class="job-row" href="{{ url('/job/' . $job->id) }}">
+                                <span class="job-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span>
+                                <span class="job-text">
+                                    <span class="job-title clamp-1">{{ $job->title }}</span>
+                                    @if ($job->location || $job->company_name)
+                                        <span class="job-meta clamp-1"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ $job->location }}@if ($job->location && $job->company_name) &middot; @endif{{ $job->company_name }}</span>
+                                    @endif
+                                    @if ($pay)<span class="job-pay clamp-1">{{ $pay }}</span>@endif
+                                </span>
+                                <svg class="icon job-go" aria-hidden="true"><use href="#i-chev-r"/></svg>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="empty"><img src="{{ $logo }}" alt="" width="48" height="48" loading="lazy"><p>{{ __('home.empty_jobs') }}</p></div>
+            @endif
+        </section>
+    </div>
+</div>
+
+{{-- ============================ FACTS ============================ --}}
+@if ($facts->count())
+<section class="container facts" id="facts" aria-labelledby="facts-title">
+    <div class="facts-card">
+        <span class="badge badge--saffron"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span>
+        <div class="facts-body">
+            <h2 id="facts-title">{{ __('home.facts_title') }}</h2>
+            <p class="facts-text" id="fact-text" aria-live="polite">{{ $facts->first()->fact }}</p>
+        </div>
+        <button type="button" class="facts-next" id="fact-next" @if ($facts->count() < 2) hidden @endif>
+            <svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg> {{ __('home.facts_next') }}
+        </button>
+    </div>
+    <script type="application/json" id="fact-data">{!! json_encode($facts->pluck('fact')->values(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+</section>
+@endif
+
+{{-- ============================ APP BANNER ============================ --}}
+<section class="app" id="app" aria-labelledby="app-title">
+    <div class="app-bg" aria-hidden="true">
+        <svg viewBox="0 0 1440 300" preserveAspectRatio="none" focusable="false">
+            <defs>
+                <linearGradient id="g-wave1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1769b5"/><stop offset="1" stop-color="#3b8be0"/></linearGradient>
+            </defs>
+            <path d="M0 150C120 110 230 100 330 140C420 175 470 270 640 300H0Z" fill="url(#g-wave1)" opacity=".95"/>
+            <path d="M0 200C100 175 190 190 260 230C330 268 400 292 470 300H0Z" fill="#0e3f7a" opacity=".55"/>
+            <path d="M420 300C700 270 1000 300 1440 230V300Z" fill="#dcebfa" opacity=".8"/>
+        </svg>
+    </div>
+    <div class="container app-inner">
+        <div class="phone" aria-hidden="true">
+            <div class="phone-screen">
+                <img src="{{ asset('assets/site/logo-128.png') }}" width="76" height="76" alt="" loading="lazy">
+                <span>Maru <b>Mehsana</b></span>
             </div>
         </div>
-    </section>
 
-    @if(count($facts) > 0)
-    <div class="facts-bar">
-        <div class="container">
-            <div class="fact-slider">
-                @foreach($facts as $key => $fact)
-                <div class="fact-item {{ $key == 0 ? 'active' : '' }}">
-                    <div class="fact-content">
-                        <i class="fas fa-info-circle"></i>
-                        <span>DID YOU KNOW? {{ $fact->fact }}</span>
-                    </div>
-                </div>
-                @endforeach
+        <div class="app-copy">
+            <h2 id="app-title">{{ __('home.app_title') }}</h2>
+            <p class="app-sub">{{ __('home.app_sub') }}</p>
+            <ul class="app-feats">
+                <li><span class="fi fi--orange"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>{{ __('home.feat_business') }}</li>
+                <li><span class="fi fi--blue"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span>{{ __('home.feat_places') }}</li>
+                <li><span class="fi fi--orange"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span>{{ __('home.feat_news') }}</li>
+                <li><span class="fi fi--orange"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span>{{ __('home.feat_updates') }}</li>
+            </ul>
+        </div>
+
+        <div class="app-get">
+            <a href="{{ $playStore }}" class="gplay" target="_blank" rel="noopener" aria-label="{{ __('home.play_aria') }}">
+                <svg class="gplay-logo" viewBox="0 0 20 22" aria-hidden="true">
+                    <path d="M1 1 11 11 1 21Z" fill="#00a0ff"/>
+                    <path d="M1 1 14.5 8.5 11 11Z" fill="#00e575"/>
+                    <path d="M1 21 14.5 13.5 11 11Z" fill="#ff3a44"/>
+                    <path d="M14.5 8.5 19 11 14.5 13.5 11 11Z" fill="#ffd500"/>
+                </svg>
+                <span class="gplay-text"><small>{{ __('home.get_it_on') }}</small><b>Google Play</b></span>
+            </a>
+            <div class="qr" id="qr" data-url="{{ $playStore }}" hidden>
+                <div class="qr-code" id="qr-code" role="img" aria-label="{{ __('home.qr_aria') }}"></div>
             </div>
         </div>
     </div>
-    @endif
+</section>
 
-    <section id="categories">
-        <div class="container">
-            <div class="section-header">
-                <h2>Explore Categories</h2>
-                <p>Everything you need, organized just for you.</p>
-            </div>
-            <div class="category-grid">
-                @foreach($categories as $category)
-                <div class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-th-large"></i>
-                    </div>
-                    <h3>{{ $category->name }}</h3>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="businesses" style="background: var(--bg-alt);">
-        <div class="container">
-            <div class="section-header">
-                <h2>Featured Businesses</h2>
-                <p>Supporting local entrepreneurs and service providers.</p>
-            </div>
-            <div class="items-grid">
-                @foreach($featuredBusinesses as $business)
-                <div class="card">
-                    <div class="card-image">
-                        <img src="{{ Str::startsWith($business->thumbnail, 'http') ? $business->thumbnail : asset('storage/' . $business->thumbnail) }}" alt="{{ $business->name }}">
-                        <span class="badge">{{ $business->category->name }}</span>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="card-title">{{ $business->name }}</h3>
-                        <p class="card-desc">{{ $business->description }}</p>
-                        <div class="card-footer">
-                            <div class="card-footer-info">
-                                <i class="fas fa-users"></i>
-                                <span>{{ $business->visitors }} visitors</span>
-                            </div>
-                            <a href="/business/{{ $business->id }}" style="color: var(--primary); font-weight: 700;">DETAILS <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="news">
-        <div class="container">
-            <div class="section-header">
-                <h2>Latest Headlines</h2>
-                <p>Stay updated with instant local news from trusted sources.</p>
-            </div>
-            <div class="items-grid">
-                @foreach($latestNews as $article)
-                <div class="card">
-                    <div class="card-image">
-                        <img src="{{ $article->imageUrl ?? 'https://images.unsplash.com/photo-1504711331083-9c897511ff04?q=80&w=1000' }}" alt="{{ $article->title }}">
-                        <span class="badge" style="background: var(--text-main);">{{ $article->agency->name }}</span>
-                    </div>
-                    <div class="card-content">
-                        <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">{{ $article->created_at->diffForHumans() }}</p>
-                        <h3 class="card-title" style="font-size: 1.1rem; margin-top: 0.5rem;">{{ $article->title }}</h3>
-                        <p class="card-desc" style="-webkit-line-clamp: 3;">{{ $article->excerpt }}</p>
-                        <a href="/news/{{ $article->id }}" class="btn btn-outline" style="width: 100%; border-radius: 0.5rem; padding: 0.5rem;">Read Story</a>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="tourist" style="background: var(--bg-alt);">
-        <div class="container">
-            <div class="section-header">
-                <h2>Visit Mehsana</h2>
-                <p>Discover historical gems and natural wonders in our district.</p>
-            </div>
-            <div class="tourist-list">
-                @foreach($touristPlaces as $place)
-                <div class="tourist-card">
-                    <img src="{{ asset('storage/' . $place->thumbnail) }}" alt="{{ $place->name }}">
-                    <div class="tourist-info">
-                        <span style="font-size: 0.7rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">{{ $place->location }}</span>
-                        <h3>{{ $place->name }}</h3>
-                        <p>{{ $place->description }}</p>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="download">
-        <div class="container">
-            <div class="cta-section">
-                <i class="fas fa-mobile-alt" style="font-size: 4rem; color: var(--primary); margin-bottom: 2rem;"></i>
-                <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1rem;">Experience maruMehsana on Android</h2>
-                <p style="font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem;">Join thousands of Mehsana citizens. Get the app now and stay closer to your city than ever before.</p>
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <a href="#" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
-                        <i class="fab fa-google-play"></i> Get it on Google Play
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <a href="/" class="footer-logo">maruMehsana</a>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Building a digital community for Mehsana. Connecting residents with businesses, news, and history.</p>
-                </div>
-                <div>
-                    <h4 class="footer-title">Explore</h4>
-                    <ul class="footer-links">
-                        <li><a href="#categories">Business Categories</a></li>
-                        <li><a href="#businesses">Local Shops</a></li>
-                        <li><a href="#news">Daily News</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="footer-title">Guidelines</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                        <li><a href="#">Disclaimer</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="footer-title">Connect</h4>
-                    <ul class="footer-links">
-                        <li><a href="mailto:hello@marumehsana.com">Email Us</a></li>
-                        <li><a href="#">Facebook</a></li>
-                        <li><a href="#">Instagram</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                &copy; {{ date('Y') }} maruMehsana. Dedicated to the people of Mehsana.
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Fact Slider
-        const factItems = document.querySelectorAll('.fact-item');
-        let currentFact = 0;
-
-        function showNextFact() {
-            if (factItems.length === 0) return;
-            factItems[currentFact].classList.remove('active');
-            currentFact = (currentFact + 1) % factItems.length;
-            factItems[currentFact].classList.add('active');
-        }
-
-        if (factItems.length > 1) {
-            setInterval(showNextFact, 4000);
-        }
-
-        // Mobile Menu toggle
-        function toggleMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-            const icon = document.querySelector('.mobile-toggle i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        }
-
-        // Close menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                const navLinks = document.getElementById('navLinks');
-                if(navLinks.classList.contains('active')) {
-                    toggleMenu();
-                }
-            });
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                const target = document.querySelector(targetId);
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Simple Fade in on scroll
-        const sections = document.querySelectorAll('section');
-        const observerOptions = { threshold: 0.1 };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(20px)';
-            section.style.transition = 'all 0.6s ease-out';
-            observer.observe(section);
-        });
-    </script>
-</body>
-</html>
+@endsection
