@@ -10,17 +10,24 @@
         $siteDesc  = trim($__env->yieldContent('description')) ?: __('home.meta_desc');
         $siteImage = asset('assets/site/logo-512.png');
         $playStore = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
-        $canonical = $lang === 'en' ? url('/') . '?lang=en' : url('/');
+        $pageUrl   = url()->current();
+        // Pages can set their own canonical (e.g. paginated or filtered lists) with @section('canonical', url).
+        $canonical = trim($__env->yieldContent('canonical')) ?: ($lang === 'en' ? $pageUrl . '?lang=en' : $pageUrl);
         $hasFacts  = isset($facts) && $facts->count() > 0;
+        // Which header tab is active; home-page sections are anchors on /, other pages link back to them.
+        $activeNav = $activeNav ?? 'home';
+        $onHome    = $activeNav === 'home';
+        $sec       = fn ($id) => ($onHome ? '' : url('/')) . '#' . $id;
+        $langUrl   = fn ($l) => request()->fullUrlWithQuery(['lang' => $l, 'page' => null]);
     @endphp
 
     <title>{{ $siteTitle }}</title>
     <meta name="description" content="{{ $siteDesc }}">
     <meta name="theme-color" content="#ffffff">
     <link rel="canonical" href="{{ $canonical }}">
-    <link rel="alternate" hreflang="gu" href="{{ url('/') }}?lang=gu">
-    <link rel="alternate" hreflang="en" href="{{ url('/') }}?lang=en">
-    <link rel="alternate" hreflang="x-default" href="{{ url('/') }}">
+    <link rel="alternate" hreflang="gu" href="{{ $pageUrl }}?lang=gu">
+    <link rel="alternate" hreflang="en" href="{{ $pageUrl }}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{{ $pageUrl }}">
     <link rel="icon" type="image/png" href="{{ asset('assets/site/logo-128.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('assets/site/logo-512.png') }}">
 
@@ -94,13 +101,13 @@
 
             <nav class="nav-panel" id="nav-panel" aria-label="{{ __('home.nav_aria') }}">
                 <ul class="nav-links">
-                    {{-- Whole home page counts as "Home". Other tabs get their own pages later; until then they jump to the home section. --}}
-                    <li><a href="{{ url('/') }}" class="is-active" aria-current="page">{{ __('home.nav_home') }}</a></li>
-                    <li><a href="#businesses">{{ __('home.nav_businesses') }}</a></li>
-                    <li><a href="#places">{{ __('home.nav_places') }}</a></li>
-                    <li><a href="#news">{{ __('home.nav_news') }}</a></li>
-                    <li><a href="#jobs">{{ __('home.nav_jobs') }}</a></li>
-                    <li><a href="{{ $hasFacts ? '#facts' : '#app' }}">{{ __('home.nav_facts') }}</a></li>
+                    {{-- Tabs with their own page link there; the rest jump to the home page section until their page exists. --}}
+                    <li><a href="{{ url('/') }}" @if ($activeNav === 'home') class="is-active" aria-current="page" @endif>{{ __('home.nav_home') }}</a></li>
+                    <li><a href="{{ route('businesses') }}" @if ($activeNav === 'businesses') class="is-active" aria-current="page" @endif>{{ __('home.nav_businesses') }}</a></li>
+                    <li><a href="{{ $sec('places') }}">{{ __('home.nav_places') }}</a></li>
+                    <li><a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a></li>
+                    <li><a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a></li>
+                    <li><a href="{{ $sec($onHome && !$hasFacts ? 'app' : 'facts') }}">{{ __('home.nav_facts') }}</a></li>
                 </ul>
             </nav>
 
@@ -112,8 +119,8 @@
                         <svg class="icon icon--sm" aria-hidden="true"><use href="#i-chev-d"/></svg>
                     </summary>
                     <ul class="lang-list">
-                        <li><a href="{{ url('/') }}?lang=gu" hreflang="gu" lang="gu" @if ($lang === 'gu') aria-current="true" @endif>ગુજરાતી</a></li>
-                        <li><a href="{{ url('/') }}?lang=en" hreflang="en" lang="en" @if ($lang === 'en') aria-current="true" @endif>English</a></li>
+                        <li><a href="{{ $langUrl('gu') }}" hreflang="gu" lang="gu" @if ($lang === 'gu') aria-current="true" @endif>ગુજરાતી</a></li>
+                        <li><a href="{{ $langUrl('en') }}" hreflang="en" lang="en" @if ($lang === 'en') aria-current="true" @endif>English</a></li>
                     </ul>
                 </details>
                 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-panel"
@@ -139,10 +146,10 @@
                 <p class="footer-about">{{ __('home.footer_about') }}</p>
             </div>
             <nav class="footer-links" aria-label="{{ __('home.footer_explore') }}">
-                <a href="#businesses">{{ __('home.nav_businesses') }}</a>
-                <a href="#places">{{ __('home.nav_places') }}</a>
-                <a href="#news">{{ __('home.nav_news') }}</a>
-                <a href="#jobs">{{ __('home.nav_jobs') }}</a>
+                <a href="{{ route('businesses') }}">{{ __('home.nav_businesses') }}</a>
+                <a href="{{ $sec('places') }}">{{ __('home.nav_places') }}</a>
+                <a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a>
+                <a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a>
                 <a href="{{ $playStore }}" target="_blank" rel="noopener">Google Play</a>
                 <a href="{{ url('/privacy-policy') }}">{{ __('home.privacy') }}</a>
             </nav>

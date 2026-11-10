@@ -189,7 +189,7 @@
 <div class="container quick-wrap">
     <nav class="quick" aria-label="{{ __('home.tiles_aria') }}">
         <ul class="quick-grid">
-            <li><a href="#businesses" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
+            <li><a href="{{ route('businesses') }}" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
             <li><a href="#places" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
             <li><a href="#news" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
             <li><a href="#jobs" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
@@ -318,7 +318,7 @@
                     <h2 id="biz-title">{{ __('home.biz_title') }}</h2>
                     <p>{{ __('home.biz_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('businesses') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($topBusinesses->count())

@@ -103,6 +103,13 @@
     // Click on the dark backdrop closes the popup
     enq.addEventListener('click', function (e) { if (e.target === enq) enq.close(); });
 
+    // Other pages link to /#add-business to open this popup directly
+    if (window.location.hash === '#add-business') {
+      var opener = document.querySelector('[data-open-enquiry]');
+      if (opener) opener.click();
+      if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
     enqForm.addEventListener('submit', function (e) {
       e.preventDefault();
       clearErrors();
@@ -497,4 +504,97 @@
       if (cat) openCategory(cat, name); else search(name);
     });
   });
+})();
+
+/* ---------------- Businesses page: infinite scroll ----------------
+   Page 1 of /businesses carries data-next on the grid. We fetch the same URL as JSON
+   ({ html, next, shown, total }) and append the cards. Without JS the numeric pager stays. */
+(function () {
+  'use strict';
+
+  var grid = document.querySelector('.dir-grid[data-next]');
+  var box = document.querySelector('[data-dir-more]');
+  if (!grid || !box || !window.fetch || !('content' in document.createElement('template'))) return;
+
+  var next = grid.getAttribute('data-next');
+  var pager = document.querySelector('.pager');
+  var sentinel = box.querySelector('.dir-sentinel');
+  var loading = box.querySelector('.dir-loading');
+  var btn = box.querySelector('.dir-more-btn');
+  var end = box.querySelector('.dir-end');
+  var status = box.querySelector('[data-dir-status]');
+  var busy = false;
+  var io = null;
+  var seen = {};
+
+  // Cards are keyed by their business link so a card never shows twice (e.g. if the list changed meanwhile).
+  function key(li) {
+    var a = li.querySelector && li.querySelector('a.stretched');
+    return a ? a.getAttribute('href') : null;
+  }
+  [].forEach.call(grid.children, function (li) { var k = key(li); if (k) seen[k] = true; });
+
+  function showButton(label) {
+    btn.textContent = label;
+    btn.hidden = false;
+  }
+
+  function finish() {
+    next = null;
+    if (io) io.disconnect();
+    loading.hidden = true;
+    btn.hidden = true;
+    end.hidden = false;
+    status.textContent = end.textContent;
+  }
+
+  function load() {
+    if (busy || !next) return;
+    busy = true;
+    loading.hidden = false;
+    btn.hidden = true;
+    status.textContent = loading.textContent;
+
+    fetch(next, {
+      headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        var tpl = document.createElement('template');
+        tpl.innerHTML = (data && data.html) || '';
+        [].slice.call(tpl.content.children).forEach(function (li) {
+          var k = key(li);
+          if (k && seen[k]) return;
+          if (k) seen[k] = true;
+          grid.appendChild(li);
+        });
+        next = (data && data.next) || null;
+        busy = false;
+        loading.hidden = true;
+        if (!next) { finish(); return; }
+        status.textContent = (box.getAttribute('data-showing') || '').replace('__SHOWN__', grid.children.length);
+        if (io) { io.unobserve(sentinel); io.observe(sentinel); } // re-check: still near the end on tall screens
+        else showButton(box.getAttribute('data-load'));
+      })
+      .catch(function () {
+        busy = false;
+        loading.hidden = true;
+        showButton(box.getAttribute('data-retry'));
+        status.textContent = btn.textContent;
+      });
+  }
+
+  btn.addEventListener('click', load);
+  if (pager) pager.hidden = true;
+  box.hidden = false;
+
+  if ('IntersectionObserver' in window) {
+    io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) load();
+    }, { rootMargin: '0px 0px 600px 0px' });
+    io.observe(sentinel);
+  } else {
+    showButton(box.getAttribute('data-load'));
+  }
 })();

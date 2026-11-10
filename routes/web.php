@@ -28,6 +28,7 @@ use App\Http\Controllers\QuizController;
 */
 
 Route::get('/', [App\Http\Controllers\LandingPageController::class, 'index']);
+Route::get('/businesses', [App\Http\Controllers\BusinessDirectoryController::class, 'index'])->name('businesses');
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);
