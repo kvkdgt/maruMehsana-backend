@@ -75,7 +75,7 @@
           <th>Sr. No.</th>
           <th>Business & Owner</th>
           <th>Contact Info</th>
-          <th>Source</th>
+          <th style="white-space:nowrap;">Source</th>
           <th>Created At</th>
           <th>Status</th>
         </tr>
@@ -96,14 +96,17 @@
                 <span style="font-size: 0.9rem;"><i class="fab fa-whatsapp" style="color: #27ae60; width: 15px;"></i> {{ $enquiry->whatsapp_no }}</span>
             </div>
           </td>
-          <td>
+          <td style="white-space:nowrap;">
             @if ($enquiry->source === 'web')
-              <span class="badge-premium" style="background:#e0f2fe; color:#0369a1;"><i class="fas fa-globe" style="margin-right:4px;"></i>Website</span>
+              <span class="badge-premium source-pill" style="background:#e0f2fe; color:#0369a1;"><i class="fas fa-globe"></i>Website</span>
             @else
-              <span class="badge-premium" style="background:#ede9fe; color:#6d28d9;"><i class="fas fa-mobile-alt" style="margin-right:4px;"></i>App</span>
+              <span class="badge-premium source-pill" style="background:#ede9fe; color:#6d28d9;"><i class="fas fa-mobile-alt"></i>App</span>
             @endif
           </td>
-          <td>{{ $enquiry->created_at->format('d M Y, h:i A') }}</td>
+          <td>
+            <div style="white-space:nowrap;">{{ $enquiry->created_at->format('d M Y') }}</div>
+            <div style="white-space:nowrap; font-size:0.85rem; color:#777;">{{ $enquiry->created_at->format('h:i A') }}</div>
+          </td>
           <td onclick="toggleDropdown(this)" style="cursor: pointer;">
             <div class="status-wrapper">
                 <span class="badge-premium {{ $enquiry->status == 'Done' ? 'badge-success' : 'badge-warning' }} status-label">
@@ -131,6 +134,7 @@
   /* No additional styles needed for container, using global utilities */
   .hidden { display: none; }
   .status-wrapper { display: flex; align-items: center; }
+  .source-pill { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; line-height: 1.2; }
 </style>
 
 <script>
