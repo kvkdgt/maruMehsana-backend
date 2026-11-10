@@ -68,7 +68,6 @@ return [
 
     'business_default' => 'Local business',
     'rating_aria'      => 'Average :rating stars from :count reviews',
-    'save_business'    => 'Save this business',
     'view_place'       => 'View place',
     'per_month'        => 'month',
     'per_year'         => 'year',

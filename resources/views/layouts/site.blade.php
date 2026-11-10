@@ -69,7 +69,6 @@
         <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
         <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></symbol>
         <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></symbol>
-        <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol>
         <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.9 6.9-1z"/></symbol>
         <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
         <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></symbol>
@@ -92,12 +91,13 @@
 
             <nav class="nav-panel" id="nav-panel" aria-label="{{ __('home.nav_aria') }}">
                 <ul class="nav-links">
-                    <li><a href="#home" data-spy="home" class="is-active" aria-current="true">{{ __('home.nav_home') }}</a></li>
-                    <li><a href="#businesses" data-spy="businesses">{{ __('home.nav_businesses') }}</a></li>
-                    <li><a href="#places" data-spy="places">{{ __('home.nav_places') }}</a></li>
-                    <li><a href="#news" data-spy="news">{{ __('home.nav_news') }}</a></li>
-                    <li><a href="#jobs" data-spy="jobs">{{ __('home.nav_jobs') }}</a></li>
-                    <li><a href="{{ $hasFacts ? '#facts' : '#app' }}" data-spy="{{ $hasFacts ? 'facts' : 'app' }}">{{ __('home.nav_facts') }}</a></li>
+                    {{-- Whole home page counts as "Home". Other tabs get their own pages later; until then they jump to the home section. --}}
+                    <li><a href="{{ url('/') }}" class="is-active" aria-current="page">{{ __('home.nav_home') }}</a></li>
+                    <li><a href="#businesses">{{ __('home.nav_businesses') }}</a></li>
+                    <li><a href="#places">{{ __('home.nav_places') }}</a></li>
+                    <li><a href="#news">{{ __('home.nav_news') }}</a></li>
+                    <li><a href="#jobs">{{ __('home.nav_jobs') }}</a></li>
+                    <li><a href="{{ $hasFacts ? '#facts' : '#app' }}">{{ __('home.nav_facts') }}</a></li>
                 </ul>
             </nav>
 

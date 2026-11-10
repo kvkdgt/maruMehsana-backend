@@ -68,7 +68,6 @@ return [
 
     'business_default' => 'સ્થાનિક વ્યવસાય',
     'rating_aria'      => ':count સમીક્ષાઓમાંથી સરેરાશ :rating સ્ટાર',
-    'save_business'    => 'આ વ્યવસાય સાચવો',
     'view_place'       => 'સ્થળ જુઓ',
     'per_month'        => 'મહિને',
     'per_year'         => 'વર્ષે',

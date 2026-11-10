@@ -227,9 +227,6 @@
                                     <img src="{{ $img($business->thumbnail) }}" alt="" width="400" height="260" loading="lazy" decoding="async" onerror="this.remove()">
                                 @endif
                             </div>
-                            <button type="button" class="heart" data-save="{{ $business->id }}" aria-pressed="false" aria-label="{{ __('home.save_business') }}: {{ $business->name }}">
-                                <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
-                            </button>
                             <div class="biz-body">
                                 <h3 class="clamp-1"><a class="stretched" href="{{ url('/business/' . $business->id) }}">{{ $business->name }}</a></h3>
                                 <p class="biz-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
@@ -316,10 +313,7 @@
                                 </span>
                                 <span class="place-foot">
                                     <span class="place-text">
-                                        <span class="place-name clamp-1">{{ $place->name }}</span>
-                                        @if ($place->location)
-                                            <span class="place-loc clamp-1"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ $place->location }}</span>
-                                        @endif
+                                        <span class="place-name clamp-2">{{ $place->name }}</span>
                                     </span>
                                     <span class="go" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
                                 </span>

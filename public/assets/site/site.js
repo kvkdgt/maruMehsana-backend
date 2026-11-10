@@ -2,7 +2,6 @@
   'use strict';
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var header = document.querySelector('.site-header');
   var toggle = document.querySelector('.nav-toggle');
   var panel = document.getElementById('nav-panel');
   var langMenu = document.getElementById('lang-menu');
@@ -37,64 +36,6 @@
     if (e.key !== 'Escape') return;
     if (langMenu && langMenu.open) { langMenu.open = false; var s = langMenu.querySelector('summary'); if (s) s.focus(); }
     setMenu(false);
-  });
-
-  /* ---------------- Active nav link while scrolling ---------------- */
-  var spyLinks = [].slice.call(document.querySelectorAll('[data-spy]'));
-  var spyTargets = spyLinks.map(function (a) { return document.getElementById(a.getAttribute('data-spy')); });
-  var lockUntil = 0;
-  var ticking = false;
-
-  function setNavActive(id) {
-    spyLinks.forEach(function (a) {
-      var on = a.getAttribute('data-spy') === id;
-      a.classList.toggle('is-active', on);
-      if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
-    });
-  }
-  function spy() {
-    ticking = false;
-    if (Date.now() < lockUntil) return;
-    var y = (header ? header.offsetHeight : 64) + 140;
-    var best = 'home', bestTop = -Infinity;
-    spyTargets.forEach(function (el) {
-      if (!el) return;
-      var top = el.getBoundingClientRect().top;
-      if (top <= y && top > bestTop) { bestTop = top; best = el.id; }
-    });
-    var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-    if (atBottom && spyLinks.length) best = spyLinks[spyLinks.length - 1].getAttribute('data-spy');
-    setNavActive(best);
-  }
-  if (spyLinks.length) {
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; window.requestAnimationFrame(spy); }
-    }, { passive: true });
-    spyLinks.forEach(function (a) {
-      a.addEventListener('click', function () {
-        setNavActive(a.getAttribute('data-spy'));
-        lockUntil = Date.now() + 1100;
-      });
-    });
-    spy();
-  }
-
-  /* ---------------- Saved businesses (hearts, stored on this device only) ---------------- */
-  var KEY = 'mm_saved_businesses';
-  var saved = [];
-  try { saved = JSON.parse(window.localStorage.getItem(KEY) || '[]') || []; } catch (e) { saved = []; }
-  function persistSaved() { try { window.localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* storage unavailable */ } }
-  [].forEach.call(document.querySelectorAll('.heart[data-save]'), function (btn) {
-    var id = btn.getAttribute('data-save');
-    if (saved.indexOf(id) !== -1) btn.setAttribute('aria-pressed', 'true');
-    btn.addEventListener('click', function () {
-      var on = btn.getAttribute('aria-pressed') !== 'true';
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      var i = saved.indexOf(id);
-      if (on && i === -1) saved.push(id);
-      if (!on && i !== -1) saved.splice(i, 1);
-      persistSaved();
-    });
   });
 
   /* ---------------- Facts rotator ---------------- */
