@@ -457,7 +457,8 @@ class NotificationController extends Controller
             'title' => $newsArticle->title,
             'description' => $description,
             'audience' => 'all_users',
-            'banner' => 'news/'.$newsArticle->image,
+            // No photo -> no banner (previously "news/" was stored, giving FCM a broken image URL)
+            'banner' => $newsArticle->image ? 'news/' . $newsArticle->image : null,
             'news_article_id' => $newsArticle->id,
             'type' => 'news',
             'auto_scheduled_at' => $autoScheduledAt,

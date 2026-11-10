@@ -301,10 +301,62 @@ class SendFcmNotificationJob implements ShouldQueue
                     'error' => $errorMessage
                 ]);
                 $this->logNotification($user, 'failed', $errorMessage, $deviceType);
+
+                if ($this->isDeadToken($responseData['error'])) {
+                    $this->removeToken($user, $fcmToken);
+                }
             } else {
                 $messageId = $responseData['name'] ?? null;
                 $this->logNotification($user, 'sent', null, $deviceType, $messageId);
             }
+        }
+    }
+
+    /**
+     * True when FCM says the token will never work again (app uninstalled,
+     * data cleared, token replaced). Temporary errors (quota, server) are not dead.
+     */
+    private function isDeadToken(array $error): bool
+    {
+        foreach ($error['details'] ?? [] as $detail) {
+            if (($detail['errorCode'] ?? null) === 'UNREGISTERED') {
+                return true;
+            }
+        }
+
+        $message = (string) ($error['message'] ?? '');
+
+        return stripos($message, 'NotRegistered') !== false
+            || stripos($message, 'Requested entity was not found') !== false
+            || stripos($message, 'not a valid FCM registration token') !== false;
+    }
+
+    /**
+     * Remove a dead token from the user so later notifications skip it.
+     */
+    private function removeToken(AppUser $user, string $fcmToken): void
+    {
+        try {
+            $fresh = AppUser::find($user->id);
+            if (!$fresh || !is_array($fresh->fcm_tokens)) {
+                return;
+            }
+
+            $remaining = array_values(array_filter($fresh->fcm_tokens, fn ($t) => $t !== $fcmToken));
+            if (count($remaining) === count($fresh->fcm_tokens)) {
+                return;
+            }
+
+            $fresh->fcm_tokens = $remaining;
+            $fresh->save();
+
+            Log::info('Removed dead FCM token', [
+                'user_id' => $user->id,
+                'token' => substr($fcmToken, 0, 20) . '...',
+                'tokens_left' => count($remaining),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Could not remove dead FCM token', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
     }
 
