@@ -31,6 +31,12 @@ Route::get('/', [App\Http\Controllers\LandingPageController::class, 'index']);
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);
+
+// Password-protected page to publish news from a phone
+Route::get('/news-upload', [App\Http\Controllers\NewsUploadController::class, 'show'])->name('news-upload');
+Route::post('/news-upload/unlock', [App\Http\Controllers\NewsUploadController::class, 'unlock'])->middleware('throttle:5,1')->name('news-upload.unlock');
+Route::post('/news-upload/lock', [App\Http\Controllers\NewsUploadController::class, 'lock'])->name('news-upload.lock');
+Route::post('/news-upload', [App\Http\Controllers\NewsUploadController::class, 'store'])->middleware('throttle:30,1')->name('news-upload.store');
 Route::get('/job/{jobId}', [ShareController::class, 'job']);
 
 

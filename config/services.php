@@ -44,4 +44,12 @@ return [
         'agency_username' => env('NEWS_API_AGENCY_USERNAME', 'MaruMehsana'),
     ],
 
+    /*
+    | Password-protected "upload news" web page (/news-upload).
+    | Only the SHA-256 hash of the password is stored, never the password itself.
+    */
+    'news_upload' => [
+        'password_sha256' => env('NEWS_UPLOAD_PASSWORD_SHA256', '3902b8f0203db5d6f92cfe7edf1322ea82c93f9df66995b1fef0bcc932b566c0'),
+    ],
+
 ];
