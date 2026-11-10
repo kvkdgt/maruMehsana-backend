@@ -146,8 +146,11 @@ input { font: inherit; }
 
 .search-panel { position: absolute; left: 0; right: 0; top: calc(100% + 10px); max-height: min(440px, 62vh); overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow-lift); padding: 8px; }
 .search-panel[hidden], .search-msg[hidden] { display: none; }
-/* While results are open, lift the hero above the quick tiles and stop it clipping the panel */
-.hero:has(.search-panel:not([hidden])) { overflow: visible; z-index: 6; }
+/* While results are open: stop the hero clipping the panel, and drop its stacking context so the
+   search (z-index 20) layers above the quick tiles (z-index 5) while the photo, scrim and text stay
+   below them, exactly as when closed. The hero's own fill would then cover .hero-bg (z-index -1),
+   so it goes transparent; the page colour behind it is the same #f6f9fd. */
+.hero:has(.search-panel:not([hidden])) { overflow: visible; isolation: auto; background: transparent; }
 .search-msg { padding: 18px 16px; color: var(--muted); font-weight: 500; font-size: 0.95rem; }
 .search-group { padding-bottom: 4px; }
 .search-group + .search-group { border-top: 1px solid var(--line); padding-top: 4px; margin-top: 4px; }
@@ -450,6 +453,10 @@ button.tile { width: 100%; font: inherit; border: 0; cursor: pointer; }
 .footer-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 24px; padding-block: 16px 28px; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
 
 /* ---------- Responsive ---------- */
+/* The clear (x) button carries [hidden] until there is text, but display:grid overrode it,
+   stealing room from the placeholder (all screen sizes) */
+.search-clear[hidden] { display: none; }
+
 @media (max-width: 1180px) {
   .nav-tagline, .nav-sep { display: none; }
   .tile-label { font-size: 0.92rem; }
@@ -471,7 +478,10 @@ button.tile { width: 100%; font: inherit; border: 0; cursor: pointer; }
 
   .hero { min-height: 0; }
   .hero-inner { padding-top: 44px; padding-bottom: 130px; }
-  .quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  /* 5 tiles on a 6-track grid: 3 on the first row, 2 wider ones on the second (no empty slot) */
+  .quick-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .quick-grid > li { grid-column: span 2; }
+  .quick-grid > li:nth-child(n+4) { grid-column: span 3; }
   .tile { min-height: 116px; }
 
   .duo { grid-template-columns: minmax(0, 1fr); }
@@ -495,6 +505,9 @@ button.tile { width: 100%; font: inherit; border: 0; cursor: pointer; }
   .hero-bg img { object-position: 60% 12%; }
   .app-inner { grid-template-columns: minmax(0, 1fr); padding-block: 38px 40px; }
   .phone { display: none; }
+  /* Waves: a short band along the bottom instead of tall stretched blobs behind the text */
+  .app-bg svg { position: absolute; left: 0; bottom: 0; height: 80px; }
+  .app-inner { padding-bottom: 100px; }
   .app-feats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   .app-get { justify-content: flex-start; }
 }
@@ -534,6 +547,9 @@ button.tile { width: 100%; font: inherit; border: 0; cursor: pointer; }
   .biz-grid > li, .place-grid > li { flex: 0 0 72%; max-width: 300px; scroll-snap-align: start; }
 
   .news-thumb { width: 104px; }
+  /* Agency on its own line, without a dangling separator dot */
+  .news-agency { flex-basis: 100%; }
+  .news-agency::before { display: none; }
   .job-row { padding: 12px 14px; }
 
   .facts-card { flex-wrap: wrap; padding: 18px; }
@@ -542,12 +558,34 @@ button.tile { width: 100%; font: inherit; border: 0; cursor: pointer; }
   .app-feats li { flex-direction: row; text-align: left; }
   .app-get { flex-wrap: wrap; }
   .app { margin-top: 48px; }
+
+  /* Bigger tap targets for footer links */
+  .footer-links { gap: 2px 20px; }
+  .footer-links a { display: inline-block; padding-block: 8px; }
+}
+
+@media (max-width: 400px) {
+  /* Logo + language switcher + menu button must fit 360px phones (English label is widest) */
+  .nav { gap: 8px; }
+  .brand { gap: 8px; }
+  .brand img { width: 36px; height: 36px; }
+  .nav-actions { gap: 6px; }
+  .lang summary { padding: 0 9px; gap: 5px; }
 }
 
 @media (max-width: 380px) {
   .brand-name { font-size: 1.08rem; }
   .hero h1 { font-size: 1.85rem; }
   .tile-label { font-size: 0.74rem; }
+}
+
+/* Small phones (< 360px, e.g. 320px / 280px): the header was ~341px wide and widened the
+   whole page. Language switcher shows only the globe (its summary keeps the aria-label). */
+@media (max-width: 359px) {
+  .lang summary > span, .lang summary .icon--sm { display: none; }
+  .lang summary { width: 40px; padding: 0; justify-content: center; }
+  .brand img { width: 32px; height: 32px; }
+  .brand-name { font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
