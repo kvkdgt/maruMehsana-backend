@@ -146,6 +146,8 @@ input { font: inherit; }
 
 .search-panel { position: absolute; left: 0; right: 0; top: calc(100% + 10px); max-height: min(440px, 62vh); overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow-lift); padding: 8px; }
 .search-panel[hidden], .search-msg[hidden] { display: none; }
+/* While results are open, lift the hero above the quick tiles and stop it clipping the panel */
+.hero:has(.search-panel:not([hidden])) { overflow: visible; z-index: 6; }
 .search-msg { padding: 18px 16px; color: var(--muted); font-weight: 500; font-size: 0.95rem; }
 .search-group { padding-bottom: 4px; }
 .search-group + .search-group { border-top: 1px solid var(--line); padding-top: 4px; margin-top: 4px; }
