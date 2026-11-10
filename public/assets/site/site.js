@@ -38,6 +38,107 @@
     setMenu(false);
   });
 
+  /* ---------------- "Add your business" enquiry popup ---------------- */
+  var enq = document.getElementById('enquiry');
+  var enqForm = document.getElementById('enq-form');
+  if (enq && enqForm && typeof enq.showModal === 'function') {
+    var enqMsg = document.getElementById('enq-msg');
+    var enqBtn = document.getElementById('enq-submit');
+    var enqBtnText = enqBtn.textContent;
+    var mobile = enqForm.elements.mobile_no;
+    var whatsapp = enqForm.elements.whatsapp_no;
+    var same = document.getElementById('enq-same');
+
+    function syncWhatsapp() {
+      if (same.checked) whatsapp.value = mobile.value;
+      whatsapp.readOnly = same.checked;
+    }
+    function digitsOnly(input) { input.value = input.value.replace(/\D/g, '').slice(0, 10); }
+    function setMsg(text, ok) {
+      enqMsg.textContent = text || '';
+      enqMsg.className = 'enq-msg' + (text ? (ok ? ' is-ok' : ' is-bad') : '');
+    }
+    function clearErrors() {
+      [].forEach.call(enqForm.querySelectorAll('[data-err]'), function (p) { p.textContent = ''; });
+      [].forEach.call(enqForm.querySelectorAll('[aria-invalid]'), function (i) { i.removeAttribute('aria-invalid'); });
+    }
+    function showErrors(errors) {
+      var first = null;
+      Object.keys(errors).forEach(function (name) {
+        var p = enqForm.querySelector('[data-err="' + name + '"]');
+        var input = enqForm.elements[name];
+        if (p) p.textContent = [].concat(errors[name])[0];
+        if (input) { input.setAttribute('aria-invalid', 'true'); if (!first) first = input; }
+      });
+      if (first) first.focus();
+    }
+
+    mobile.addEventListener('input', function () { digitsOnly(mobile); syncWhatsapp(); });
+    whatsapp.addEventListener('input', function () { digitsOnly(whatsapp); });
+    same.addEventListener('change', syncWhatsapp);
+    syncWhatsapp();
+
+    var enqFields = document.getElementById('enq-fields');
+    var enqDone = document.getElementById('enq-done');
+    function showDone(text) {
+      document.getElementById('enq-done-text').textContent = text;
+      enqFields.hidden = true;
+      enqDone.hidden = false;
+      enqDone.querySelector('button').focus();
+    }
+
+    [].forEach.call(document.querySelectorAll('[data-open-enquiry]'), function (b) {
+      b.addEventListener('click', function () {
+        // Start fresh each time the popup opens (after a previous success)
+        enqFields.hidden = false;
+        enqDone.hidden = true;
+        setMsg('');
+        if (!enq.open) enq.showModal();
+        enqForm.elements.business_name.focus();
+      });
+    });
+    [].forEach.call(enq.querySelectorAll('[data-close-enquiry]'), function (b) {
+      b.addEventListener('click', function () { enq.close(); });
+    });
+    // Click on the dark backdrop closes the popup
+    enq.addEventListener('click', function (e) { if (e.target === enq) enq.close(); });
+
+    enqForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearErrors();
+      setMsg('');
+      syncWhatsapp();
+      enqBtn.disabled = true;
+      enqBtn.textContent = enqForm.getAttribute('data-sending');
+
+      window.fetch(enqForm.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(enqForm),
+        credentials: 'same-origin'
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) { return { status: res.status, body: body }; });
+      }).then(function (r) {
+        if (r.status === 201) {
+          enqForm.reset();
+          syncWhatsapp();
+          showDone(r.body.message);
+        } else if (r.status === 422 && r.body.errors) {
+          showErrors(r.body.errors);
+        } else if (r.status === 429) {
+          setMsg(enqForm.getAttribute('data-err-many'), false);
+        } else {
+          setMsg(enqForm.getAttribute('data-err-generic'), false);
+        }
+      }).catch(function () {
+        setMsg(enqForm.getAttribute('data-err-generic'), false);
+      }).then(function () {
+        enqBtn.disabled = false;
+        enqBtn.textContent = enqBtnText;
+      });
+    });
+  }
+
   /* ---------------- Facts rotator ---------------- */
   var factEl = document.getElementById('fact-text');
   var factBtn = document.getElementById('fact-next');

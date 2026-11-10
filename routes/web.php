@@ -32,6 +32,9 @@ Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);
 
+// "Add your business" popup on the home page (stored with source = web)
+Route::post('/business-enquiry', [BusinessEnquiryController::class, 'createFromWeb'])->middleware('throttle:5,1')->name('business-enquiry.web');
+
 // Password-protected page to publish news from a phone
 Route::get('/news-upload', [App\Http\Controllers\NewsUploadController::class, 'show'])->name('news-upload');
 Route::post('/news-upload/unlock', [App\Http\Controllers\NewsUploadController::class, 'unlock'])->middleware('throttle:5,1')->name('news-upload.unlock');

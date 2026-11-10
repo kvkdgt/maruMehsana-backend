@@ -368,6 +368,12 @@ class AdminController extends Controller
             $businessEnquiryQuery->where('status', $status);
         }
 
+        // Apply source filter (app / web)
+        $source = $request->get('source');
+        if (in_array($source, ['app', 'web'], true)) {
+            $businessEnquiryQuery->where('source', $source);
+        }
+
         // Apply date range filter
         if ($startDate) {
             $businessEnquiryQuery->whereDate('created_at', '>=', $startDate);

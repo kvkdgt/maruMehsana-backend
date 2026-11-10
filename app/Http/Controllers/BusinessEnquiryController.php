@@ -19,6 +19,29 @@ class BusinessEnquiryController extends Controller {
         return response()->json(['message' => 'Business enquiry created successfully!', 'data' => $enquiry], 201);
     }
 
+    // 2️⃣ Create Business Enquiry from the website popup (source = "web").
+    // The app keeps using create() above, which stores the default source "app".
+    public function createFromWeb(Request $request) {
+        // Honeypot: real visitors never see or fill the "website" field.
+        if ($request->filled('website')) {
+            return response()->json(['message' => 'ok'], 201);
+        }
+
+        $data = $request->validate([
+            'business_name' => 'required|string|max:255',
+            'owner_name' => 'required|string|max:255',
+            'mobile_no' => ['required', 'regex:/^[0-9]{10}$/'],
+            'whatsapp_no' => ['required', 'regex:/^[0-9]{10}$/'],
+        ], [
+            'mobile_no.regex' => __('home.enq_err_phone'),
+            'whatsapp_no.regex' => __('home.enq_err_phone'),
+        ]);
+
+        BusinessEnquiry::create($data + ['source' => 'web']);
+
+        return response()->json(['message' => __('home.enq_success')], 201);
+    }
+
 
     // 3️⃣ Update Status of a Business Enquiry
     public function updateStatus(Request $request, $id) {

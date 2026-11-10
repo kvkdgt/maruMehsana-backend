@@ -34,6 +34,15 @@
         </div>
 
         <div class="filter-control">
+          <label>Source</label>
+          <select name="source" class="filter-input">
+            <option value="">All Sources</option>
+            <option value="app" {{ request()->source == 'app' ? 'selected' : '' }}>App</option>
+            <option value="web" {{ request()->source == 'web' ? 'selected' : '' }}>Website</option>
+          </select>
+        </div>
+
+        <div class="filter-control">
           <label>Start Date</label>
           <input type="date" name="start_date" value="{{ request()->start_date }}" class="filter-input">
         </div>
@@ -66,6 +75,7 @@
           <th>Sr. No.</th>
           <th>Business & Owner</th>
           <th>Contact Info</th>
+          <th>Source</th>
           <th>Created At</th>
           <th>Status</th>
         </tr>
@@ -85,6 +95,13 @@
                 <span style="font-size: 0.9rem;"><i class="fas fa-phone-alt" style="color: #3498db; width: 15px;"></i> {{ $enquiry->mobile_no }}</span>
                 <span style="font-size: 0.9rem;"><i class="fab fa-whatsapp" style="color: #27ae60; width: 15px;"></i> {{ $enquiry->whatsapp_no }}</span>
             </div>
+          </td>
+          <td>
+            @if ($enquiry->source === 'web')
+              <span class="badge-premium" style="background:#e0f2fe; color:#0369a1;"><i class="fas fa-globe" style="margin-right:4px;"></i>Website</span>
+            @else
+              <span class="badge-premium" style="background:#ede9fe; color:#6d28d9;"><i class="fas fa-mobile-alt" style="margin-right:4px;"></i>App</span>
+            @endif
           </td>
           <td>{{ $enquiry->created_at->format('d M Y, h:i A') }}</td>
           <td onclick="toggleDropdown(this)" style="cursor: pointer;">

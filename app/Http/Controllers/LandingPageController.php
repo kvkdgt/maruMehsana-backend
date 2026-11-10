@@ -60,7 +60,15 @@ class LandingPageController extends Controller
             ->limit(5)
             ->get(['id', 'name']);
 
+        // Real numbers for the "Add your business" popup.
+        $enqStats = [
+            'businesses' => Business::count(),
+            'categories' => Category::whereHas('businesses')->count(),
+            'views'      => (int) Business::sum('visitors'),
+        ];
+
         $response = response()->view('landing', compact(
+            'enqStats',
             'lang',
             'topBusinesses',
             'latestNews',

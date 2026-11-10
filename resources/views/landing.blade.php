@@ -32,8 +32,6 @@
         return $range . ($per ? ' / ' . __('home.' . $per) : '');
     };
 
-    $factsId = $facts->count() ? '#facts' : '#app';
-
     $searchI18n = [
         'api'     => url('/api'),
         'base'    => url('/'),
@@ -195,11 +193,118 @@
             <li><a href="#places" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
             <li><a href="#news" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
             <li><a href="#jobs" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
-            <li><a href="{{ $factsId }}" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="tile-label">{{ __('home.tile_facts') }}</span></a></li>
-            <li><a href="{{ $playStore }}" class="tile tile--add" target="_blank" rel="noopener"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></a></li>
+            <li><button type="button" class="tile tile--add" data-open-enquiry aria-haspopup="dialog" aria-controls="enquiry"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></button></li>
         </ul>
     </nav>
 </div>
+
+{{-- ============ ADD YOUR BUSINESS: enquiry popup (saved with source = web) ============ --}}
+<dialog class="enq" id="enquiry" aria-labelledby="enq-title">
+  <div class="enq-wrap">
+    {{-- Left: brand + mock app cards + real stats (becomes a slim banner on phones) --}}
+    <aside class="enq-side" aria-hidden="true">
+        <div class="enq-brand">
+            <img src="{{ $logo }}" alt="" width="34" height="34">
+            <span>Maru <b>Mehsana</b></span>
+            <span class="enq-pill">{{ __('home.enq_pill') }}</span>
+        </div>
+
+        <div class="enq-stage">
+            {{-- Card 1: what their listing will look like --}}
+            <div class="mk mk-listing">
+                <div class="mk-row">
+                    <span class="mk-thumb"><svg class="icon"><use href="#i-store"/></svg></span>
+                    <div class="mk-info">
+                        <p class="mk-title">{{ __('home.enq_mk_name') }}</p>
+                        <p class="mk-meta">
+                            <span class="mk-chip">{{ __('home.enq_mk_cat') }}</span>
+                            <span class="mk-stars"><svg class="icon"><use href="#i-star"/></svg>4.8</span>
+                        </p>
+                        <p class="mk-place"><svg class="icon"><use href="#i-pin"/></svg>{{ __('home.enq_mk_place') }}</p>
+                    </div>
+                    <span class="mk-live"><i></i>{{ __('home.enq_mk_live_short') }}</span>
+                </div>
+                <div class="mk-actions">
+                    <span class="mk-btn mk-btn--call"><svg class="icon"><use href="#i-phone"/></svg>{{ __('home.enq_mk_call') }}</span>
+                    <span class="mk-btn mk-btn--wa"><svg class="icon"><use href="#i-chat"/></svg>WhatsApp</span>
+                </div>
+            </div>
+
+            {{-- Card 2: incoming customer message --}}
+            <div class="mk mk-msg">
+                <p class="mk-card-head"><span class="mk-dot mk-dot--green"><svg class="icon"><use href="#i-chat"/></svg></span>{{ __('home.enq_mk_new') }}</p>
+                <p class="mk-bubble">{{ __('home.enq_mk_msg') }}</p>
+                <p class="mk-time">2 {{ __('home.enq_mk_min') }}</p>
+            </div>
+
+            {{-- Card 3: profile views --}}
+            <div class="mk mk-views">
+                <p class="mk-card-head"><span class="mk-dot"><svg class="icon"><use href="#i-trend"/></svg></span>{{ __('home.enq_mk_views') }}</p>
+                <p class="mk-views-num">1,284 <b class="mk-up">+24%</b></p>
+                <div class="mk-bars"><i style="height:35%"></i><i style="height:50%"></i><i style="height:42%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:80%"></i><i style="height:100%"></i></div>
+            </div>
+        </div>
+
+        <div class="enq-trust">
+            <p class="enq-trust-title">{{ __('home.enq_trust') }}</p>
+            <div class="enq-stats">
+                <div><b>{{ number_format($enqStats['businesses']) }}+</b><span>{{ __('home.enq_stat_biz') }}</span></div>
+                <div><b>{{ number_format($enqStats['categories']) }}+</b><span>{{ __('home.enq_stat_cat') }}</span></div>
+                <div><b>{{ $enqStats['views'] >= 1000 ? number_format($enqStats['views'] / 1000, 1) . 'K' : number_format($enqStats['views']) }}+</b><span>{{ __('home.enq_stat_views') }}</span></div>
+            </div>
+        </div>
+    </aside>
+
+    {{-- Right: form --}}
+    <form class="enq-form" id="enq-form" method="POST" action="{{ route('business-enquiry.web') }}" novalidate
+          data-sending="{{ __('home.enq_sending') }}" data-err-generic="{{ __('home.enq_err_generic') }}" data-err-many="{{ __('home.enq_err_many') }}">
+        @csrf
+        <button type="button" class="enq-x" data-close-enquiry aria-label="{{ __('home.enq_close') }}"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+        <div class="enq-head">
+            <p class="enq-eyebrow">{{ __('home.enq_eyebrow') }}</p>
+            <h2 id="enq-title">{{ __('home.enq_h_a') }} <span class="enq-accent">{{ __('home.enq_h_u') }}<svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9C40 2 90 2 130 5c24 2 44 3 67 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span> {{ __('home.enq_h_b') }}</h2>
+        </div>
+        <div class="enq-done" id="enq-done" hidden>
+            <span class="enq-done-ic"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+            <p class="enq-done-text" id="enq-done-text"></p>
+            <button type="button" class="enq-submit" data-close-enquiry>{{ __('home.enq_close') }}</button>
+        </div>
+        <div class="enq-body" id="enq-fields">
+            <p class="enq-sub">{{ __('home.enq_sub') }}</p>
+
+            <div class="enq-grid">
+                <div class="enq-field">
+                    <label for="enq-business">{{ __('home.enq_business') }}</label>
+                    <input id="enq-business" name="business_name" type="text" maxlength="255" required autocomplete="organization">
+                    <p class="enq-err" data-err="business_name"></p>
+                </div>
+                <div class="enq-field">
+                    <label for="enq-owner">{{ __('home.enq_owner') }}</label>
+                    <input id="enq-owner" name="owner_name" type="text" maxlength="255" required autocomplete="name">
+                    <p class="enq-err" data-err="owner_name"></p>
+                </div>
+                <div class="enq-field">
+                    <label for="enq-mobile">{{ __('home.enq_mobile') }}</label>
+                    <input id="enq-mobile" name="mobile_no" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required autocomplete="tel-national">
+                    <p class="enq-err" data-err="mobile_no"></p>
+                </div>
+                <div class="enq-field">
+                    <label for="enq-whatsapp">{{ __('home.enq_whatsapp') }}</label>
+                    <input id="enq-whatsapp" name="whatsapp_no" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required>
+                    <p class="enq-err" data-err="whatsapp_no"></p>
+                </div>
+            </div>
+            <label class="enq-check"><input type="checkbox" id="enq-same" checked> {{ __('home.enq_same') }}</label>
+
+            {{-- Honeypot for bots: hidden from people and screen readers --}}
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="enq-hp" aria-hidden="true">
+
+            <p class="enq-msg" id="enq-msg" role="status" aria-live="polite"></p>
+            <button type="submit" class="enq-submit" id="enq-submit">{{ __('home.enq_submit') }}</button>
+        </div>
+    </form>
+  </div>
+</dialog>
 
 {{-- ======================= CONTENT: ROW 1 ======================= --}}
 <div class="container home-rows">
