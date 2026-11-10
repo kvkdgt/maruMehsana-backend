@@ -72,6 +72,7 @@
 
                 <label class="check"><input type="checkbox" name="is_for_mehsana" value="1" @checked(old('is_for_mehsana'))> Mehsana news</label>
                 <label class="check"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured'))> Featured</label>
+                <label class="check"><input type="checkbox" name="send_notification" value="1" @checked(old('send_notification', !$errors->any()))> Send push notification to all users</label>
 
                 <button type="submit" id="submit-btn">Publish</button>
             </form>

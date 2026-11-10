@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Api\ExternalNewsController;
+use App\Models\NewsArticle;
 use Illuminate\Http\Request;
 
 /**
@@ -74,8 +76,21 @@ class NewsUploadController extends Controller
         $body = $response->getData(true);
 
         if ($response->getStatusCode() === 201) {
-            return redirect()->route('news-upload')
-                ->with('success', 'News published: ' . $body['data']['title']);
+            $message = 'News published: ' . $body['data']['title'];
+
+            // Same as the agency panel: schedule a push to all users (sent 5 minutes later).
+            if ($request->boolean('send_notification')) {
+                $article = NewsArticle::find($body['data']['id']);
+                $result = $article && $article->is_active
+                    ? app(NotificationController::class)->scheduleNewsNotification($article)
+                    : ['success' => false, 'message' => 'article is not active'];
+
+                $message .= $result['success']
+                    ? '. Notification will be sent at ' . $result['scheduled_at']->format('h:i A') . '.'
+                    : '. Notification NOT scheduled: ' . $result['message'];
+            }
+
+            return redirect()->route('news-upload')->with('success', $message);
         }
 
         $errors = $body['errors'] ?? ['general' => [$body['message'] ?? 'Could not publish the news.']];
