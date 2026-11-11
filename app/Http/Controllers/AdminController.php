@@ -78,7 +78,7 @@ class AdminController extends Controller
     
     // Visitor statistics
     $totalCategoryVisitors = Category::sum('category_visitors');
-    $totalBusinessVisitors = Business::sum('visitors');
+    $totalBusinessVisitors = Business::sum('visitors') + Business::sum('web_visitors');
     $totalTouristVisitors = TouristPlace::sum('visitors');
     
     // App users statistics
@@ -286,9 +286,9 @@ class AdminController extends Controller
 
         // Apply sorting
         if ($sortBy == 'highest') {
-            $businessesQuery->orderBy('visitors', 'desc');
+            $businessesQuery->orderByRaw('(visitors + web_visitors) desc');
         } elseif ($sortBy == 'lowest') {
-            $businessesQuery->orderBy('visitors', 'asc');
+            $businessesQuery->orderByRaw('(visitors + web_visitors) asc');
         } elseif ($sortBy == 'newest') {
             $businessesQuery->orderBy('created_at', 'desc');
         } elseif ($sortBy == 'oldest') {

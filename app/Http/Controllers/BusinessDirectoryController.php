@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\Business;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Public "Businesses" page: search, filter by category, sort, paginate.
@@ -114,6 +115,64 @@ class BusinessDirectoryController extends Controller
 
         return $this->rememberSiteLanguage($response, $request, $lang)
             ->header('Vary', 'Accept, X-Requested-With');
+    }
+
+    /** Public web detail page: GET /businesses/{id} (the app share link /business/{id} is separate). */
+    public function show(Request $request, int $id)
+    {
+        $lang = $this->resolveSiteLanguage($request);
+
+        $business = Business::with(['category:id,name', 'businessImages'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->findOrFail($id);
+
+        $this->countWebVisit($request, $business->id);
+
+        $similar = collect();
+        if ($business->category_id) {
+            $similar = Business::query()
+                ->with('category:id,name')
+                ->withCount('reviews')
+                ->withAvg('reviews', 'rating')
+                ->where('category_id', $business->category_id)
+                ->whereKeyNot($business->id)
+                ->orderByDesc('visitors')
+                ->orderByDesc('id')
+                ->limit(6)
+                ->get();
+        }
+
+        $response = response()->view('business-detail', [
+            'lang'      => $lang,
+            'activeNav' => 'businesses',
+            'business'  => $business,
+            'similar'   => $similar,
+        ]);
+
+        return $this->rememberSiteLanguage($response, $request, $lang);
+    }
+
+    /** Count one website view (separate from the app's `visitors`). Skips HEAD requests and bots. */
+    private function countWebVisit(Request $request, int $id): void
+    {
+        static $hasColumn = null;
+
+        if ($request->isMethod('HEAD')) {
+            return;
+        }
+        $ua = (string) $request->userAgent();
+        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua)) {
+            return;
+        }
+        try {
+            $hasColumn ??= Schema::hasColumn('businesses', 'web_visitors');
+            if ($hasColumn) {
+                Business::whereKey($id)->increment('web_visitors');
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** JSON for infinite scroll: card <li> markup, the next page URL (null at the end), and counts. */

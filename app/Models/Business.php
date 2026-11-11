@@ -23,6 +23,7 @@ class Business extends Model
         'delivery_reject_reason',
         'delivery_strikes',
         'visitors',
+        'web_visitors',
         'mobile_no',
         'whatsapp_no',
         'website_url',

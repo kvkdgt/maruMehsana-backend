@@ -51,7 +51,15 @@
         </div>
         <div style="text-align:center; padding:14px 20px; background:#f8f9fb; border-radius:10px; min-width:90px;">
           <div style="font-size:1.4rem; font-weight:700; color:#3498db;">{{ number_format($business->visitors) }}</div>
-          <div style="font-size:0.8rem; color:#777;">Visitors</div>
+          <div style="font-size:0.8rem; color:#777;">App Visitors</div>
+        </div>
+        <div style="text-align:center; padding:14px 20px; background:#f8f9fb; border-radius:10px; min-width:90px;">
+          <div style="font-size:1.4rem; font-weight:700; color:#16a085;">{{ number_format($business->web_visitors) }}</div>
+          <div style="font-size:0.8rem; color:#777;">Web Visitors</div>
+        </div>
+        <div style="text-align:center; padding:14px 20px; background:#f8f9fb; border-radius:10px; min-width:90px;">
+          <div style="font-size:1.4rem; font-weight:700; color:#e67e22;">{{ number_format($business->visitors + $business->web_visitors) }}</div>
+          <div style="font-size:0.8rem; color:#777;">Total Visitors</div>
         </div>
       </div>
     </div>

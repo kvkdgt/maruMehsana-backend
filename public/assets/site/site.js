@@ -598,3 +598,59 @@
     showButton(box.getAttribute('data-load'));
   }
 })();
+
+/* Business detail photo lightbox (native <dialog>) */
+(function () {
+  'use strict';
+  var dlg = document.getElementById('lb');
+  if (!dlg || typeof dlg.showModal !== 'function') return;
+  var photos;
+  try { photos = JSON.parse(dlg.getAttribute('data-photos') || '[]'); } catch (e) { photos = []; }
+  if (!photos.length) return;
+  var img = dlg.querySelector('.lb-img');
+  var count = dlg.querySelector('.lb-count');
+  var idx = 0;
+  if (photos.length < 2) dlg.classList.add('single');
+
+  function show(i) {
+    idx = (i + photos.length) % photos.length;
+    img.src = photos[idx];
+    count.textContent = (idx + 1) + ' / ' + photos.length;
+    dlg.classList.toggle('single', photos.length < 2);
+  }
+  function open(i) {
+    show(i);
+    if (!dlg.open) dlg.showModal();
+    document.body.classList.add('lb-open');
+  }
+  function close() { if (dlg.open) dlg.close(); }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-lb]');
+    if (t) { e.preventDefault(); open(parseInt(t.getAttribute('data-lb'), 10) || 0); }
+  });
+  dlg.addEventListener('close', function () { document.body.classList.remove('lb-open'); img.removeAttribute('src'); });
+  dlg.addEventListener('click', function (e) {
+    if (e.target.closest('[data-lb-close]')) return close();
+    if (e.target.closest('[data-lb-prev]')) return show(idx - 1);
+    if (e.target.closest('[data-lb-next]')) return show(idx + 1);
+    if (e.target === dlg) close();
+  });
+  dlg.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') show(idx - 1);
+    else if (e.key === 'ArrowRight') show(idx + 1);
+  });
+  img.addEventListener('error', function () {
+    if (!img.getAttribute('src')) return;
+    if (photos.length > 1) { photos.splice(idx, 1); show(idx); }
+    else close();
+  });
+  var x0 = null;
+  dlg.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  dlg.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+  });
+})();

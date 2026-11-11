@@ -19,7 +19,7 @@
     </div>
     <div class="dir-body">
         <p class="dir-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
-        <h2 class="clamp-2"><a class="stretched" href="{{ url('/business/' . $business->id) }}">{{ $business->name }}</a></h2>
+        <h2 class="clamp-2"><a class="stretched" href="{{ route('businesses.show', $business->id) }}">{{ $business->name }}</a></h2>
         @if ($reviews > 0 && $avg)
             <p class="rating" aria-label="{{ __('home.rating_aria', ['rating' => number_format((float) $avg, 1), 'count' => $reviews]) }}">
                 <svg class="icon icon--fill star" aria-hidden="true"><use href="#i-star"/></svg>

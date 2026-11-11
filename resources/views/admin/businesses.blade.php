@@ -84,7 +84,7 @@
           <th>Sr. No.</th>
           <th>Business Info</th>
           <th>Category</th>
-          <th>Visitors</th>
+          <th>Total Visitors</th>
           <th>Avg. Rating</th>
           <th>Total Reviews</th>
           <th>Actions</th>
@@ -113,9 +113,15 @@
             <span class="badge-premium badge-info">{{ $business->category->name }}</span>
           </td>
           <td>
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
-                <span style="font-weight: 500;">{{ number_format($business->visitors) }}</span>
+            <div style="white-space: nowrap;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
+                    <span style="font-weight: 600;">{{ number_format($business->visitors + $business->web_visitors) }}</span>
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 5px;">
+                    <span title="Web visitors" style="font-size: 0.72rem; font-weight: 600; color: #0e7490; background: #e0f2fe; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-globe" style="font-size: 0.65rem;"></i> {{ number_format($business->web_visitors) }}</span>
+                    <span title="App visitors" style="font-size: 0.72rem; font-weight: 600; color: #15803d; background: #dcfce7; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-mobile-alt" style="font-size: 0.65rem;"></i> {{ number_format($business->visitors) }}</span>
+                </div>
             </div>
           </td>
           <td>
