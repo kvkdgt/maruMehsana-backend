@@ -192,4 +192,29 @@ return [
     'privacy'        => 'Privacy Policy',
     'rights'         => 'All rights reserved.',
     'made'           => 'Made with care in Mehsana, Gujarat',
+
+    // Tourist places listing page (/places)
+    'plp_meta_title' => 'Tourist places in Mehsana | Maru Mehsana',
+    'plp_meta_desc'  => 'Explore temples, heritage sites and places worth visiting in and around Mehsana, with photos, ratings and directions.',
+    'plp_title'      => 'Tourist places in Mehsana',
+    'plp_sub'        => 'Temples, heritage sites and beautiful spots worth visiting around Mehsana.',
+    'plp_search_ph'  => 'Search a place or area',
+    'plp_count'      => 'places',
+    'plp_clear'      => 'Clear search',
+    'plp_none'       => 'No places found. Try another word.',
+    'plp_view'       => 'View place',
+    'plp_loading'    => 'Loading more places…',
+    'plp_end'        => 'You’ve seen all :count places',
+    'plp_showing'    => 'Showing :shown of :total places',
+
+    // Tourist place detail page (/places/{id})
+    'pld_label'      => 'Tourist place',
+    'pld_meta_desc'  => 'Photos, location, directions and reviews of :name, a place worth visiting near Mehsana.',
+    'pld_no_rating'  => 'No ratings yet',
+    'pld_location'   => 'Location',
+    'pld_directions' => 'Get directions',
+    'pld_map_title'  => 'Map of :name',
+    'pld_app_sub'    => 'See more photos, rate places and discover new spots around Mehsana in the Maru Mehsana app.',
+    'pld_more'       => 'More places to visit',
+    'pld_back'       => 'All places',
 ];

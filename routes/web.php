@@ -30,7 +30,9 @@ use App\Http\Controllers\QuizController;
 Route::get('/', [App\Http\Controllers\LandingPageController::class, 'index']);
 Route::get('/businesses', [App\Http\Controllers\BusinessDirectoryController::class, 'index'])->name('businesses');
 Route::get('/businesses/{id}', [App\Http\Controllers\BusinessDirectoryController::class, 'show'])->whereNumber('id')->name('businesses.show');
-// App share link (opens the app via deep link). The website uses /businesses/{id} instead.
+Route::get('/places', [App\Http\Controllers\PlaceDirectoryController::class, 'index'])->name('places');
+Route::get('/places/{id}', [App\Http\Controllers\PlaceDetailController::class, 'show'])->whereNumber('id')->name('places.show');
+// App share links (open the app via deep link). The website uses /businesses/{id} and /places/{id} instead.
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);

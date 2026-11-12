@@ -376,7 +376,7 @@
         } else if (r.type === 'Business') {
           biz.push({ type: 'business', title: String(r.name), href: cfg.base + '/businesses/' + encodeURIComponent(r.id) });
         } else if (r.type === 'Tourist Place') {
-          places.push({ type: 'place', title: String(r.name), href: cfg.base + '/place/' + encodeURIComponent(r.id) });
+          places.push({ type: 'place', title: String(r.name), href: cfg.base + '/places/' + encodeURIComponent(r.id) });
         }
       });
       var news = newsRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {

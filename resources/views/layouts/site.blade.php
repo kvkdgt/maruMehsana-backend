@@ -9,6 +9,8 @@
         $siteTitle = trim($__env->yieldContent('title')) ?: __('home.meta_title');
         $siteDesc  = trim($__env->yieldContent('description')) ?: __('home.meta_desc');
         $siteImage = asset('assets/site/logo-512.png');
+        // Pages can set their own share image with @section('og_image', ...); the logo stays the default.
+        $pageImage = trim($__env->yieldContent('og_image')) ?: $siteImage;
         $playStore = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
         $pageUrl   = url()->current();
         // Pages can set their own canonical (e.g. paginated or filtered lists) with @section('canonical', url).
@@ -37,11 +39,11 @@
     <meta property="og:title" content="{{ $siteTitle }}">
     <meta property="og:description" content="{{ $siteDesc }}">
     <meta property="og:url" content="{{ $canonical }}">
-    <meta property="og:image" content="{{ $siteImage }}">
+    <meta property="og:image" content="{{ $pageImage }}">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ $siteTitle }}">
     <meta name="twitter:description" content="{{ $siteDesc }}">
-    <meta name="twitter:image" content="{{ $siteImage }}">
+    <meta name="twitter:image" content="{{ $pageImage }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,7 +106,7 @@
                     {{-- Tabs with their own page link there; the rest jump to the home page section until their page exists. --}}
                     <li><a href="{{ url('/') }}" @if ($activeNav === 'home') class="is-active" aria-current="page" @endif>{{ __('home.nav_home') }}</a></li>
                     <li><a href="{{ route('businesses') }}" @if ($activeNav === 'businesses') class="is-active" aria-current="page" @endif>{{ __('home.nav_businesses') }}</a></li>
-                    <li><a href="{{ $sec('places') }}">{{ __('home.nav_places') }}</a></li>
+                    <li><a href="{{ route('places') }}" @if ($activeNav === 'places') class="is-active" aria-current="page" @endif>{{ __('home.nav_places') }}</a></li>
                     <li><a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a></li>
                     <li><a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a></li>
                     <li><a href="{{ $sec($onHome && !$hasFacts ? 'app' : 'facts') }}">{{ __('home.nav_facts') }}</a></li>
@@ -147,7 +149,7 @@
             </div>
             <nav class="footer-links" aria-label="{{ __('home.footer_explore') }}">
                 <a href="{{ route('businesses') }}">{{ __('home.nav_businesses') }}</a>
-                <a href="{{ $sec('places') }}">{{ __('home.nav_places') }}</a>
+                <a href="{{ route('places') }}">{{ __('home.nav_places') }}</a>
                 <a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a>
                 <a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a>
                 <a href="{{ $playStore }}" target="_blank" rel="noopener">Google Play</a>

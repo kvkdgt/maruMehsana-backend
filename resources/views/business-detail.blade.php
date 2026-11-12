@@ -26,8 +26,9 @@
     $playUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
 @endphp
 
-@section('title', $business->name . ' - ' . $catName . ' | Maru Mehsana')
-@section('description', $desc ?: __('home.bizp_meta_desc'))
+{{-- HtmlString: the layout escapes title/description itself, so don't let @section escape them a second time. --}}
+@section('title', new \Illuminate\Support\HtmlString($business->name . ' - ' . $catName . ' | Maru Mehsana'))
+@section('description', new \Illuminate\Support\HtmlString($desc ?: __('home.bizp_meta_desc')))
 @section('canonical', route('businesses.show', $business->id) . ($lang === 'en' ? '?lang=en' : ''))
 
 @section('content')
