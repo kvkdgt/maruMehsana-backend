@@ -37,6 +37,8 @@ Route::get('/news', [App\Http\Controllers\NewsListController::class, 'index'])->
 Route::get('/news/feed.xml', [App\Http\Controllers\SitemapController::class, 'newsFeed'])->name('news.feed');
 Route::get('/news/{id}/{slug}', [App\Http\Controllers\NewsDetailController::class, 'show'])->whereNumber('id')->name('news.show');
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/jobs', [App\Http\Controllers\JobListController::class, 'index'])->name('jobs');
+Route::get('/jobs/{id}', [App\Http\Controllers\JobDetailController::class, 'show'])->whereNumber('id')->name('jobs.show');
 // App share links (open the app via deep link). The website uses /businesses/{id}, /places/{id} and /news/{id}/{slug} instead.
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);

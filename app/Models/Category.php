@@ -15,6 +15,7 @@ class Category extends Model
         'description',
         'image',
         'category_visitors',
+        'web_visitors',
         'created_by',
         'updated_by',
     ];

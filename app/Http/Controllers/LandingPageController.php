@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Category;
-use App\Models\Fact;
 use App\Models\JobVacancy;
 use App\Models\NewsArticle;
 use App\Models\TouristPlace;
@@ -53,11 +52,9 @@ class LandingPageController extends Controller
 
         $latestJobs = JobVacancy::active()->latest()->limit(3)->get();
 
-        $facts = Fact::inRandomOrder()->limit(5)->get();
-
         // Popular-search chips: the most visited categories that actually contain businesses.
         $chipCategories = Category::whereHas('businesses')
-            ->orderByDesc('category_visitors')
+            ->orderByRaw('(category_visitors + web_visitors) desc')
             ->orderBy('name')
             ->limit(5)
             ->get(['id', 'name']);
@@ -76,7 +73,6 @@ class LandingPageController extends Controller
             'latestNews',
             'popularPlaces',
             'latestJobs',
-            'facts',
             'chipCategories'
         ));
 

@@ -35,6 +35,7 @@ class JobVacancy extends Model
         'status',
         'is_active',
         'views_count',
+        'web_visitors',
         'last_notified_views_milestone',
     ];
 
@@ -44,9 +45,16 @@ class JobVacancy extends Model
         'salary_max' => 'integer',
         'vacancies_count' => 'integer',
         'views_count' => 'integer',
+        'web_visitors' => 'integer',
         'is_active' => 'integer',
         'last_notified_views_milestone' => 'integer',
     ];
+
+    /** Total views: app (views_count) + website (web_visitors). */
+    public function getTotalViewsAttribute(): int
+    {
+        return (int) $this->views_count + (int) $this->web_visitors;
+    }
 
     // Relationships
     public function poster()

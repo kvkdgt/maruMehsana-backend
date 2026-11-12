@@ -113,9 +113,15 @@
                             @endif
                         </td>
                         <td>
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
-                                <span style="font-weight: 600;">{{ number_format($job->views_count ?? 0) }}</span>
+                            <div style="white-space: nowrap;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-eye" style="color: #3498db; font-size: 0.8rem;"></i>
+                                    <span style="font-weight: 600;">{{ number_format(($job->views_count ?? 0) + ($job->web_visitors ?? 0)) }}</span>
+                                </div>
+                                <div style="display: flex; gap: 6px; margin-top: 5px;">
+                                    <span title="Web visitors" style="font-size: 0.72rem; font-weight: 600; color: #0e7490; background: #e0f2fe; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-globe" style="font-size: 0.65rem;"></i> {{ number_format($job->web_visitors ?? 0) }}</span>
+                                    <span title="App views" style="font-size: 0.72rem; font-weight: 600; color: #15803d; background: #dcfce7; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-mobile-alt" style="font-size: 0.65rem;"></i> {{ number_format($job->views_count ?? 0) }}</span>
+                                </div>
                             </div>
                         </td>
                         <td>

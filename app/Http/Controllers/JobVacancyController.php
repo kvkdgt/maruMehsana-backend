@@ -75,7 +75,7 @@ class JobVacancyController extends Controller
             // Sort
             $sort = $request->input('sort', 'latest');
             if ($sort === 'views') {
-                $query->orderByDesc('views_count');
+                $query->orderByRaw('(views_count + web_visitors) desc');
             } else {
                 $query->latest();
             }
@@ -513,7 +513,10 @@ class JobVacancyController extends Controller
             'thumbnail'      => $job->thumbnail ? url('storage/' . $job->thumbnail) : null,
             'posted_by_name' => optional($job->poster)->name,
             'apply_via'      => $job->apply_via,
-            'views_count'    => $job->views_count,
+            // views_count = total (app + website), so the poster sees every view; split kept for reference.
+            'views_count'    => (int) $job->views_count + (int) $job->web_visitors,
+            'app_views_count'=> (int) $job->views_count,
+            'web_views_count'=> (int) $job->web_visitors,
             'is_saved'       => in_array($job->id, $savedIds),
             'expires_at'     => $job->expires_at?->toDateString(),
             'created_at'     => $job->created_at,

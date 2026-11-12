@@ -46,12 +46,13 @@ class NotifyJobViewMilestones extends Command
         // Prefilter: only jobs that gained views beyond what we last notified,
         // and that have at least reached the first milestone.
         JobVacancy::query()
-            ->where('views_count', '>=', self::MILESTONES[0])
-            ->whereColumn('views_count', '>', 'last_notified_views_milestone')
+            // Milestones use total views: app (views_count) + website (web_visitors).
+            ->whereRaw('(views_count + web_visitors) >= ?', [self::MILESTONES[0]])
+            ->whereRaw('(views_count + web_visitors) > last_notified_views_milestone')
             ->with('poster')
             ->chunkById(200, function ($jobs) use (&$dispatched, $dryRun) {
                 foreach ($jobs as $job) {
-                    $milestone = $this->highestMilestoneReached($job->views_count);
+                    $milestone = $this->highestMilestoneReached((int) $job->views_count + (int) $job->web_visitors);
 
                     // Nothing new crossed since last time.
                     if ($milestone === null || $milestone <= $job->last_notified_views_milestone) {
@@ -65,7 +66,7 @@ class NotifyJobViewMilestones extends Command
                         continue;
                     }
 
-                    $this->line("Job #{$job->id} \"{$job->title}\" — {$job->views_count} views → milestone {$milestone}+ → user #{$poster->id}");
+                    $this->line("Job #{$job->id} \"{$job->title}\" — {$job->total_views} views → milestone {$milestone}+ → user #{$poster->id}");
 
                     if ($dryRun) {
                         continue;

@@ -116,6 +116,27 @@
 
   /* ── Facts ──────────────────────────────── */
   .pd-fact { background: linear-gradient(135deg,#fff7f3,#ffece2); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 10px; font-size: 0.88rem; }
+
+  /* ── Views by module (website vs app) ───── */
+  .pd-views-legend { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--muted); font-weight: 600; }
+  .pd-views-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 8px; }
+  .pd-views-legend i.web, .pd-views-bar i.web { background: #0ea5e9; }
+  .pd-views-legend i.app, .pd-views-bar i.app { background: #22c55e; }
+  .pd-views-row { display: grid; grid-template-columns: minmax(140px, 1.4fr) repeat(3, minmax(70px, 0.8fr)) minmax(120px, 1.6fr); gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+  .pd-views-row > span:not(.pd-views-name):not(.pd-views-barcol) { text-align: right; font-variant-numeric: tabular-nums; }
+  .pd-views-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; padding-top: 0; }
+  .pd-views-foot { border-bottom: none; font-weight: 700; }
+  .pd-views-name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .pd-views-name i { width: 18px; text-align: center; }
+  .pd-views-web { color: #0e7490; font-weight: 600; }
+  .pd-views-app { color: #15803d; font-weight: 600; }
+  .pd-views-total { font-weight: 700; }
+  .pd-views-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: #eef2f7; }
+  .pd-views-bar i { display: block; height: 100%; }
+  @media (max-width: 760px) {
+    .pd-views-row { grid-template-columns: 1.4fr repeat(3, 1fr); font-size: 0.82rem; gap: 8px; }
+    .pd-views-barcol { display: none; }
+  }
 </style>
 
 <div class="pro-dash">
@@ -128,7 +149,72 @@
       <div class="pd-chip"><div class="v">{{ number_format($totalAppUsers ?? 0) }}</div><div class="l">Total Users</div></div>
       <div class="pd-chip"><div class="v">{{ number_format($loggedInUsers ?? 0) }}</div><div class="l">Logged-in Users</div></div>
       <div class="pd-chip"><div class="v">{{ number_format($totalJobs ?? 0) }}</div><div class="l">Job Vacancies</div></div>
-      <div class="pd-chip"><div class="v">{{ number_format($totalJobViews ?? 0) }}</div><div class="l">Job Views</div></div>
+      <div class="pd-chip"><div class="v">{{ number_format($viewTotals['total'] ?? 0) }}</div><div class="l">Total Views</div></div>
+    </div>
+  </div>
+
+  {{-- ── Views: website + mobile app ──────── --}}
+  @php
+    $vt = $viewTotals ?? ['total' => 0, 'web' => 0, 'app' => 0];
+    $pct = fn ($part, $whole) => $whole > 0 ? round($part / $whole * 100) : 0;
+  @endphp
+  <div class="pd-sec-title">Views &middot; Website + App</div>
+  <div class="pd-grid pd-grid-3">
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#F2652D;"><i class="fas fa-eye"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($vt['total']) }}</div>
+        <div class="pd-kpi-lbl">Total Views</div>
+        <div class="pd-kpi-sub pd-mut">Website + App, all modules</div>
+      </div>
+    </div>
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#0e7490;"><i class="fas fa-globe"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($vt['web']) }}</div>
+        <div class="pd-kpi-lbl">Website Views</div>
+        <div class="pd-kpi-sub pd-mut">{{ $pct($vt['web'], $vt['total']) }}% of total</div>
+      </div>
+    </div>
+    <div class="pd-card pd-kpi">
+      <div class="pd-kpi-icon" style="background:#15803d;"><i class="fas fa-mobile-alt"></i></div>
+      <div>
+        <div class="pd-kpi-val">{{ number_format($vt['app']) }}</div>
+        <div class="pd-kpi-lbl">Mobile App Views</div>
+        <div class="pd-kpi-sub pd-mut">{{ $pct($vt['app'], $vt['total']) }}% of total</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-card pd-views" style="margin-top:20px;">
+    <div class="pd-panel-head">
+      <h3>Views by module</h3>
+      <span class="pd-views-legend"><i class="web"></i> Website <i class="app"></i> App</span>
+    </div>
+    <div class="pd-views-table">
+      <div class="pd-views-row pd-views-head">
+        <span>Module</span><span>Website</span><span>App</span><span>Total</span><span class="pd-views-barcol">Split</span>
+      </div>
+      @foreach (($viewStats ?? []) as $m)
+        <div class="pd-views-row">
+          <span class="pd-views-name"><i class="fas {{ $m['icon'] }}" style="color: {{ $m['color'] }};"></i> {{ $m['label'] }}</span>
+          <span class="pd-views-web">{{ number_format($m['web']) }}</span>
+          <span class="pd-views-app">{{ number_format($m['app']) }}</span>
+          <span class="pd-views-total">{{ number_format($m['total']) }}</span>
+          <span class="pd-views-barcol">
+            <span class="pd-views-bar" title="Website {{ $pct($m['web'], $m['total']) }}% · App {{ $pct($m['app'], $m['total']) }}%">
+              <i class="web" style="width: {{ $pct($m['web'], $m['total']) }}%;"></i><i class="app" style="width: {{ $m['total'] > 0 ? 100 - $pct($m['web'], $m['total']) : 0 }}%;"></i>
+            </span>
+          </span>
+        </div>
+      @endforeach
+      <div class="pd-views-row pd-views-foot">
+        <span>All modules</span>
+        <span class="pd-views-web">{{ number_format($vt['web']) }}</span>
+        <span class="pd-views-app">{{ number_format($vt['app']) }}</span>
+        <span class="pd-views-total">{{ number_format($vt['total']) }}</span>
+        <span class="pd-views-barcol"></span>
+      </div>
     </div>
   </div>
 
@@ -350,7 +436,7 @@
             <div class="name">{{ Str::limit($job->title, 26) }}</div>
             <div class="meta">{{ Str::limit($job->company_name ?? 'N/A', 30) }}</div>
           </div>
-          <span class="pd-badge default"><i class="fas fa-eye"></i> {{ number_format($job->views_count ?? 0) }}</span>
+          <span class="pd-badge default"><i class="fas fa-eye"></i> {{ number_format(($job->views_count ?? 0) + ($job->web_visitors ?? 0)) }}</span>
         </div>
       @empty
         <div class="pd-empty"><i class="fas fa-briefcase"></i><br>No jobs posted yet</div>

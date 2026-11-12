@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Models\JobVacancy;
 use App\Models\NewsArticle;
 use App\Models\TouristPlace;
 use Carbon\CarbonInterface;
@@ -62,6 +63,8 @@ class SitemapController extends Controller
         $businesses = Business::query()->orderBy('id')->get(['id', 'updated_at']);
         $places = TouristPlace::query()->orderBy('id')->get(['id', 'updated_at']);
         $news = $this->visibleNews()->orderByDesc('id')->get(['id', 'slug', 'updated_at']);
+        // Same visibility as /jobs: active, open or filled, not expired.
+        $jobs = JobVacancy::active()->orderByDesc('id')->get(['id', 'updated_at']);
 
         $latest = fn ($items) => $items->pluck('updated_at')->filter()->max();
 
@@ -71,10 +74,11 @@ class SitemapController extends Controller
         $w->writeAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
 
         $home = url('/');
-        $this->writeUrl($w, $home, collect([$latest($businesses), $latest($places), $latest($news)])->filter()->max());
+        $this->writeUrl($w, $home, collect([$latest($businesses), $latest($places), $latest($news), $latest($jobs)])->filter()->max());
         $this->writeUrl($w, route('businesses'), $latest($businesses));
         $this->writeUrl($w, route('places'), $latest($places));
         $this->writeUrl($w, route('news'), $latest($news));
+        $this->writeUrl($w, route('jobs'), $latest($jobs));
 
         foreach ($businesses as $b) {
             $this->writeUrl($w, route('businesses.show', $b->id), $b->updated_at);
@@ -84,6 +88,9 @@ class SitemapController extends Controller
         }
         foreach ($news as $n) {
             $this->writeUrl($w, $n->web_url, $n->updated_at);
+        }
+        foreach ($jobs as $j) {
+            $this->writeUrl($w, route('jobs.show', $j->id), $j->updated_at);
         }
 
         // Static page, English only (no language switch), so no alternates.

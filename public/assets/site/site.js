@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var toggle = document.querySelector('.nav-toggle');
   var panel = document.getElementById('nav-panel');
   var langMenu = document.getElementById('lang-menu');
@@ -143,22 +142,6 @@
         enqBtn.disabled = false;
         enqBtn.textContent = enqBtnText;
       });
-    });
-  }
-
-  /* ---------------- Facts rotator ---------------- */
-  var factEl = document.getElementById('fact-text');
-  var factBtn = document.getElementById('fact-next');
-  var facts = safeJSON('fact-data') || [];
-  if (factEl && factBtn && facts.length > 1) {
-    var fi = 0;
-    factBtn.addEventListener('click', function () {
-      fi = (fi + 1) % facts.length;
-      factEl.classList.add('is-swapping');
-      window.setTimeout(function () {
-        factEl.textContent = facts[fi];
-        factEl.classList.remove('is-swapping');
-      }, reduce ? 0 : 200);
     });
   }
 
@@ -384,7 +367,7 @@
       });
       var jobs = jobRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {
         var sub = [r.location, r.company_name].filter(Boolean).join(' · ');
-        return { type: 'job', title: String(r.title), sub: sub, href: cfg.base + '/job/' + encodeURIComponent(r.id) };
+        return { type: 'job', title: String(r.title), sub: sub, href: cfg.base + '/jobs/' + encodeURIComponent(r.id) };
       });
 
       var groups = [

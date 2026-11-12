@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\Business;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -48,7 +49,7 @@ class BusinessDirectoryController extends Controller
         // Only categories that actually contain businesses, most visited first.
         $categories = Category::whereHas('businesses')
             ->withCount('businesses')
-            ->orderByDesc('category_visitors')
+            ->orderByRaw('(category_visitors + web_visitors) desc')
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -100,6 +101,12 @@ class BusinessDirectoryController extends Controller
         if ($businesses->currentPage() > $businesses->lastPage()) {
             $last = $businesses->lastPage();
             return redirect()->to($last > 1 ? $businesses->url($last) : $request->fullUrlWithoutQuery('page'));
+        }
+
+        // Opening a category on the website counts as one web view of that category
+        // (first page only, so scrolling or paging does not count again).
+        if ($activeCategory && $businesses->onFirstPage()) {
+            $this->countCategoryWebVisit($request, $activeCategory->id);
         }
 
         $response = response()->view('businesses', [
@@ -180,16 +187,37 @@ class BusinessDirectoryController extends Controller
         return $this->rememberSiteLanguage($response, $request, $lang);
     }
 
+    /** A real person's page view: not a HEAD request and not a bot / tool user agent. */
+    private function isHumanView(Request $request): bool
+    {
+        if ($request->isMethod('HEAD')) {
+            return false;
+        }
+        $ua = (string) $request->userAgent();
+
+        return !($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua));
+    }
+
+    /** Count one website view of a category (separate from the app's `category_visitors`). */
+    private function countCategoryWebVisit(Request $request, int $categoryId): void
+    {
+        if (!$this->isHumanView($request)) {
+            return;
+        }
+        try {
+            // Query builder: a view must not touch updated_at.
+            DB::table('categories')->where('id', $categoryId)->increment('web_visitors');
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     /** Count one website view (separate from the app's `visitors`). Skips HEAD requests and bots. */
     private function countWebVisit(Request $request, int $id): void
     {
         static $hasColumn = null;
 
-        if ($request->isMethod('HEAD')) {
-            return;
-        }
-        $ua = (string) $request->userAgent();
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua)) {
+        if (!$this->isHumanView($request)) {
             return;
         }
         try {

@@ -76,10 +76,34 @@ class AdminController extends Controller
     $totalAppUsers = AppUser::count();
     $totalTouristPlaces = TouristPlace::count();
     
-    // Visitor statistics
-    $totalCategoryVisitors = Category::sum('category_visitors');
-    $totalBusinessVisitors = Business::sum('visitors') + Business::sum('web_visitors');
-    $totalTouristVisitors = TouristPlace::sum('visitors') + TouristPlace::sum('web_visitors');
+    // Views: app (mobile) and website counted separately per module, then totalled.
+    $viewSum = fn (string $table, string $appColumn) => (array) \Illuminate\Support\Facades\DB::table($table)
+        ->selectRaw("COALESCE(SUM($appColumn), 0) as app, COALESCE(SUM(web_visitors), 0) as web")
+        ->first();
+    $viewStats = [];
+    foreach ([
+        'categories'  => ['Categories', 'categories', 'category_visitors', 'fa-th-large', '#3b82f6'],
+        'businesses'  => ['Businesses', 'businesses', 'visitors', 'fa-store', '#F2652D'],
+        'places'      => ['Tourist Places', 'tourist_places', 'visitors', 'fa-map-marked-alt', '#10b981'],
+        'news'        => ['News', 'news_articles', 'visitor', 'fa-newspaper', '#8b5cf6'],
+        'jobs'        => ['Jobs', 'job_vacancies', 'views_count', 'fa-briefcase', '#0ea5e9'],
+    ] as $key => [$label, $table, $appColumn, $icon, $color]) {
+        $s = $viewSum($table, $appColumn);
+        $viewStats[$key] = [
+            'label' => $label, 'icon' => $icon, 'color' => $color,
+            'app' => (int) $s['app'], 'web' => (int) $s['web'], 'total' => (int) $s['app'] + (int) $s['web'],
+        ];
+    }
+    $viewTotals = [
+        'app'   => array_sum(array_column($viewStats, 'app')),
+        'web'   => array_sum(array_column($viewStats, 'web')),
+        'total' => array_sum(array_column($viewStats, 'total')),
+    ];
+
+    // Visitor statistics (app + web)
+    $totalCategoryVisitors = $viewStats['categories']['total'];
+    $totalBusinessVisitors = $viewStats['businesses']['total'];
+    $totalTouristVisitors = $viewStats['places']['total'];
     
     // App users statistics
     $loggedInUsers = AppUser::where('is_login', true)->count();   // currently logged-in
@@ -90,8 +114,8 @@ class AdminController extends Controller
     // Job vacancy statistics
     $totalJobs = JobVacancy::count();
     $activeJobs = JobVacancy::where('is_active', 1)->count();
-    $totalJobViews = (int) JobVacancy::sum('views_count');
-    $topJobs = JobVacancy::orderByDesc('views_count')->take(5)->get();
+    $totalJobViews = (int) JobVacancy::sum('views_count') + (int) JobVacancy::sum('web_visitors');
+    $topJobs = JobVacancy::orderByRaw('(views_count + web_visitors) desc')->take(5)->get();
 
     // Business enquiries
     $pendingEnquiries = BusinessEnquiry::where('status', 'Pending')->count();
@@ -178,6 +202,8 @@ class AdminController extends Controller
     // To revert to the classic dashboard, change the view name below to
     // 'admin.dashboard-2026-06-10' (the backup of the old dashboard).
     return view('admin.dashboard', compact(
+        'viewStats',
+        'viewTotals',
         'totalCategories',
         'totalBusinesses',
         'totalAppUsers',
@@ -243,9 +269,9 @@ class AdminController extends Controller
         
         // Apply sorting by visitors
         if ($sortBy == 'highest') {
-            $categoriesQuery->orderBy('category_visitors', 'desc');
+            $categoriesQuery->orderByRaw('(category_visitors + web_visitors) desc');
         } elseif ($sortBy == 'lowest') {
-            $categoriesQuery->orderBy('category_visitors', 'asc');
+            $categoriesQuery->orderByRaw('(category_visitors + web_visitors) asc');
         }
     
         // Get categories
@@ -546,14 +572,14 @@ class AdminController extends Controller
 
         // Minimum view-count filter
         if (is_numeric($minViews)) {
-            $query->where('views_count', '>=', (int) $minViews);
+            $query->whereRaw('(views_count + web_visitors) >= ?', [(int) $minViews]);
         }
 
         // Sorting
         if ($sortBy == 'views_high') {
-            $query->orderByDesc('views_count');
+            $query->orderByRaw('(views_count + web_visitors) desc');
         } elseif ($sortBy == 'views_low') {
-            $query->orderBy('views_count', 'asc');
+            $query->orderByRaw('(views_count + web_visitors) asc');
         } elseif ($sortBy == 'oldest') {
             $query->oldest();
         } else {

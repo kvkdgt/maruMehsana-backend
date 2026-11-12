@@ -15,11 +15,8 @@
         $pageUrl   = url()->current();
         // Pages can set their own canonical (e.g. paginated or filtered lists) with @section('canonical', url).
         $canonical = trim($__env->yieldContent('canonical')) ?: ($lang === 'en' ? $pageUrl . '?lang=en' : $pageUrl);
-        $hasFacts  = isset($facts) && $facts->count() > 0;
-        // Which header tab is active; home-page sections are anchors on /, other pages link back to them.
+        // Which header tab is active (each tab is its own page).
         $activeNav = $activeNav ?? 'home';
-        $onHome    = $activeNav === 'home';
-        $sec       = fn ($id) => ($onHome ? '' : url('/')) . '#' . $id;
         $langUrl   = fn ($l) => request()->fullUrlWithQuery(['lang' => $l, 'page' => null]);
     @endphp
 
@@ -103,13 +100,11 @@
 
             <nav class="nav-panel" id="nav-panel" aria-label="{{ __('home.nav_aria') }}">
                 <ul class="nav-links">
-                    {{-- Tabs with their own page link there; the rest jump to the home page section until their page exists. --}}
                     <li><a href="{{ url('/') }}" @if ($activeNav === 'home') class="is-active" aria-current="page" @endif>{{ __('home.nav_home') }}</a></li>
                     <li><a href="{{ route('businesses') }}" @if ($activeNav === 'businesses') class="is-active" aria-current="page" @endif>{{ __('home.nav_businesses') }}</a></li>
                     <li><a href="{{ route('places') }}" @if ($activeNav === 'places') class="is-active" aria-current="page" @endif>{{ __('home.nav_places') }}</a></li>
                     <li><a href="{{ route('news') }}" @if ($activeNav === 'news') class="is-active" aria-current="page" @endif>{{ __('home.nav_news') }}</a></li>
-                    <li><a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a></li>
-                    <li><a href="{{ $sec($onHome && !$hasFacts ? 'app' : 'facts') }}">{{ __('home.nav_facts') }}</a></li>
+                    <li><a href="{{ route('jobs') }}" @if ($activeNav === 'jobs') class="is-active" aria-current="page" @endif>{{ __('home.nav_jobs') }}</a></li>
                 </ul>
             </nav>
 
@@ -151,7 +146,7 @@
                 <a href="{{ route('businesses') }}">{{ __('home.nav_businesses') }}</a>
                 <a href="{{ route('places') }}">{{ __('home.nav_places') }}</a>
                 <a href="{{ route('news') }}">{{ __('home.nav_news') }}</a>
-                <a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a>
+                <a href="{{ route('jobs') }}">{{ __('home.nav_jobs') }}</a>
                 <a href="{{ $playStore }}" target="_blank" rel="noopener">Google Play</a>
                 <a href="{{ url('/privacy-policy') }}">{{ __('home.privacy') }}</a>
             </nav>
