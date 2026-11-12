@@ -1,2 +1,6 @@
 User-agent: *
 Disallow:
+
+# Sitemap: the site serves it at /sitemap.xml. Uncomment and set the live domain
+# (robots.txt needs an absolute URL, and it differs per environment):
+# Sitemap: https://<production-domain>/sitemap.xml

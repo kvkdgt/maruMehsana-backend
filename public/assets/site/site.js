@@ -380,7 +380,7 @@
         }
       });
       var news = newsRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {
-        return { type: 'news', title: String(r.title), sub: r.agency && r.agency.name ? String(r.agency.name) : '', href: cfg.base + '/news/' + encodeURIComponent(r.id) };
+        return { type: 'news', title: String(r.title), sub: r.agency && r.agency.name ? String(r.agency.name) : '', href: cfg.base + '/news/' + encodeURIComponent(r.id) + '/' + encodeURIComponent(r.slug ? String(r.slug) : 'news-' + r.id) };
       });
       var jobs = jobRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {
         var sub = [r.location, r.company_name].filter(Boolean).join(' · ');

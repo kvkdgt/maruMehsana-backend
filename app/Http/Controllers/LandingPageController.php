@@ -40,6 +40,8 @@ class LandingPageController extends Controller
 
         $latestNews = NewsArticle::with('agency:id,name')
             ->where('is_active', true)
+            // Same visibility as /news, the sitemap and RSS: agency must be active (status is boolean).
+            ->whereHas('agency', fn ($q) => $q->where('status', true))
             ->latest()
             ->limit(3)
             ->get();

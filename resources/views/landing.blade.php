@@ -191,7 +191,7 @@
         <ul class="quick-grid">
             <li><a href="{{ route('businesses') }}" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
             <li><a href="{{ route('places') }}" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
-            <li><a href="#news" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
+            <li><a href="{{ route('news') }}" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
             <li><a href="#jobs" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
             <li><button type="button" class="tile tile--add" data-open-enquiry aria-haspopup="dialog" aria-controls="enquiry"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></button></li>
         </ul>
@@ -359,14 +359,14 @@
                     <h2 id="news-title">{{ __('home.news_title') }}</h2>
                     <p>{{ __('home.news_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ $playStore }}" target="_blank" rel="noopener" aria-label="{{ __('home.view_all') }} - {{ __('home.view_all_hint') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('news') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($latestNews->count())
                 <ul class="news-list">
                     @foreach ($latestNews as $article)
                         <li>
-                            <a class="news-row" href="{{ url('/news/' . $article->id) }}">
+                            <a class="news-row" href="{{ $article->web_url }}">
                                 <span class="news-thumb ph">
                                     <svg class="icon ph-ico" aria-hidden="true"><use href="#i-news"/></svg>
                                     @if ($article->imageUrl)

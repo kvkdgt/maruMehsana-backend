@@ -32,7 +32,12 @@ Route::get('/businesses', [App\Http\Controllers\BusinessDirectoryController::cla
 Route::get('/businesses/{id}', [App\Http\Controllers\BusinessDirectoryController::class, 'show'])->whereNumber('id')->name('businesses.show');
 Route::get('/places', [App\Http\Controllers\PlaceDirectoryController::class, 'index'])->name('places');
 Route::get('/places/{id}', [App\Http\Controllers\PlaceDetailController::class, 'show'])->whereNumber('id')->name('places.show');
-// App share links (open the app via deep link). The website uses /businesses/{id} and /places/{id} instead.
+Route::get('/news', [App\Http\Controllers\NewsListController::class, 'index'])->name('news');
+// Must stay above the /news/{newsId} app share route, which would otherwise catch "feed.xml".
+Route::get('/news/feed.xml', [App\Http\Controllers\SitemapController::class, 'newsFeed'])->name('news.feed');
+Route::get('/news/{id}/{slug}', [App\Http\Controllers\NewsDetailController::class, 'show'])->whereNumber('id')->name('news.show');
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+// App share links (open the app via deep link). The website uses /businesses/{id}, /places/{id} and /news/{id}/{slug} instead.
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);
 Route::get('/news/{newsId}', [ShareController::class, 'news']);

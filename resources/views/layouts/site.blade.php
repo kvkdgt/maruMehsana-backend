@@ -33,14 +33,14 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/site/logo-128.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('assets/site/logo-512.png') }}">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:site_name" content="Maru Mehsana">
     <meta property="og:locale" content="{{ $lang === 'en' ? 'en_IN' : 'gu_IN' }}">
     <meta property="og:title" content="{{ $siteTitle }}">
     <meta property="og:description" content="{{ $siteDesc }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $pageImage }}">
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="@yield('twitter_card', 'summary')">
     <meta name="twitter:title" content="{{ $siteTitle }}">
     <meta name="twitter:description" content="{{ $siteDesc }}">
     <meta name="twitter:image" content="{{ $pageImage }}">
@@ -107,7 +107,7 @@
                     <li><a href="{{ url('/') }}" @if ($activeNav === 'home') class="is-active" aria-current="page" @endif>{{ __('home.nav_home') }}</a></li>
                     <li><a href="{{ route('businesses') }}" @if ($activeNav === 'businesses') class="is-active" aria-current="page" @endif>{{ __('home.nav_businesses') }}</a></li>
                     <li><a href="{{ route('places') }}" @if ($activeNav === 'places') class="is-active" aria-current="page" @endif>{{ __('home.nav_places') }}</a></li>
-                    <li><a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a></li>
+                    <li><a href="{{ route('news') }}" @if ($activeNav === 'news') class="is-active" aria-current="page" @endif>{{ __('home.nav_news') }}</a></li>
                     <li><a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a></li>
                     <li><a href="{{ $sec($onHome && !$hasFacts ? 'app' : 'facts') }}">{{ __('home.nav_facts') }}</a></li>
                 </ul>
@@ -150,7 +150,7 @@
             <nav class="footer-links" aria-label="{{ __('home.footer_explore') }}">
                 <a href="{{ route('businesses') }}">{{ __('home.nav_businesses') }}</a>
                 <a href="{{ route('places') }}">{{ __('home.nav_places') }}</a>
-                <a href="{{ $sec('news') }}">{{ __('home.nav_news') }}</a>
+                <a href="{{ route('news') }}">{{ __('home.nav_news') }}</a>
                 <a href="{{ $sec('jobs') }}">{{ __('home.nav_jobs') }}</a>
                 <a href="{{ $playStore }}" target="_blank" rel="noopener">Google Play</a>
                 <a href="{{ url('/privacy-policy') }}">{{ __('home.privacy') }}</a>

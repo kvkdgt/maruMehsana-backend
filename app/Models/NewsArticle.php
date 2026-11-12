@@ -62,6 +62,12 @@ class NewsArticle extends Model
         });
     }
 
+    /** Website URL of this article: /news/{id}/{slug} (slug falls back to "news-{id}"). */
+    public function getWebUrlAttribute(): string
+    {
+        return route('news.show', ['id' => $this->id, 'slug' => $this->slug ?: 'news-' . $this->id]);
+    }
+
     // Relationship with Agency
     public function agency()
     {
