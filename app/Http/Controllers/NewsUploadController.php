@@ -72,7 +72,19 @@ class NewsUploadController extends Controller
             return redirect()->route('news-upload');
         }
 
-        $response = $api->store($request);
+        // Show server problems on the form instead of a bare "500 Server Error" page.
+        try {
+            $response = $api->store($request);
+        } catch (\Throwable $e) {
+            report($e);
+
+            $reason = $e instanceof \Illuminate\Database\QueryException
+                ? 'Database error while saving the news (details are in the server log).'
+                : 'Server error while saving the news: ' . $e->getMessage();
+
+            return back()->withInput()->withErrors(['general' => $reason]);
+        }
+
         $body = $response->getData(true);
 
         if ($response->getStatusCode() === 201) {

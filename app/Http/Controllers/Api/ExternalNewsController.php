@@ -75,8 +75,9 @@ class ExternalNewsController extends Controller
 
         $article = NewsArticle::create($data);
 
-        // Gujarati titles slugify to an empty string; keep slugs usable.
-        if ($article->slug === '' || $article->slug === null) {
+        // Gujarati titles slugify to "" and the model then falls back to "news-xxxxxx";
+        // replace that with the readable "news-{id}".
+        if (preg_match('/^news(-[a-z0-9]{6})?$/', (string) $article->slug)) {
             $article->slug = 'news-' . $article->id;
             $article->save();
         }

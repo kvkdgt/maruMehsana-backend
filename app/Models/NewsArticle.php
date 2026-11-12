@@ -37,6 +37,31 @@ class NewsArticle extends Model
         $this->attributes['slug'] = Str::slug($value);
     }
 
+    /**
+     * The slug column is UNIQUE. Gujarati titles slugify to "" (or to the same
+     * short ASCII bits, e.g. "2026"), so two such articles collided and the
+     * second insert failed with a 500. Make every slug non-empty and unique.
+     */
+    protected static function booted()
+    {
+        static::saving(function (NewsArticle $article) {
+            if (!$article->isDirty(['slug', 'title']) && $article->slug !== '' && $article->slug !== null) {
+                return;
+            }
+
+            $base = $article->slug ?: 'news';
+            $slug = $base;
+
+            while (static::where('slug', $slug)
+                ->when($article->exists, fn ($q) => $q->where('id', '!=', $article->id))
+                ->exists()) {
+                $slug = $base . '-' . Str::lower(Str::random(6));
+            }
+
+            $article->slug = $slug;
+        });
+    }
+
     // Relationship with Agency
     public function agency()
     {
