@@ -857,7 +857,13 @@ body.lb-open { overflow: hidden; }
 .plp-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px 14px; font-size: 0.86rem; font-weight: 700; color: var(--blue-deep); }
 .plp-card:hover .go { transform: translateX(3px); background: var(--blue-deep); }
 @media (max-width: 760px) { .plp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .plp-grid { grid-template-columns: minmax(0, 1fr); } }
+.plp-foot span:first-child { white-space: nowrap; }
+@media (max-width: 480px) {
+  .plp-grid { grid-template-columns: minmax(0, 1fr); }
+  /* Phone rows put the photo in a 108px column; the footer must span the full card width */
+  .plp-foot { grid-column: 1 / -1; margin-top: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+  .plp-foot .go { width: 28px; height: 28px; }
+}
 
 /* ---- Place detail page ---- */
 .pld-head { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }

@@ -5,11 +5,14 @@
     $thumb = $place->thumbnail ? $img($place->thumbnail) : null;
     $reviews = (int) $place->reviews_count;
     $avg = $place->reviews_avg_rating;
-    $locationText = trim((string) $place->location);
-    $hasGeo = $place->hasCoordinates();
-    $lat = $hasGeo ? (float) $place->latitude : null;
-    $lng = $hasGeo ? (float) $place->longitude : null;
-    $directionsUrl = $hasGeo ? 'https://www.google.com/maps/dir/?api=1&destination=' . $lat . ',' . $lng : null;
+    // "location" may hold a pasted Google Maps link: never print it, use it for directions/coordinates.
+    $locationText = (string) $place->location_text;
+    $geo = $place->geoPoint();
+    $hasGeo = $geo !== null;
+    [$lat, $lng] = $geo ?? [null, null];
+    $directionsUrl = $hasGeo
+        ? 'https://www.google.com/maps/dir/?api=1&destination=' . $lat . ',' . $lng
+        : $place->maps_link;
     // OpenStreetMap embed needs no API key; a small box around the point with a marker.
     $mapUrl = $hasGeo
         ? 'https://www.openstreetmap.org/export/embed.html?bbox=' . implode(',', [$lng - 0.012, $lat - 0.008, $lng + 0.012, $lat + 0.008]) . '&layer=mapnik&marker=' . $lat . ',' . $lng
@@ -202,7 +205,7 @@
     </article>
 
     <aside class="bd-side">
-        @if ($hasGeo || $locationText !== '')
+        @if ($hasGeo || $directionsUrl || $locationText !== '')
             <section class="bd-card pld-loc">
                 <h2>{{ __('home.pld_location') }}</h2>
                 @if ($locationText !== '')
@@ -212,6 +215,8 @@
                     <div class="pld-map">
                         <iframe src="{{ $mapUrl }}" title="{{ __('home.pld_map_title', ['name' => $place->name]) }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
+                @endif
+                @if ($directionsUrl)
                     <a class="bd-store pld-dir" href="{{ $directionsUrl }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.pld_directions') }}</a>
                 @endif
             </section>

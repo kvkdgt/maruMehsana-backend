@@ -15,8 +15,8 @@
         @endif
     </div>
     <div class="dir-body">
-        @if ($place->location)
-            <p class="plp-loc"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>{{ $place->location }}</span></p>
+        @if ($place->location_text)
+            <p class="plp-loc"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>{{ $place->location_text }}</span></p>
         @endif
         <h2 class="clamp-2"><a class="stretched" href="{{ route('places.show', $place->id) }}">{{ $place->name }}</a></h2>
         @if ($reviews > 0 && $avg)
