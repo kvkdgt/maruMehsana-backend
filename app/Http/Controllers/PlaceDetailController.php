@@ -58,10 +58,10 @@ class PlaceDetailController extends Controller
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->whereKeyNot($place->id)
-            ->orderByDesc('visitors')
+            ->orderByRaw('(visitors + web_visitors) desc')
             ->orderByDesc('id')
             ->limit(self::MORE_PLACES)
-            ->get(['id', 'name', 'thumbnail', 'location', 'visitors']);
+            ->get(['id', 'name', 'thumbnail', 'location', 'visitors', 'web_visitors']);
 
         $response = response()->view('place-detail', [
             'lang'            => $lang,

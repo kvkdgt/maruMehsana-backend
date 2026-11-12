@@ -349,7 +349,7 @@
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
         </svg>
-        {{ number_format($article->visitor) }}
+        <span title="Total = App + Web"><b>{{ number_format($article->visitor + $article->web_visitors) }}</b> <small style="color:#94a3b8;">(App {{ number_format($article->visitor) }} + Web {{ number_format($article->web_visitors) }})</small></span>
     </div>
 </td>
                         <td>

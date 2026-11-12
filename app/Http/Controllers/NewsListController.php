@@ -66,7 +66,7 @@ class NewsListController extends Controller
         ];
 
         $query = (clone $base)
-            ->select(['id', 'title', 'slug', 'excerpt', 'image', 'is_featured', 'is_for_mehsana', 'visitor', 'agency_id', 'created_at'])
+            ->select(['id', 'title', 'slug', 'excerpt', 'image', 'is_featured', 'is_for_mehsana', 'visitor', 'web_visitors', 'agency_id', 'created_at'])
             ->with('agency:id,name');
 
         match ($filter) {
@@ -87,7 +87,7 @@ class NewsListController extends Controller
         $leadCount = $lead ? 1 : 0;
 
         match ($sort) {
-            'popular' => $query->orderByDesc('visitor')->orderByDesc('created_at'),
+            'popular' => $query->orderByRaw('(visitor + web_visitors) desc')->orderByDesc('created_at'),
             default   => $query->orderByDesc('created_at'),
         };
         $query->orderByDesc('id');

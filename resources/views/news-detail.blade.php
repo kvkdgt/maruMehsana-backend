@@ -8,7 +8,6 @@
     $published = $article->created_at;
     $modified = $article->updated_at ?: $published;
     $wasUpdated = $published && $modified && $modified->gt($published->copy()->addHour());
-    $reads = (int) $article->visitor + (int) ($article->web_visitors ?? 0);
 
     $bodyHtml = \App\Support\HtmlSanitizer::render($article->content);
     $plainBody = (string) $article->content;
@@ -130,9 +129,6 @@
             <span class="nwd-tags">
                 @if ($article->is_for_mehsana)
                     <span class="nwd-tag"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.nwd_local') }}</span>
-                @endif
-                @if ($reads >= 10)
-                    <span class="nwd-tag nwd-tag--muted"><svg class="icon" aria-hidden="true"><use href="#i-trend"/></svg>{{ __('home.nwd_reads', ['count' => number_format($reads)]) }}</span>
                 @endif
             </span>
         </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\NewsArticle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -37,7 +38,7 @@ class NewsDetailController extends Controller
 
         $this->countWebVisit($request, $article->id);
 
-        $columns = ['id', 'title', 'slug', 'image', 'is_for_mehsana', 'visitor', 'agency_id', 'created_at'];
+        $columns = ['id', 'title', 'slug', 'image', 'is_for_mehsana', 'visitor', 'web_visitors', 'agency_id', 'created_at'];
 
         // Latest other articles, same "for Mehsana" kind first.
         $related = $this->visible(NewsArticle::query())
@@ -52,8 +53,8 @@ class NewsDetailController extends Controller
         $mostRead = $this->visible(NewsArticle::query())
             ->whereKeyNot($article->id)
             ->whereNotIn('id', $related->pluck('id'))
-            ->where('visitor', '>', 0)
-            ->orderByDesc('visitor')
+            ->whereRaw('(visitor + web_visitors) > 0')
+            ->orderByRaw('(visitor + web_visitors) desc')
             ->orderByDesc('id')
             ->limit(self::MOST_READ)
             ->get($columns);

@@ -324,7 +324,7 @@
 </div>
 <div class="detail-item">
     <span class="detail-label">Total Views</span>
-    <span class="detail-value">{{ number_format($news->visitor) }}</span>
+    <span class="detail-value">{{ number_format($news->visitor + $news->web_visitors) }} <small style="color:#94a3b8;">(App {{ number_format($news->visitor) }} + Web {{ number_format($news->web_visitors) }})</small></span>
 </div>
             </div>
         </div>

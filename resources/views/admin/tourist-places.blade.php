@@ -108,8 +108,12 @@
           <td>
             <div style="display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-eye" style="color: #9b59b6; font-size: 0.8rem;"></i>
-                <span style="font-weight: 600;">{{ number_format($place->visitors) }}</span>
+                <span style="font-weight: 600;">{{ number_format($place->visitors + $place->web_visitors) }}</span>
             </div>
+                <div style="display: flex; gap: 6px; margin-top: 5px;">
+                    <span title="Web visitors" style="font-size: 0.72rem; font-weight: 600; color: #0e7490; background: #e0f2fe; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-globe" style="font-size: 0.65rem;"></i> {{ number_format($place->web_visitors) }}</span>
+                    <span title="App visitors" style="font-size: 0.72rem; font-weight: 600; color: #15803d; background: #dcfce7; padding: 2px 8px; border-radius: 10px;"><i class="fas fa-mobile-alt" style="font-size: 0.65rem;"></i> {{ number_format($place->visitors) }}</span>
+                </div>
           </td>
           <td>
             <div style="display: flex; gap: 8px;">

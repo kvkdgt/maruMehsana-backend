@@ -42,7 +42,7 @@ class PlaceDirectoryController extends Controller
         $sort = in_array($request->query('sort'), self::SORTS, true) ? $request->query('sort') : 'popular';
 
         $query = TouristPlace::query()
-            ->select(['id', 'name', 'description', 'thumbnail', 'location', 'visitors', 'created_at'])
+            ->select(['id', 'name', 'description', 'thumbnail', 'location', 'visitors', 'web_visitors', 'created_at'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating');
 
@@ -59,7 +59,7 @@ class PlaceDirectoryController extends Controller
             'rating' => $query->orderByDesc('reviews_avg_rating')->orderByDesc('reviews_count'),
             'newest' => $query->orderByDesc('created_at'),
             'name'   => $query->orderBy('name'),
-            default  => $query->orderByDesc('visitors'),
+            default  => $query->orderByRaw('(visitors + web_visitors) desc'),
         };
         $query->orderByDesc('id');
 

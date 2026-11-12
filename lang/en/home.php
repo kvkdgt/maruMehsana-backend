@@ -244,7 +244,6 @@ return [
     // News article detail page (/news/{id}/{slug})
     'nwd_meta_desc'  => 'Read ":title" and more local news from Mehsana on Maru Mehsana.',
     'nwd_local'      => 'Mehsana',
-    'nwd_reads'      => ':count reads',
     'nwd_updated'    => 'Updated',
     'nwd_share'      => 'Share this news',
     'nwd_share_on'   => 'Share on :site',

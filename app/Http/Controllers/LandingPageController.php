@@ -33,7 +33,7 @@ class LandingPageController extends Controller
         $topBusinesses = Business::with('category:id,name')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->orderByDesc('visitors')
+            ->orderByRaw('(visitors + web_visitors) desc')
             ->orderByDesc('id')
             ->limit(3)
             ->get();
@@ -46,7 +46,7 @@ class LandingPageController extends Controller
             ->limit(3)
             ->get();
 
-        $popularPlaces = TouristPlace::orderByDesc('visitors')
+        $popularPlaces = TouristPlace::orderByRaw('(visitors + web_visitors) desc')
             ->orderByDesc('id')
             ->limit(3)
             ->get();
@@ -66,7 +66,7 @@ class LandingPageController extends Controller
         $enqStats = [
             'businesses' => Business::count(),
             'categories' => Category::whereHas('businesses')->count(),
-            'views'      => (int) Business::sum('visitors'),
+            'views'      => (int) Business::sum('visitors') + (int) Business::sum('web_visitors'),
         ];
 
         $response = response()->view('landing', compact(

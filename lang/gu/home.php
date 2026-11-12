@@ -244,7 +244,6 @@ return [
     // News article detail page (/news/{id}/{slug})
     'nwd_meta_desc'  => 'મારું મહેસાણા પર ":title" અને મહેસાણાના બીજા સ્થાનિક સમાચાર વાંચો.',
     'nwd_local'      => 'મહેસાણા',
-    'nwd_reads'      => ':count વાચકો',
     'nwd_updated'    => 'અપડેટ',
     'nwd_share'      => 'આ સમાચાર શેર કરો',
     'nwd_share_on'   => ':site પર શેર કરો',

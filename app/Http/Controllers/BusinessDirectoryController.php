@@ -79,7 +79,7 @@ class BusinessDirectoryController extends Controller
             'rating' => $query->orderByDesc('reviews_avg_rating')->orderByDesc('reviews_count'),
             'newest' => $query->orderByDesc('created_at'),
             'name'   => $query->orderBy('name'),
-            default  => $query->orderByDesc('visitors'),
+            default  => $query->orderByRaw('(visitors + web_visitors) desc'),
         };
         $query->orderByDesc('id');
 
@@ -162,7 +162,7 @@ class BusinessDirectoryController extends Controller
                 ->withAvg('reviews', 'rating')
                 ->where('category_id', $business->category_id)
                 ->whereKeyNot($business->id)
-                ->orderByDesc('visitors')
+                ->orderByRaw('(visitors + web_visitors) desc')
                 ->orderByDesc('id')
                 ->limit(6)
                 ->get();
