@@ -18,6 +18,7 @@ class BusinessDirectoryController extends Controller
 
     private const SORTS = ['popular', 'rating', 'newest', 'name'];
     private const PER_PAGE = 12;
+    private const REVIEWS_SHOWN = 10;
 
     public function index(Request $request)
     {
@@ -129,6 +130,30 @@ class BusinessDirectoryController extends Controller
 
         $this->countWebVisit($request, $business->id);
 
+        // Latest reviews with the reviewer's name only (never phone/email/photo).
+        $latestReviews = collect();
+        $ratingBreakdown = array_fill_keys([5, 4, 3, 2, 1], 0);
+        if ($business->reviews_count > 0) {
+            $latestReviews = $business->reviews()
+                ->with('user:id,name')
+                ->latest()
+                ->orderByDesc('id')
+                ->limit(self::REVIEWS_SHOWN)
+                ->get(['id', 'business_id', 'app_user_id', 'rating', 'comment', 'created_at']);
+
+            // One grouped query for the 5..1 star bars.
+            $counts = $business->reviews()
+                ->selectRaw('rating, COUNT(*) as total')
+                ->groupBy('rating')
+                ->pluck('total', 'rating');
+            foreach ($counts as $star => $total) {
+                $star = (int) round((float) $star);
+                if (isset($ratingBreakdown[$star])) {
+                    $ratingBreakdown[$star] += (int) $total;
+                }
+            }
+        }
+
         $similar = collect();
         if ($business->category_id) {
             $similar = Business::query()
@@ -148,6 +173,8 @@ class BusinessDirectoryController extends Controller
             'activeNav' => 'businesses',
             'business'  => $business,
             'similar'   => $similar,
+            'latestReviews'   => $latestReviews,
+            'ratingBreakdown' => $ratingBreakdown,
         ]);
 
         return $this->rememberSiteLanguage($response, $request, $lang);

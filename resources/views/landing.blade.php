@@ -333,7 +333,7 @@
                                 @endif
                             </div>
                             <div class="biz-body">
-                                <h3 class="clamp-1"><a class="stretched" href="{{ url('/business/' . $business->id) }}">{{ $business->name }}</a></h3>
+                                <h3 class="clamp-1"><a class="stretched" href="{{ route('businesses.show', $business->id) }}">{{ $business->name }}</a></h3>
                                 <p class="biz-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
                                 @if ($reviews > 0 && $avg)
                                     <p class="rating" aria-label="{{ __('home.rating_aria', ['rating' => number_format((float) $avg, 1), 'count' => $reviews]) }}">

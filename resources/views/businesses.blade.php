@@ -58,17 +58,28 @@
 </section>
 
 <div class="container dir">
-    {{-- Category chips (scroll sideways on phones) --}}
-    <nav class="cat-bar" aria-label="{{ __('home.bizp_categories') }}">
-        <a href="{{ $filterUrl(['category' => null]) }}" class="cat-chip {{ $activeCategory ? '' : 'is-on' }}" @if (!$activeCategory) aria-current="true" @endif>
-            {{ __('home.bizp_all') }} <span>{{ number_format($totalAll) }}</span>
-        </a>
-        @foreach ($categories as $cat)
-            <a href="{{ $filterUrl(['category' => $cat->id]) }}" class="cat-chip {{ $activeCategory?->id === $cat->id ? 'is-on' : '' }}" @if ($activeCategory?->id === $cat->id) aria-current="true" @endif>
-                {{ $cat->name }} <span>{{ $cat->businesses_count }}</span>
+    {{-- Category chips: scroll sideways on phones; on wider screens site.js folds them to
+         two rows behind a "More categories" button. The selected category moves to the front
+         so it is never folded away. --}}
+    @php
+        [$activeFirst, $otherCats] = $categories->partition(fn ($c) => $c->id === $activeCategory?->id);
+    @endphp
+    <div class="cat-wrap" data-cat-wrap>
+        <nav class="cat-bar" id="cat-bar" aria-label="{{ __('home.bizp_categories') }}">
+            <a href="{{ $filterUrl(['category' => null]) }}" class="cat-chip {{ $activeCategory ? '' : 'is-on' }}" @if (!$activeCategory) aria-current="true" @endif>
+                {{ __('home.bizp_all') }} <span>{{ number_format($totalAll) }}</span>
             </a>
-        @endforeach
-    </nav>
+            @foreach ($activeFirst->concat($otherCats) as $cat)
+                <a href="{{ $filterUrl(['category' => $cat->id]) }}" class="cat-chip {{ $activeCategory?->id === $cat->id ? 'is-on' : '' }}" @if ($activeCategory?->id === $cat->id) aria-current="true" @endif>
+                    {{ $cat->name }} <span>{{ $cat->businesses_count }}</span>
+                </a>
+            @endforeach
+        </nav>
+        <button type="button" class="cat-more" aria-controls="cat-bar" aria-expanded="false" hidden
+                data-more="{{ __('home.bizp_more_cats', ['count' => '__N__']) }}" data-less="{{ __('home.bizp_less_cats') }}">
+            <span></span><svg class="icon" aria-hidden="true"><use href="#i-chev-r"/></svg>
+        </button>
+    </div>
 
     {{-- Result count + sort --}}
     <div class="dir-bar">

@@ -374,7 +374,7 @@
         if (r.type === 'Category') {
           cats.push({ type: 'category', title: String(r.name), sub: cfg.catLabel, pick: function () { openCategory(r.id, String(r.name)); } });
         } else if (r.type === 'Business') {
-          biz.push({ type: 'business', title: String(r.name), href: cfg.base + '/business/' + encodeURIComponent(r.id) });
+          biz.push({ type: 'business', title: String(r.name), href: cfg.base + '/businesses/' + encodeURIComponent(r.id) });
         } else if (r.type === 'Tourist Place') {
           places.push({ type: 'place', title: String(r.name), href: cfg.base + '/place/' + encodeURIComponent(r.id) });
         }
@@ -416,7 +416,7 @@
         if (my !== seq) return;
         var rows = (r && Array.isArray(r.data)) ? r.data : [];
         var items = rows.filter(function (b) { return b && b.id != null && b.name; }).map(function (b) {
-          return { type: 'business', title: String(b.name), href: cfg.base + '/business/' + encodeURIComponent(b.id) };
+          return { type: 'business', title: String(b.name), href: cfg.base + '/businesses/' + encodeURIComponent(b.id) };
         });
         var head = lastGroups ? { label: cfg.catBack, pick: function () { input.value = ''; syncClear(); input.focus(); showPrev(); } } : null;
         if (!items.length) {
@@ -504,6 +504,61 @@
       if (cat) openCategory(cat, name); else search(name);
     });
   });
+})();
+
+/* ---------------- Businesses page: fold category chips to two rows ----------------
+   Only where the chips wrap (wider screens); on phones they are one sideways-scrolling row. */
+(function () {
+  'use strict';
+
+  var wrap = document.querySelector('[data-cat-wrap]');
+  if (!wrap) return;
+  var bar = wrap.querySelector('.cat-bar');
+  var btn = wrap.querySelector('.cat-more');
+  var label = btn.querySelector('span');
+  var chips = Array.prototype.slice.call(bar.children);
+  var open = false;
+
+  function setHidden(chip, hide) {
+    if (hide) { chip.setAttribute('tabindex', '-1'); chip.setAttribute('aria-hidden', 'true'); }
+    else { chip.removeAttribute('tabindex'); chip.removeAttribute('aria-hidden'); }
+  }
+
+  function layout() {
+    bar.style.maxHeight = '';
+    wrap.classList.remove('is-folded');
+    chips.forEach(function (c) { setHidden(c, false); });
+
+    var rowTops = [];
+    if (getComputedStyle(bar).flexWrap === 'wrap') {
+      chips.forEach(function (c) { if (rowTops.indexOf(c.offsetTop) === -1) rowTops.push(c.offsetTop); });
+    }
+    if (rowTops.length <= 2) { btn.hidden = true; return; }
+
+    btn.hidden = false;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { label.textContent = btn.getAttribute('data-less'); return; }
+
+    var cut = rowTops[2];
+    var hiddenCount = 0;
+    chips.forEach(function (c) {
+      if (c.offsetTop >= cut) { setHidden(c, true); hiddenCount++; }
+    });
+    // Third row starts at "cut"; stop just above it (minus the row gap).
+    bar.style.maxHeight = (cut - parseFloat(getComputedStyle(bar).rowGap || 0)) + 'px';
+    wrap.classList.add('is-folded');
+    label.textContent = btn.getAttribute('data-more').replace('__N__', hiddenCount);
+  }
+
+  btn.addEventListener('click', function () {
+    open = !open;
+    layout();
+  });
+
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(layout, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  layout();
 })();
 
 /* ---------------- Businesses page: infinite scroll ----------------

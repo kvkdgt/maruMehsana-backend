@@ -98,6 +98,73 @@
                 </ul>
             </section>
         @endif
+
+        <section class="bd-sec bd-rev" id="reviews" aria-labelledby="bd-rev-title">
+            <div class="bd-rev-head">
+                <h2 id="bd-rev-title">{{ __('home.bizd_rev_title') }}</h2>
+                @if ($reviews > 0)
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                @endif
+            </div>
+
+            @if ($reviews > 0)
+                @php $avgRounded = (int) round((float) $avg); @endphp
+                <div class="bd-rev-sum">
+                    <div class="bd-rev-score">
+                        <b>{{ number_format((float) $avg, 1) }}</b>
+                        <span class="bd-stars" role="img" aria-label="{{ __('home.bizd_rev_stars', ['n' => number_format((float) $avg, 1)]) }}">
+                            @for ($s = 1; $s <= 5; $s++)<svg class="icon {{ $s <= $avgRounded ? 'icon--fill on' : '' }}" aria-hidden="true"><use href="#i-star"/></svg>@endfor
+                        </span>
+                        <span class="bd-rev-total">{{ number_format($reviews) }} {{ __('home.bizd_reviews') }}</span>
+                    </div>
+                    <ul class="bd-rev-bars">
+                        @foreach ($ratingBreakdown as $star => $count)
+                            <li>
+                                <span class="bd-rev-n">{{ $star }}<svg class="icon icon--fill" aria-hidden="true"><use href="#i-star"/></svg></span>
+                                <span class="bd-rev-bar" aria-hidden="true"><i style="width: {{ $reviews ? round($count / $reviews * 100) : 0 }}%"></i></span>
+                                <span class="bd-rev-c">{{ number_format($count) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <ul class="bd-rev-list">
+                    @foreach ($latestReviews as $rv)
+                        @php
+                            $rvName = trim((string) optional($rv->user)->name) ?: __('home.bizd_rev_anon');
+                            $rvStars = max(0, min(5, (int) round((float) $rv->rating)));
+                            $rvDate = $rv->created_at;
+                        @endphp
+                        <li class="bd-rev-item">
+                            <span class="bd-rev-av" aria-hidden="true">{{ mb_strtoupper(mb_substr($rvName, 0, 1)) }}</span>
+                            <div class="bd-rev-body">
+                                <div class="bd-rev-meta">
+                                    <b class="clamp-1">{{ $rvName }}</b>
+                                    @if ($rvDate)
+                                        <time datetime="{{ $rvDate->toIso8601String() }}">{{ $rvDate->diffInDays(now()) < 30 ? $rvDate->locale($lang)->diffForHumans() : $rvDate->locale($lang)->isoFormat('D MMM YYYY') }}</time>
+                                    @endif
+                                </div>
+                                <span class="bd-stars bd-stars--sm" role="img" aria-label="{{ __('home.bizd_rev_stars', ['n' => $rvStars]) }}">
+                                    @for ($s = 1; $s <= 5; $s++)<svg class="icon {{ $s <= $rvStars ? 'icon--fill on' : '' }}" aria-hidden="true"><use href="#i-star"/></svg>@endfor
+                                </span>
+                                @if (trim((string) $rv->comment) !== '')
+                                    <p>{!! nl2br(e($rv->comment)) !!}</p>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+                @if ($reviews > $latestReviews->count())
+                    <p class="bd-rev-more">{{ __('home.bizd_rev_more', ['count' => number_format($reviews)]) }}</p>
+                @endif
+            @else
+                <div class="bd-rev-empty">
+                    <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+                    <p>{{ __('home.bizd_rev_empty') }}</p>
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                </div>
+            @endif
+        </section>
     </article>
 
     <aside class="bd-side">
