@@ -201,10 +201,28 @@
                 <h2>{{ __('home.nwd_most_read') }}</h2>
                 <ol class="nwd-pop-list">
                     @foreach ($mostRead as $i => $item)
+                        @php
+                            $d = $item->created_at;
+                            $popWhen = $d
+                                ? ($d->diffInDays(now()) < 30 ? $d->copy()->locale($lang)->diffForHumans() : $d->copy()->locale($lang)->isoFormat('D MMM YYYY'))
+                                : null;
+                            if ($popWhen && $lang === 'gu') { $popWhen = str_replace('પેહલા', 'પહેલાં', $popWhen); }
+                        @endphp
                         <li>
-                            <a href="{{ $item->web_url }}">
-                                <span class="nwd-pop-n" aria-hidden="true">{{ $i + 1 }}</span>
-                                <span class="clamp-2">{{ $item->title }}</span>
+                            <a class="nwd-pop-item" href="{{ $item->web_url }}">
+                                <span class="nwd-pop-n" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <span class="nwd-pop-text">
+                                    <span class="nwd-pop-title clamp-2">{{ $item->title }}</span>
+                                    <span class="nwd-pop-meta">
+                                        @if ($item->agency)<span>{{ $item->agency->name }}</span>@endif
+                                        @if ($popWhen)<span>{{ $popWhen }}</span>@endif
+                                    </span>
+                                </span>
+                                <span class="nwd-pop-thumb" aria-hidden="true">
+                                    @if ($item->image_url)
+                                        <img src="{{ $item->image_url }}" alt="" width="72" height="72" loading="lazy" decoding="async" onerror="this.remove()">
+                                    @endif
+                                </span>
                             </a>
                         </li>
                     @endforeach

@@ -51,6 +51,7 @@ class NewsDetailController extends Controller
             ->get($columns);
 
         $mostRead = $this->visible(NewsArticle::query())
+            ->with('agency:id,name')
             ->whereKeyNot($article->id)
             ->whereNotIn('id', $related->pluck('id'))
             ->whereRaw('(visitor + web_visitors) > 0')

@@ -52,4 +52,12 @@ return [
         'password_sha256' => env('NEWS_UPLOAD_PASSWORD_SHA256', '3902b8f0203db5d6f92cfe7edf1322ea82c93f9df66995b1fef0bcc932b566c0'),
     ],
 
+    /*
+    | New business enquiry ("lead") alert e-mail. Comma-separated list allowed.
+    | Sent for every enquiry, from the app and from the website popup.
+    */
+    'leads' => [
+        'notify_email' => env('LEAD_NOTIFY_EMAIL', 'kvkdgt12345@gmail.com'),
+    ],
+
 ];

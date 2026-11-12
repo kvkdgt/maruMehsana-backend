@@ -962,11 +962,21 @@ body.lb-open { overflow: hidden; }
 .nwd-sb--app { background: var(--blue-wash); border-color: var(--blue); color: var(--blue-deep); }
 .nwd-copy-msg { margin-top: 10px; font-size: 0.86rem; font-weight: 700; color: #15803d; }
 .nwd-copy-msg.is-fail { color: #b42318; }
-.nwd-pop-list { display: grid; gap: 4px; counter-reset: none; }
-.nwd-pop-list a { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; font-size: 0.92rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
-.nwd-pop-list li + li a { border-top: 1px solid var(--line); }
-.nwd-pop-list a:hover { color: var(--blue); }
-.nwd-pop-n { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: var(--blue-tint); color: var(--blue-deep); font-size: 0.8rem; font-weight: 800; }
+/* Most read: ranked list (big muted rank, title + source/time, small thumbnail) */
+.nwd-pop-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.nwd-pop-item { display: grid; grid-template-columns: 30px minmax(0, 1fr) 64px; gap: 12px; align-items: center; padding: 12px 0; color: var(--ink); }
+.nwd-pop-list li:first-child .nwd-pop-item { padding-top: 4px; }
+.nwd-pop-list li:last-child .nwd-pop-item { padding-bottom: 0; }
+.nwd-pop-list li + li .nwd-pop-item { border-top: 1px solid var(--line); }
+.nwd-pop-n { align-self: start; font-size: 1.35rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; color: #c3d2e4; font-variant-numeric: tabular-nums; }
+.nwd-pop-list li:first-child .nwd-pop-n { color: var(--blue); }
+.nwd-pop-text { display: grid; gap: 4px; min-width: 0; }
+.nwd-pop-title { font-size: 0.9rem; font-weight: 700; line-height: 1.45; transition: color 0.15s; }
+.nwd-pop-item:hover .nwd-pop-title { color: var(--blue); }
+.nwd-pop-meta { display: flex; flex-wrap: wrap; gap: 0 6px; font-size: 0.74rem; font-weight: 500; color: var(--muted); }
+.nwd-pop-meta span + span::before { content: "·"; margin-right: 6px; }
+.nwd-pop-thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--blue-wash); }
+.nwd-pop-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .nwd-card .news-meta { margin-top: 4px; }
 @media (max-width: 560px) {
   .nwd-meta { align-items: flex-start; }
