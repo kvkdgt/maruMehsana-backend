@@ -16,6 +16,15 @@
         'page' => $jobs->currentPage() > 1 ? $jobs->currentPage() : null,
         'lang' => $lang === 'en' ? 'en' : null,
     ]));
+
+    // Google Analytics page context + server-side search event (partials/analytics).
+    $gaPage = [
+        'list_filter'   => $type,
+        'list_sort'     => $sort,
+        'results_total' => $jobs->total(),
+        'page_number'   => $jobs->currentPage(),
+    ];
+    $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'jobs', 'count' => $jobs->total()] : null;
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
@@ -64,11 +73,11 @@
 <div class="container dir">
     {{-- Job type chips (types with no jobs are hidden) --}}
     <nav class="cat-bar" aria-label="{{ __('home.jbl_types') }}">
-        <a href="{{ $filterUrl(['type' => null]) }}" class="cat-chip {{ $type === 'all' ? 'is-on' : '' }}" @if ($type === 'all') aria-current="true" @endif>
+        <a href="{{ $filterUrl(['type' => null]) }}" data-ga="filter_change" data-ga-filter-type="job_type" data-ga-filter-value="all" class="cat-chip {{ $type === 'all' ? 'is-on' : '' }}" @if ($type === 'all') aria-current="true" @endif>
             {{ __('home.jbl_type_all') }} <span>{{ number_format($counts['all']) }}</span>
         </a>
         @foreach ($types as $t)
-            <a href="{{ $filterUrl(['type' => $t]) }}" class="cat-chip {{ $type === $t ? 'is-on' : '' }}" @if ($type === $t) aria-current="true" @endif>
+            <a href="{{ $filterUrl(['type' => $t]) }}" data-ga="filter_change" data-ga-filter-type="job_type" data-ga-filter-value="{{ $t }}" class="cat-chip {{ $type === $t ? 'is-on' : '' }}" @if ($type === $t) aria-current="true" @endif>
                 {{ __('home.jbl_type_' . $t) }} <span>{{ number_format($counts[$t]) }}</span>
             </a>
         @endforeach
@@ -88,7 +97,7 @@
             @if ($q !== '')<input type="hidden" name="q" value="{{ $q }}">@endif
             @if ($type !== 'all')<input type="hidden" name="type" value="{{ $type }}">@endif
             <label for="dir-sort">{{ __('home.bizp_sort') }}</label>
-            <select id="dir-sort" name="sort" onchange="this.form.submit()">
+            <select id="dir-sort" name="sort" data-ga="filter_change" data-ga-filter-type="sort" onchange="this.form.submit()">
                 @foreach ($sorts as $s)
                     <option value="{{ $s }}" @selected($sort === $s)>{{ __('home.jbl_sort_' . $s) }}</option>
                 @endforeach
@@ -158,7 +167,7 @@
                 <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>{{ __('home.jbl_cta_p3') }}</li>
             </ul>
         </div>
-        <a class="dir-cta-btn" href="{{ $playStore }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.jbl_cta_btn') }}</a>
+        <a class="dir-cta-btn" href="{{ $playStore }}" target="_blank" rel="noopener" data-ga-link-location="jobs_cta"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.jbl_cta_btn') }}</a>
     </aside>
 </div>
 @endsection

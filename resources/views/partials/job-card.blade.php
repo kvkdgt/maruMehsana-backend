@@ -50,7 +50,7 @@
         : null;
     $openings = (int) $job->vacancies_count;
 @endphp
-<li class="dir-card jbl-card{{ $filled ? ' is-filled' : '' }}">
+<li class="dir-card jbl-card{{ $filled ? ' is-filled' : '' }}" data-ga-item data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-content-category="{{ $job->job_type }}">
     <div class="dir-body">
         <div class="jbl-top">
             <span class="jbl-logo" aria-hidden="true">
@@ -60,7 +60,7 @@
                 @endif
             </span>
             <div class="jbl-head">
-                <h2 class="clamp-2"><a class="stretched" href="{{ route('jobs.show', $job->id) }}">{{ $job->title }}</a></h2>
+                <h2 class="clamp-2"><a class="stretched" href="{{ route('jobs.show', $job->id) }}" data-ga="select_content">{{ $job->title }}</a></h2>
                 @if ($job->company_name)
                     <p class="jbl-co clamp-1">{{ $job->company_name }}</p>
                 @endif

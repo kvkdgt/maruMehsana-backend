@@ -60,4 +60,20 @@ return [
         'notify_email' => env('LEAD_NOTIFY_EMAIL', 'kvkdgt12345@gmail.com'),
     ],
 
+    /*
+    | Google Analytics 4 for the public website (resources/views/partials/analytics.blade.php).
+    | Nothing is output unless GA_MEASUREMENT_ID is set AND enabled is true.
+    | GA_ENABLED unset/empty: on only when APP_ENV=production. GA_DEBUG=true turns on DebugView
+    | for every visitor (per visit: add ?ga_debug=1 to a URL instead).
+    */
+    'google_analytics' => [
+        // Public ID (it is visible in every page's HTML), so a default here is safe.
+        // An empty GA_MEASUREMENT_ID= line falls back to this ID too; turn GA off with GA_ENABLED=false.
+        'id'      => env('GA_MEASUREMENT_ID') ?: 'G-TTTBYWF8H6',
+        'enabled' => in_array(env('GA_ENABLED'), [null, ''], true)
+            ? env('APP_ENV') === 'production'
+            : filter_var(env('GA_ENABLED'), FILTER_VALIDATE_BOOLEAN),
+        'debug'   => filter_var(env('GA_DEBUG', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];

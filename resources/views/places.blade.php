@@ -13,6 +13,14 @@
         'page' => $places->currentPage() > 1 ? $places->currentPage() : null,
         'lang' => $lang === 'en' ? 'en' : null,
     ]));
+
+    // Google Analytics page context + server-side search event (partials/analytics).
+    $gaPage = [
+        'list_sort'     => $sort,
+        'results_total' => $places->total(),
+        'page_number'   => $places->currentPage(),
+    ];
+    $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'places', 'count' => $places->total()] : null;
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
@@ -59,7 +67,7 @@
         <form class="dir-sort" method="GET" action="{{ route('places') }}">
             @if ($q !== '')<input type="hidden" name="q" value="{{ $q }}">@endif
             <label for="dir-sort">{{ __('home.bizp_sort') }}</label>
-            <select id="dir-sort" name="sort" onchange="this.form.submit()">
+            <select id="dir-sort" name="sort" data-ga="filter_change" data-ga-filter-type="sort" onchange="this.form.submit()">
                 @foreach ($sorts as $s)
                     <option value="{{ $s }}" @selected($sort === $s)>{{ __('home.bizp_sort_' . $s) }}</option>
                 @endforeach

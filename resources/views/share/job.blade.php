@@ -9,7 +9,7 @@
     <meta name="description" content="Check out this job opportunity on Maru Mehsana app">
     <meta property="og:title" content="Job Opportunity on Maru Mehsana">
     <meta property="og:description" content="Find your next career move in Mehsana">
-    <meta property="og:image" content="https://maru-mehsana.krishivtech.in/logo.png">
+    <meta property="og:image" content="{{ asset('assets/site/logo-512.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     
     <style>

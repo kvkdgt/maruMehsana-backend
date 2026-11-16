@@ -4,6 +4,8 @@
     $agency = $article->agency;
     $agencyName = trim((string) optional($agency)->name);
     $agencyLogo = optional($agency)->logo_url;
+    // Google Analytics page context (partials/analytics).
+    $gaPage = ['content_id' => (string) $article->id, 'content_category' => $agencyName];
     $hero = $article->image_url;
     $published = $article->created_at;
     $modified = $article->updated_at ?: $published;
@@ -153,23 +155,24 @@
         @if ($bodyHtml !== '')
             <div class="nwd-body">{!! $bodyHtml !!}</div>
         @endif
+        <div data-ga-read-end data-ga-content-type="news" data-ga-content-id="{{ $article->id }}" data-ga-content-category="{{ optional($article->agency)->name }}" aria-hidden="true"></div>
 
         <section class="nwd-share" aria-labelledby="nwd-share-title">
             <h2 id="nwd-share-title">{{ __('home.nwd_share') }}</h2>
             <div class="nwd-share-btns">
-                <a class="nwd-sb nwd-sb--wa" href="{{ $waUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'WhatsApp']) }}">
+                <a class="nwd-sb nwd-sb--wa" data-ga="share" data-ga-content-type="news" data-ga-item-id="{{ $article->id }}" data-ga-method="whatsapp" href="{{ $waUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'WhatsApp']) }}">
                     <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span>WhatsApp</span>
                 </a>
-                <a class="nwd-sb nwd-sb--fb" href="{{ $fbUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'Facebook']) }}">
+                <a class="nwd-sb nwd-sb--fb" data-ga="share" data-ga-content-type="news" data-ga-item-id="{{ $article->id }}" data-ga-method="facebook" href="{{ $fbUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'Facebook']) }}">
                     <svg class="icon icon--fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.2c-.3 0-1.3-.2-2.5-.2-2.5 0-4.2 1.5-4.2 4.3v2.2H7.6V12h2.7v10H14V12h2.8l.4-3.5H14Z"/></svg><span>Facebook</span>
                 </a>
-                <a class="nwd-sb nwd-sb--x" href="{{ $xUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'X']) }}">
+                <a class="nwd-sb nwd-sb--x" data-ga="share" data-ga-content-type="news" data-ga-item-id="{{ $article->id }}" data-ga-method="x" href="{{ $xUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'X']) }}">
                     <svg class="icon icon--fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 2.5h3.1l-6.8 7.8 8 10.6h-6.3l-4.9-6.4-5.6 6.4H2.2l7.3-8.3L1.8 2.5h6.4l4.4 5.9 5.2-5.9Zm-1.1 16.5h1.7L7.4 4.3H5.6L16.7 19Z"/></svg><span>X</span>
                 </a>
-                <button type="button" class="nwd-sb nwd-sb--copy" data-nwd-copy="{{ $webUrl }}">
+                <button type="button" class="nwd-sb nwd-sb--copy" data-ga="share" data-ga-content-type="news" data-ga-item-id="{{ $article->id }}" data-ga-method="copy_link" data-nwd-copy="{{ $webUrl }}">
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>{{ __('home.nwd_copy') }}</span>
                 </button>
-                <a class="nwd-sb nwd-sb--app" href="{{ $shareUrl }}" rel="noopener">
+                <a class="nwd-sb nwd-sb--app" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="news" data-ga-content-id="{{ $article->id }}" data-ga-link-location="share_bar" data-ga-link-type="deep_link">
                     <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg><span>{{ __('home.bizd_app_open') }}</span>
                 </a>
             </div>
@@ -187,10 +190,10 @@
                 </div>
             </div>
             <div class="bd-app-btns">
-                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener">
+                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener" data-ga-link-location="sidebar">
                     <svg class="icon icon--fill" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.bizd_app_play') }}
                 </a>
-                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener">
+                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="news" data-ga-content-id="{{ $article->id }}" data-ga-link-location="sidebar" data-ga-link-type="deep_link">
                     <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}
                 </a>
             </div>
@@ -199,7 +202,7 @@
         @if ($mostRead->count())
             <section class="bd-card nwd-popular">
                 <h2>{{ __('home.nwd_most_read') }}</h2>
-                <ol class="nwd-pop-list">
+                <ol class="nwd-pop-list" data-ga-list="most_read">
                     @foreach ($mostRead as $i => $item)
                         @php
                             $d = $item->created_at;
@@ -208,8 +211,8 @@
                                 : null;
                             if ($popWhen && $lang === 'gu') { $popWhen = str_replace('પેહલા', 'પહેલાં', $popWhen); }
                         @endphp
-                        <li>
-                            <a class="nwd-pop-item" href="{{ $item->web_url }}">
+                        <li data-ga-item data-ga-content-type="news" data-ga-content-id="{{ $item->id }}" data-ga-content-category="{{ optional($item->agency)->name }}">
+                            <a class="nwd-pop-item" href="{{ $item->web_url }}" data-ga="select_content">
                                 <span class="nwd-pop-n" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
                                 <span class="nwd-pop-text">
                                     <span class="nwd-pop-title clamp-2">{{ $item->title }}</span>
@@ -237,10 +240,10 @@
 @if ($related->count())
     <section class="container bd-similar">
         <h2>{{ __('home.nwd_related') }}</h2>
-        <ul class="place-grid nwd-grid">
+        <ul class="place-grid nwd-grid" data-ga-list="related_news">
             @foreach ($related as $item)
-                <li>
-                    <a class="place-card nwd-card" href="{{ $item->web_url }}">
+                <li data-ga-item data-ga-content-type="news" data-ga-content-id="{{ $item->id }}" data-ga-content-category="{{ optional($item->agency)->name }}">
+                    <a class="place-card nwd-card" href="{{ $item->web_url }}" data-ga="select_content">
                         <span class="media ph">
                             <svg class="icon ph-ico" aria-hidden="true"><use href="#i-news"/></svg>
                             @if ($item->image_url)

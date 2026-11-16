@@ -24,6 +24,12 @@
     $galleryPhotos = $thumb ? array_slice($photos, 1) : $photos;
     $shareUrl = url('/business/' . $business->id);
     $playUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
+    // Google Analytics page context (partials/analytics).
+    $gaPage = [
+        'content_id'       => (string) $business->id,
+        'content_category' => optional($business->category)->name,
+        'category_id'      => $business->category_id ? (string) $business->category_id : null,
+    ];
 @endphp
 
 {{-- HtmlString: the layout escapes title/description itself, so don't let @section escape them a second time. --}}
@@ -69,10 +75,10 @@
                 @if ($phone || $wa)
                     <div class="dir-actions bd-actions">
                         @if ($phone)
-                            <a class="dir-btn dir-btn--call" href="tel:{{ $phone }}"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>{{ __('home.bizp_call') }}</a>
+                            <a class="dir-btn dir-btn--call" href="tel:{{ $phone }}" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="detail_hero"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>{{ __('home.bizp_call') }}</a>
                         @endif
                         @if ($wa)
-                            <a class="dir-btn dir-btn--wa" href="https://wa.me/{{ $waDigits }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>WhatsApp</a>
+                            <a class="dir-btn dir-btn--wa" href="https://wa.me/{{ $waDigits }}" target="_blank" rel="noopener" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="detail_hero"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>WhatsApp</a>
                         @endif
                     </div>
                 @endif
@@ -104,7 +110,7 @@
             <div class="bd-rev-head">
                 <h2 id="bd-rev-title">{{ __('home.bizd_rev_title') }}</h2>
                 @if ($reviews > 0)
-                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow" data-ga="write_review_click" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="rev_header"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
                 @endif
             </div>
 
@@ -162,7 +168,7 @@
                 <div class="bd-rev-empty">
                     <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
                     <p>{{ __('home.bizd_rev_empty') }}</p>
-                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow" data-ga="write_review_click" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="rev_empty"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
                 </div>
             @endif
         </section>
@@ -172,9 +178,9 @@
         <section class="bd-card">
             <h2>{{ __('home.bizd_contact') }}</h2>
             <ul class="bd-list">
-                @if ($phone)<li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><a href="tel:{{ $phone }}">{{ $business->mobile_no }}</a></li>@endif
-                @if ($business->email_id)<li><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><a href="mailto:{{ $business->email_id }}">{{ $business->email_id }}</a></li>@endif
-                @if ($website)<li><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><a href="{{ $website }}" target="_blank" rel="noopener nofollow">{{ $business->website_url }}</a></li>@endif
+                @if ($phone)<li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><a href="tel:{{ $phone }}" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="contact_list">{{ $business->mobile_no }}</a></li>@endif
+                @if ($business->email_id)<li><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><a href="mailto:{{ $business->email_id }}" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="contact_list">{{ $business->email_id }}</a></li>@endif
+                @if ($website)<li><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><a href="{{ $website }}" target="_blank" rel="noopener nofollow" data-ga="website_click" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="contact_list">{{ $business->website_url }}</a></li>@endif
             </ul>
         </section>
         <section class="bd-card bd-app">
@@ -186,10 +192,10 @@
                 </div>
             </div>
             <div class="bd-app-btns">
-                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener">
+                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener" data-ga-link-location="sidebar">
                     <svg class="icon icon--fill" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.bizd_app_play') }}
                 </a>
-                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener">
+                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-link-location="sidebar" data-ga-link-type="deep_link">
                     <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}
                 </a>
             </div>
@@ -201,7 +207,7 @@
 @if ($similar->count())
     <section class="container bd-similar">
         <h2>{{ __('home.bizd_similar') }}</h2>
-        <ul class="dir-grid">
+        <ul class="dir-grid" data-ga-list="similar_businesses">
             @foreach ($similar as $item)
                 @include('partials.business-card', ['business' => $item])
             @endforeach

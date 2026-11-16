@@ -15,6 +15,15 @@
         'page'     => $businesses->currentPage() > 1 ? $businesses->currentPage() : null,
         'lang'     => $lang === 'en' ? 'en' : null,
     ]));
+
+    // Google Analytics page context + server-side search event (partials/analytics).
+    $gaPage = [
+        'list_filter'   => $activeCategory?->id ? (string) $activeCategory->id : 'all',
+        'list_sort'     => $sort,
+        'results_total' => $businesses->total(),
+        'page_number'   => $businesses->currentPage(),
+    ];
+    $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'businesses', 'count' => $businesses->total()] : null;
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
@@ -66,11 +75,11 @@
     @endphp
     <div class="cat-wrap" data-cat-wrap>
         <nav class="cat-bar" id="cat-bar" aria-label="{{ __('home.bizp_categories') }}">
-            <a href="{{ $filterUrl(['category' => null]) }}" class="cat-chip {{ $activeCategory ? '' : 'is-on' }}" @if (!$activeCategory) aria-current="true" @endif>
+            <a href="{{ $filterUrl(['category' => null]) }}" data-ga="filter_change" data-ga-filter-type="category" data-ga-filter-value="all" class="cat-chip {{ $activeCategory ? '' : 'is-on' }}" @if (!$activeCategory) aria-current="true" @endif>
                 {{ __('home.bizp_all') }} <span>{{ number_format($totalAll) }}</span>
             </a>
             @foreach ($activeFirst->concat($otherCats) as $cat)
-                <a href="{{ $filterUrl(['category' => $cat->id]) }}" class="cat-chip {{ $activeCategory?->id === $cat->id ? 'is-on' : '' }}" @if ($activeCategory?->id === $cat->id) aria-current="true" @endif>
+                <a href="{{ $filterUrl(['category' => $cat->id]) }}" data-ga="filter_change" data-ga-filter-type="category" data-ga-filter-value="{{ $cat->id }}" data-ga-category-name="{{ $cat->name }}" class="cat-chip {{ $activeCategory?->id === $cat->id ? 'is-on' : '' }}" @if ($activeCategory?->id === $cat->id) aria-current="true" @endif>
                     {{ $cat->name }} <span>{{ $cat->businesses_count }}</span>
                 </a>
             @endforeach
@@ -95,7 +104,7 @@
             @if ($q !== '')<input type="hidden" name="q" value="{{ $q }}">@endif
             @if ($activeCategory)<input type="hidden" name="category" value="{{ $activeCategory->id }}">@endif
             <label for="dir-sort">{{ __('home.bizp_sort') }}</label>
-            <select id="dir-sort" name="sort" onchange="this.form.submit()">
+            <select id="dir-sort" name="sort" data-ga="filter_change" data-ga-filter-type="sort" onchange="this.form.submit()">
                 @foreach ($sorts as $s)
                     <option value="{{ $s }}" @selected($sort === $s)>{{ __('home.bizp_sort_' . $s) }}</option>
                 @endforeach

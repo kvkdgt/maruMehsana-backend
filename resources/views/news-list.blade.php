@@ -15,6 +15,15 @@
         'page'   => $articles->currentPage() > 1 ? $articles->currentPage() : null,
         'lang'   => $lang === 'en' ? 'en' : null,
     ]));
+
+    // Google Analytics page context + server-side search event (partials/analytics).
+    $gaPage = [
+        'list_filter'   => $filter,
+        'list_sort'     => $sort,
+        'results_total' => $articles->total(),
+        'page_number'   => $articles->currentPage(),
+    ];
+    $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'news', 'count' => $articles->total()] : null;
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
@@ -60,7 +69,7 @@
     {{-- Filter chips --}}
     <nav class="cat-bar" aria-label="{{ __('home.nwl_filters') }}">
         @foreach ($filters as $f)
-            <a href="{{ $filterUrl(['filter' => $f === 'all' ? null : $f]) }}" class="cat-chip {{ $filter === $f ? 'is-on' : '' }}" @if ($filter === $f) aria-current="true" @endif>
+            <a href="{{ $filterUrl(['filter' => $f === 'all' ? null : $f]) }}" data-ga="filter_change" data-ga-filter-type="news_filter" data-ga-filter-value="{{ $f }}" class="cat-chip {{ $filter === $f ? 'is-on' : '' }}" @if ($filter === $f) aria-current="true" @endif>
                 {{ __('home.nwl_filter_' . $f) }} <span>{{ number_format($counts[$f]) }}</span>
             </a>
         @endforeach
@@ -80,7 +89,7 @@
             @if ($q !== '')<input type="hidden" name="q" value="{{ $q }}">@endif
             @if ($filter !== 'all')<input type="hidden" name="filter" value="{{ $filter }}">@endif
             <label for="dir-sort">{{ __('home.bizp_sort') }}</label>
-            <select id="dir-sort" name="sort" onchange="this.form.submit()">
+            <select id="dir-sort" name="sort" data-ga="filter_change" data-ga-filter-type="sort" onchange="this.form.submit()">
                 @foreach ($sorts as $s)
                     <option value="{{ $s }}" @selected($sort === $s)>{{ __('home.nwl_sort_' . $s) }}</option>
                 @endforeach

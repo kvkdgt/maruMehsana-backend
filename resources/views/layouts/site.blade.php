@@ -56,6 +56,7 @@
         ],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}
     </script>
+    @include('partials.analytics')
     <script>document.documentElement.classList.add('js');</script>
     @stack('head')
 </head>
@@ -116,8 +117,8 @@
                         <svg class="icon icon--sm" aria-hidden="true"><use href="#i-chev-d"/></svg>
                     </summary>
                     <ul class="lang-list">
-                        <li><a href="{{ $langUrl('gu') }}" hreflang="gu" lang="gu" @if ($lang === 'gu') aria-current="true" @endif>ગુજરાતી</a></li>
-                        <li><a href="{{ $langUrl('en') }}" hreflang="en" lang="en" @if ($lang === 'en') aria-current="true" @endif>English</a></li>
+                        <li><a href="{{ $langUrl('gu') }}" data-ga="language_switch" data-ga-language-from="{{ $lang }}" data-ga-language-to="gu" hreflang="gu" lang="gu" @if ($lang === 'gu') aria-current="true" @endif>ગુજરાતી</a></li>
+                        <li><a href="{{ $langUrl('en') }}" data-ga="language_switch" data-ga-language-from="{{ $lang }}" data-ga-language-to="en" hreflang="en" lang="en" @if ($lang === 'en') aria-current="true" @endif>English</a></li>
                     </ul>
                 </details>
                 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-panel"
@@ -141,13 +142,14 @@
                     <span class="brand-name">Maru <b>Mehsana</b></span>
                 </a>
                 <p class="footer-about">{{ __('home.footer_about') }}</p>
+                <p class="footer-cookie">{{ __('home.ga_cookie_note') }} <a href="{{ url('/privacy-policy') }}#analytics">{{ __('home.ga_cookie_link') }}</a>@if (config('services.google_analytics.id') && config('services.google_analytics.enabled')) · <a href="#" data-consent-open>{{ __('home.ga_cookie_settings') }}</a>@endif</p>
             </div>
             <nav class="footer-links" aria-label="{{ __('home.footer_explore') }}">
                 <a href="{{ route('businesses') }}">{{ __('home.nav_businesses') }}</a>
                 <a href="{{ route('places') }}">{{ __('home.nav_places') }}</a>
                 <a href="{{ route('news') }}">{{ __('home.nav_news') }}</a>
                 <a href="{{ route('jobs') }}">{{ __('home.nav_jobs') }}</a>
-                <a href="{{ $playStore }}" target="_blank" rel="noopener">Google Play</a>
+                <a href="{{ $playStore }}" target="_blank" rel="noopener" data-ga-link-location="footer">Google Play</a>
                 <a href="{{ url('/privacy-policy') }}">{{ __('home.privacy') }}</a>
             </nav>
         </div>
@@ -159,5 +161,6 @@
 
     <script src="{{ asset('assets/site/site.js') }}?v={{ filemtime(public_path('assets/site/site.js')) }}" defer></script>
     @stack('scripts')
+    @include('partials.consent')
 </body>
 </html>

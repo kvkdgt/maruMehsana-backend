@@ -336,4 +336,17 @@ return [
     'jbl_cta_p2'          => 'Candidates call or WhatsApp you directly',
     'jbl_cta_p3'          => 'Shown on the app and this website',
     'jbl_cta_btn'         => 'Post a job in the app',
+
+    // Analytics cookie note (footer)
+    'ga_cookie_note'      => 'With your permission, we use cookies for anonymous usage statistics.',
+    'ga_cookie_settings'  => 'Cookie settings',
+    'ga_cookie_link'      => 'Learn more',
+
+    // 404 page
+    'nf_meta_title'       => 'Page not found | Maru Mehsana',
+    'nf_meta_desc'        => 'The page you are looking for could not be found on Maru Mehsana.',
+    'nf_eyebrow'          => 'Error 404',
+    'nf_title'            => 'Page not found',
+    'nf_sub'              => 'This page may have been removed, renamed or is no longer available. Try one of these instead:',
+    'nf_home'             => 'Go to home page',
 ];

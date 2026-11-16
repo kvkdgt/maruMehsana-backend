@@ -438,6 +438,15 @@ html:has(dialog.enq[open]), html:has(dialog.enq[open]) body { overflow: hidden; 
 .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px 40px; padding-block: 34px 22px; }
 .footer-brand { max-width: 420px; }
 .footer-about { margin-top: 10px; font-size: 0.92rem; color: var(--muted); line-height: 1.6; }
+.footer-cookie { margin-top: 6px; font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+.footer-cookie a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.footer-cookie a:hover { color: var(--blue); }
+
+/* 404 page */
+.nf { padding-block: 28px 48px; }
+.nf-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.nf-home { margin-top: 18px; }
+.nf-home .icon { width: 16px; height: 16px; margin-left: 6px; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 .footer-links a { font-weight: 600; font-size: 0.92rem; color: var(--ink-soft); }
 .footer-links a:hover { color: var(--blue); }

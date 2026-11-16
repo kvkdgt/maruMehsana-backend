@@ -1,3 +1,148 @@
+/* ---------------- Google Analytics 4 event tracker ----------------
+   window.mmTrack(name, params) sends a GA4 event. It does nothing unless the analytics partial
+   loaded gtag (GA enabled in config), so the site works the same without it.
+   Clicks on [data-ga] / links are tracked by one delegated listener:
+     data-ga="event_name"            explicit event (otherwise tel:/mailto:/wa.me/Play Store/external links are auto-detected)
+     data-ga-foo-bar="x"             -> param foo_bar=x (element first, then its closest [data-ga-item] card)
+     data-ga-list="name"             -> list_name for cards inside that container
+   PII rule: hrefs, link URLs and form values are never sent; emails and long digit runs are masked. */
+(function () {
+  'use strict';
+
+  var MAX_LEN = 100;
+  var BLOCKED = { href: 1, link_url: 1, link_text: 1, url: 1, page_location: 1 };
+  var NUMERIC = { index: 1, page_number: 1, items_shown: 1, results_count: 1, photo_index: 1, photo_count: 1, photos_viewed: 1 };
+
+  // Mask emails and phone-like numbers (7+ digits, spaces/dashes/dots allowed), cap the length.
+  function clean(v) {
+    if (v == null) return undefined;
+    if (typeof v === 'number') return isFinite(v) ? v : undefined;
+    if (typeof v === 'boolean') return v ? 'yes' : 'no';
+    var s = String(v)
+      .replace(/[^\s@<>()[\]",;:]+@[^\s@<>()[\]",;:]+/g, '[email]')
+      .replace(/@/g, '')
+      .replace(/\+?\d(?:[\s.\-]*\d){6,}/g, '[num]')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (s.length > MAX_LEN) s = s.slice(0, MAX_LEN);
+    return s === '' ? undefined : s;
+  }
+
+  function ctx() { return window.MM_GA || {}; }
+
+  function track(name, params) {
+    try {
+      if (typeof window.gtag !== 'function' || !name) return;
+      var c = ctx(), merged = {}, out = {};
+      var own = params && params.content_id != null && params.content_id !== '';
+      ['page_type', 'content_group', 'content_id', 'content_category'].forEach(function (k) {
+        // A card's own content_id must not be mixed with the page's content_category.
+        if (own && k === 'content_category') return;
+        if (c[k] != null && c[k] !== '') merged[k] = c[k];
+      });
+      if (params) Object.keys(params).forEach(function (k) { merged[k] = params[k]; });
+      Object.keys(merged).forEach(function (k) {
+        if (BLOCKED[k] || !/^[a-z][a-z0-9_]{0,39}$/.test(k)) return;
+        var v = merged[k];
+        if (NUMERIC[k] && typeof v === 'string' && /^\d{1,6}$/.test(v)) v = parseInt(v, 10);
+        v = clean(v);
+        if (v !== undefined) out[k] = v;
+      });
+      out.transport_type = 'beacon';
+      window.gtag('event', name, out);
+    } catch (e) { /* analytics must never break the page */ }
+  }
+
+  function readAttrs(node, out) {
+    var list = node && node.attributes;
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      var n = list[i].name;
+      if (n.indexOf('data-ga-') !== 0) continue;
+      var k = n.slice(8).replace(/-/g, '_');
+      if (k === 'item' || k === 'list' || k === 'read_end') continue;
+      if (!(k in out)) out[k] = list[i].value;
+    }
+  }
+
+  // Params for an element: its own data-ga-* first, then its card ([data-ga-item]) + position, then list name.
+  function readParams(el, withList) {
+    var out = {};
+    readAttrs(el, out);
+    var item = el.closest ? el.closest('[data-ga-item]') : null;
+    if (item) {
+      if (item !== el) readAttrs(item, out);
+      if (out.index == null && item.parentNode) {
+        var sib = item.parentNode.children;
+        for (var i = 0; i < sib.length; i++) { if (sib[i] === item) { out.index = i + 1; break; } }
+      }
+    }
+    var listEl = el.closest ? el.closest('[data-ga-list]') : null;
+    if (out.list_name == null && (item || listEl || withList)) {
+      out.list_name = listEl ? listEl.getAttribute('data-ga-list') : ctx().page_type;
+    }
+    return out;
+  }
+
+  function toURL(a) {
+    try { return a.href ? new URL(a.href, window.location.href) : null; } catch (e) { return null; }
+  }
+
+  function autoName(u) {
+    if (!u) return null;
+    var p = u.protocol, h = u.hostname.toLowerCase();
+    if (p === 'tel:') return 'call_click';
+    if (p === 'mailto:') return 'email_click';
+    if (p !== 'http:' && p !== 'https:') return null;
+    if ((h === 'wa.me' || h === 'api.whatsapp.com') && /^\/\+?\d/.test(u.pathname)) return 'whatsapp_click';
+    if (h === 'play.google.com' && u.pathname.indexOf('/store') === 0) return 'app_store_click';
+    if (h !== window.location.hostname.toLowerCase()) return 'outbound_click';
+    return null;
+  }
+
+  track.clean = clean;
+  track.params = readParams;
+  track.autoName = autoName;
+  window.mmTrack = track;
+
+  document.addEventListener('click', function (e) {
+    try {
+      var t = e.target && e.target.closest ? e.target.closest('[data-ga], a[href]') : null;
+      if (!t || t.tagName === 'SELECT' || t.tagName === 'OPTION') return;
+      var u = t.tagName === 'A' ? toURL(t) : null;
+      var name = t.getAttribute('data-ga') || autoName(u);
+      if (!name) return;
+      var p = readParams(t, name === 'select_content' || name === 'filter_change');
+      if (name === 'app_store_click' && p.link_type == null) p.link_type = 'store';
+      if ((name === 'outbound_click' || name === 'website_click') && u && /^https?:$/.test(u.protocol)) {
+        p.link_domain = u.hostname.replace(/^www\./i, '');
+      }
+      track(name, p);
+    } catch (err) { /* ignore */ }
+  }, true);
+
+  document.addEventListener('change', function (e) {
+    try {
+      var t = e.target;
+      if (!t || t.tagName !== 'SELECT' || !t.hasAttribute('data-ga')) return;
+      var p = readParams(t, true);
+      p.filter_value = t.value;
+      track(t.getAttribute('data-ga') || 'filter_change', p);
+    } catch (err) { /* ignore */ }
+  }, true);
+
+  // News detail: reader reached the end of the article body (once).
+  var readEnd = document.querySelector('[data-ga-read-end]');
+  if (readEnd && 'IntersectionObserver' in window) {
+    var rio = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (en) { return en.isIntersecting; })) return;
+      rio.disconnect();
+      track('article_read', readParams(readEnd));
+    });
+    rio.observe(readEnd);
+  }
+})();
+
 (function () {
   'use strict';
 
@@ -40,7 +185,15 @@
   /* ---------------- "Add your business" enquiry popup ---------------- */
   var enq = document.getElementById('enquiry');
   var enqForm = document.getElementById('enq-form');
+  function ga(name, params) { if (window.mmTrack) window.mmTrack(name, params); }
   if (enq && enqForm && typeof enq.showModal === 'function') {
+    // Analytics funnel state. Only field NAMES are ever sent, never what people typed.
+    var leadOpen = false, leadDone = false, leadViaHash = false;
+    function leadEvent(name, extra) {
+      var p = { form_id: 'add_business' };
+      if (extra) Object.keys(extra).forEach(function (k) { p[k] = extra[k]; });
+      ga(name, p);
+    }
     var enqMsg = document.getElementById('enq-msg');
     var enqBtn = document.getElementById('enq-submit');
     var enqBtnText = enqBtn.textContent;
@@ -92,7 +245,12 @@
         enqFields.hidden = false;
         enqDone.hidden = true;
         setMsg('');
-        if (!enq.open) enq.showModal();
+        if (!enq.open) {
+          enq.showModal();
+          leadOpen = true; leadDone = false;
+          leadEvent('lead_form_open', { link_location: leadViaHash ? 'hash_link' : (b.getAttribute('data-ga-link-location') || 'home_tile') });
+        }
+        leadViaHash = false;
         enqForm.elements.business_name.focus();
       });
     });
@@ -101,11 +259,18 @@
     });
     // Click on the dark backdrop closes the popup
     enq.addEventListener('click', function (e) { if (e.target === enq) enq.close(); });
+    // Fires for every way of closing (X, backdrop, Escape, "Close" after success)
+    enq.addEventListener('close', function () {
+      if (leadOpen && !leadDone) leadEvent('lead_form_close', { form_state: 'abandoned' });
+      leadOpen = false;
+    });
 
     // Other pages link to /#add-business to open this popup directly
     if (window.location.hash === '#add-business') {
       var opener = document.querySelector('[data-open-enquiry]');
+      leadViaHash = true;
       if (opener) opener.click();
+      leadViaHash = false;
       if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
@@ -116,6 +281,7 @@
       syncWhatsapp();
       enqBtn.disabled = true;
       enqBtn.textContent = enqForm.getAttribute('data-sending');
+      leadEvent('lead_form_submit');
 
       window.fetch(enqForm.action, {
         method: 'POST',
@@ -126,17 +292,24 @@
         return res.json().catch(function () { return {}; }).then(function (body) { return { status: res.status, body: body }; });
       }).then(function (r) {
         if (r.status === 201) {
+          leadDone = true;
+          // The honeypot (bot) path also answers 201 but with message "ok": not a real lead.
+          if (!(r.body && r.body.message === 'ok')) leadEvent('generate_lead', { lead_source: 'web' });
           enqForm.reset();
           syncWhatsapp();
           showDone(r.body.message);
         } else if (r.status === 422 && r.body.errors) {
+          leadEvent('lead_form_error', { error_type: 'validation', error_fields: Object.keys(r.body.errors).join(',') });
           showErrors(r.body.errors);
         } else if (r.status === 429) {
+          leadEvent('lead_form_error', { error_type: 'rate_limit' });
           setMsg(enqForm.getAttribute('data-err-many'), false);
         } else {
+          leadEvent('lead_form_error', { error_type: 'server' });
           setMsg(enqForm.getAttribute('data-err-generic'), false);
         }
       }).catch(function () {
+        leadEvent('lead_form_error', { error_type: 'network' });
         setMsg(enqForm.getAttribute('data-err-generic'), false);
       }).then(function () {
         enqBtn.disabled = false;
@@ -199,9 +372,34 @@
   var SVGNS = 'http://www.w3.org/2000/svg';
   var ICON = { category: 'i-store', business: 'i-store', place: 'i-pin', news: 'i-news', job: 'i-briefcase' };
   var timer = 0, seq = 0, ctl = null, uid = 0;
-  var options = [];        // [{el, href, onPick}]
+  var options = [];        // [{el, href, onPick, ga}]
   var active = -1;
   var lastGroups = null;   // remembered so a category view can go back
+  var resultPos = 0;       // 1-based position of a result in the open list (analytics)
+
+  // Analytics: one "search" event per distinct term, after the typing has paused for 1s.
+  var gaTimer = 0, gaPending = null, gaSent = {};
+  function gaSearchFlush() {
+    window.clearTimeout(gaTimer);
+    var s = gaPending; gaPending = null;
+    if (!s) return;
+    var key = s.term.toLowerCase();
+    if (gaSent[key]) return;
+    gaSent[key] = true;
+    var p = { search_term: s.term, search_location: 'home_live', results_count: s.count };
+    ga('search', p);
+    if (!s.count) ga('search_no_results', p);
+  }
+  function gaSearchLater(term, count) {
+    window.clearTimeout(gaTimer);
+    gaPending = { term: term, count: count };
+    gaTimer = window.setTimeout(gaSearchFlush, 1000);
+  }
+  function gaPick(o) {
+    if (!o || !o.ga) return;
+    gaSearchFlush();
+    ga('select_content', o.ga);
+  }
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -264,15 +462,24 @@
     }
 
     var rec = { el: node, onPick: item.pick || null, href: item.href || null };
+    rec.ga = {
+      content_type: item.type === 'category' ? 'search_category' : 'search_result',
+      result_type: item.type,
+      item_id: item.id != null ? String(item.id) : undefined,
+      category_name: item.type === 'category' ? item.title : undefined,
+      index: ++resultPos,
+      search_term: input.value.trim()
+    };
     var idx = options.length;
     options.push(rec);
     node.addEventListener('mouseenter', function () { setActive(idx, false); });
-    if (item.pick) node.addEventListener('click', function (e) { e.preventDefault(); item.pick(); });
+    if (item.pick) node.addEventListener('click', function (e) { e.preventDefault(); gaPick(rec); item.pick(); });
+    else node.addEventListener('click', function () { gaPick(rec); });
     parent.appendChild(node);
   }
   function renderGroups(groups, header) {
     list.textContent = '';
-    options = []; active = -1;
+    options = []; active = -1; resultPos = 0;
     input.removeAttribute('aria-activedescendant');
     msg.hidden = true;
 
@@ -355,19 +562,19 @@
       mixed.forEach(function (r) {
         if (!r || r.id == null || !r.name) return;
         if (r.type === 'Category') {
-          cats.push({ type: 'category', title: String(r.name), sub: cfg.catLabel, pick: function () { openCategory(r.id, String(r.name)); } });
+          cats.push({ type: 'category', id: r.id, title: String(r.name), sub: cfg.catLabel, pick: function () { openCategory(r.id, String(r.name)); } });
         } else if (r.type === 'Business') {
-          biz.push({ type: 'business', title: String(r.name), href: cfg.base + '/businesses/' + encodeURIComponent(r.id) });
+          biz.push({ type: 'business', id: r.id, title: String(r.name), href: cfg.base + '/businesses/' + encodeURIComponent(r.id) });
         } else if (r.type === 'Tourist Place') {
-          places.push({ type: 'place', title: String(r.name), href: cfg.base + '/places/' + encodeURIComponent(r.id) });
+          places.push({ type: 'place', id: r.id, title: String(r.name), href: cfg.base + '/places/' + encodeURIComponent(r.id) });
         }
       });
       var news = newsRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {
-        return { type: 'news', title: String(r.title), sub: r.agency && r.agency.name ? String(r.agency.name) : '', href: cfg.base + '/news/' + encodeURIComponent(r.id) + '/' + encodeURIComponent(r.slug ? String(r.slug) : 'news-' + r.id) };
+        return { type: 'news', id: r.id, title: String(r.title), sub: r.agency && r.agency.name ? String(r.agency.name) : '', href: cfg.base + '/news/' + encodeURIComponent(r.id) + '/' + encodeURIComponent(r.slug ? String(r.slug) : 'news-' + r.id) };
       });
       var jobs = jobRows.filter(function (r) { return r && r.id != null && r.title; }).map(function (r) {
         var sub = [r.location, r.company_name].filter(Boolean).join(' · ');
-        return { type: 'job', title: String(r.title), sub: sub, href: cfg.base + '/jobs/' + encodeURIComponent(r.id) };
+        return { type: 'job', id: r.id, title: String(r.title), sub: sub, href: cfg.base + '/jobs/' + encodeURIComponent(r.id) };
       });
 
       var groups = [
@@ -378,6 +585,7 @@
         { title: cfg.groups.job, items: cap(jobs, 3) }
       ];
       var total = groups.reduce(function (n, g) { return n + g.items.length; }, 0);
+      gaSearchLater(q, total);
       if (!total) { lastGroups = null; showMessage(cfg.none); say(cfg.none); return; }
       lastGroups = groups;
       renderGroups(groups);
@@ -399,7 +607,7 @@
         if (my !== seq) return;
         var rows = (r && Array.isArray(r.data)) ? r.data : [];
         var items = rows.filter(function (b) { return b && b.id != null && b.name; }).map(function (b) {
-          return { type: 'business', title: String(b.name), href: cfg.base + '/businesses/' + encodeURIComponent(b.id) };
+          return { type: 'business', id: b.id, title: String(b.name), href: cfg.base + '/businesses/' + encodeURIComponent(b.id) };
         });
         var head = lastGroups ? { label: cfg.catBack, pick: function () { input.value = ''; syncClear(); input.focus(); showPrev(); } } : null;
         if (!items.length) {
@@ -441,6 +649,7 @@
   goBtn.addEventListener('click', function () { /* submit handler does the work */ });
 
   function pick(o) {
+    gaPick(o);
     if (o.onPick) o.onPick();
     else if (o.href) window.location.href = o.href;
   }
@@ -482,6 +691,7 @@
       window.clearTimeout(timer);
       var cat = chip.getAttribute('data-category');
       var name = chip.getAttribute('data-q') || '';
+      ga('select_content', { content_type: 'category_chip', item_id: cat || undefined, category_name: name });
       input.value = name; syncClear();
       lastGroups = null;
       if (cat) openCategory(cat, name); else search(name);
@@ -564,6 +774,12 @@
   var busy = false;
   var io = null;
   var seen = {};
+  function ga(name, params) {
+    if (!window.mmTrack) return;
+    params.list_name = (window.MM_GA && window.MM_GA.page_type) || 'list';
+    params.items_shown = grid.children.length;
+    window.mmTrack(name, params);
+  }
 
   // Cards are keyed by their business link so a card never shows twice (e.g. if the list changed meanwhile).
   function key(li) {
@@ -584,11 +800,14 @@
     btn.hidden = true;
     end.hidden = false;
     status.textContent = end.textContent;
+    ga('list_end_reached', {});
   }
 
-  function load() {
+  function load(method) {
     if (busy || !next) return;
     busy = true;
+    var pm = /[?&]page=(\d+)/.exec(next);
+    var pageNo = pm ? parseInt(pm[1], 10) : null;
     loading.hidden = false;
     btn.hidden = true;
     status.textContent = loading.textContent;
@@ -610,6 +829,7 @@
         next = (data && data.next) || null;
         busy = false;
         loading.hidden = true;
+        ga('load_more', { method: method === 'button' ? 'button' : 'auto', page_number: pageNo });
         if (!next) { finish(); return; }
         status.textContent = (box.getAttribute('data-showing') || '').replace('__SHOWN__', grid.children.length);
         if (io) { io.unobserve(sentinel); io.observe(sentinel); } // re-check: still near the end on tall screens
@@ -623,13 +843,13 @@
       });
   }
 
-  btn.addEventListener('click', load);
+  btn.addEventListener('click', function () { load('button'); });
   if (pager) pager.hidden = true;
   box.hidden = false;
 
   if ('IntersectionObserver' in window) {
     io = new IntersectionObserver(function (entries) {
-      if (entries.some(function (e) { return e.isIntersecting; })) load();
+      if (entries.some(function (e) { return e.isIntersecting; })) load('auto');
     }, { rootMargin: '0px 0px 600px 0px' });
     io.observe(sentinel);
   } else {
@@ -648,15 +868,22 @@
   var img = dlg.querySelector('.lb-img');
   var count = dlg.querySelector('.lb-count');
   var idx = 0;
+  var viewed = null;       // analytics: distinct photos seen while the lightbox is open
   if (photos.length < 2) dlg.classList.add('single');
+  function ga(name, params) { if (window.mmTrack) window.mmTrack(name, params); }
 
   function show(i) {
     idx = (i + photos.length) % photos.length;
+    if (viewed) viewed[photos[idx]] = true;
     img.src = photos[idx];
     count.textContent = (idx + 1) + ' / ' + photos.length;
     dlg.classList.toggle('single', photos.length < 2);
   }
   function open(i) {
+    if (!dlg.open) {
+      viewed = {};
+      ga('photo_open', { photo_index: ((i + photos.length) % photos.length) + 1, photo_count: photos.length });
+    }
     show(i);
     if (!dlg.open) dlg.showModal();
     document.body.classList.add('lb-open');
@@ -667,7 +894,10 @@
     var t = e.target.closest && e.target.closest('[data-lb]');
     if (t) { e.preventDefault(); open(parseInt(t.getAttribute('data-lb'), 10) || 0); }
   });
-  dlg.addEventListener('close', function () { document.body.classList.remove('lb-open'); img.removeAttribute('src'); });
+  dlg.addEventListener('close', function () {
+    document.body.classList.remove('lb-open'); img.removeAttribute('src');
+    if (viewed) { ga('photo_close', { photos_viewed: Object.keys(viewed).length, photo_count: photos.length }); viewed = null; }
+  });
   dlg.addEventListener('click', function (e) {
     if (e.target.closest('[data-lb-close]')) return close();
     if (e.target.closest('[data-lb-prev]')) return show(idx - 1);

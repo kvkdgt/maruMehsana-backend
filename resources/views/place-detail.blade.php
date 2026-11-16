@@ -29,6 +29,8 @@
     $shareUrl = url('/place/' . $place->id);
     $playUrl = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
     $canonicalUrl = route('places.show', $place->id) . ($lang === 'en' ? '?lang=en' : '');
+    // Google Analytics page context (partials/analytics).
+    $gaPage = ['content_id' => (string) $place->id];
 
     $ld = [
         '@context' => 'https://schema.org',
@@ -114,9 +116,9 @@
                 @endif
                 <div class="pld-actions">
                     @if ($directionsUrl)
-                        <a class="bd-store" href="{{ $directionsUrl }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.pld_directions') }}</a>
+                        <a class="bd-store" href="{{ $directionsUrl }}" target="_blank" rel="noopener" data-ga="directions_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="detail_hero"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.pld_directions') }}</a>
                     @endif
-                    <a class="bd-open" href="{{ $shareUrl }}" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}</a>
+                    <a class="bd-open" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="detail_hero" data-ga-link-type="deep_link"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}</a>
                 </div>
             </div>
         </div>
@@ -140,7 +142,7 @@
             <div class="bd-rev-head">
                 <h2 id="bd-rev-title">{{ __('home.bizd_rev_title') }}</h2>
                 @if ($reviews > 0)
-                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow" data-ga="write_review_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="rev_header"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
                 @endif
             </div>
 
@@ -198,7 +200,7 @@
                 <div class="bd-rev-empty">
                     <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
                     <p>{{ __('home.bizd_rev_empty') }}</p>
-                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
+                    <a class="bd-rev-add" href="{{ $shareUrl }}" rel="nofollow" data-ga="write_review_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="rev_empty"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>{{ __('home.bizd_rev_add') }}</a>
                 </div>
             @endif
         </section>
@@ -217,7 +219,7 @@
                     </div>
                 @endif
                 @if ($directionsUrl)
-                    <a class="bd-store pld-dir" href="{{ $directionsUrl }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.pld_directions') }}</a>
+                    <a class="bd-store pld-dir" href="{{ $directionsUrl }}" target="_blank" rel="noopener" data-ga="directions_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="map"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>{{ __('home.pld_directions') }}</a>
                 @endif
             </section>
         @endif
@@ -230,10 +232,10 @@
                 </div>
             </div>
             <div class="bd-app-btns">
-                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener">
+                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener" data-ga-link-location="sidebar">
                     <svg class="icon icon--fill" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.bizd_app_play') }}
                 </a>
-                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener">
+                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="place" data-ga-content-id="{{ $place->id }}" data-ga-link-location="sidebar" data-ga-link-type="deep_link">
                     <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}
                 </a>
             </div>
@@ -245,15 +247,15 @@
 @if ($morePlaces->count())
     <section class="container bd-similar">
         <h2>{{ __('home.pld_more') }}</h2>
-        <ul class="place-grid">
+        <ul class="place-grid" data-ga-list="more_places">
             @foreach ($morePlaces as $item)
                 @php
                     $mThumb = $item->thumbnail ? $img($item->thumbnail) : null;
                     $mReviews = (int) $item->reviews_count;
                     $mAvg = $item->reviews_avg_rating;
                 @endphp
-                <li>
-                    <a class="place-card" href="{{ route('places.show', $item->id) }}">
+                <li data-ga-item data-ga-content-type="place" data-ga-content-id="{{ $item->id }}">
+                    <a class="place-card" href="{{ route('places.show', $item->id) }}" data-ga="select_content">
                         <span class="media ph">
                             <svg class="icon ph-ico" aria-hidden="true"><use href="#i-pin"/></svg>
                             @if ($mThumb)

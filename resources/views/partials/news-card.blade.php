@@ -11,7 +11,7 @@
     $excerpt = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) $article->excerpt), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
     $tag = $isLead ? 'div' : 'li';
 @endphp
-<{{ $tag }} class="dir-card nwl-card{{ $isLead ? ' nwl-lead' : '' }}">
+<{{ $tag }} class="dir-card nwl-card{{ $isLead ? ' nwl-lead' : '' }}" data-ga-item data-ga-content-type="news" data-ga-content-id="{{ $article->id }}" data-ga-content-category="{{ optional($article->agency)->name }}"@if ($isLead) data-ga-list-name="news_lead" data-ga-index="1"@endif>
     <div class="media ph">
         <svg class="icon ph-ico" aria-hidden="true"><use href="#i-news"/></svg>
         @if ($article->image_url)
@@ -28,9 +28,9 @@
             @if ($when)<time datetime="{{ $date->toIso8601String() }}">{{ $when }}</time>@endif
         </p>
         @if ($isLead)
-            <h2 class="nwl-lead-title clamp-2"><a class="stretched" href="{{ $article->web_url }}">{{ $article->title }}</a></h2>
+            <h2 class="nwl-lead-title clamp-2"><a class="stretched" href="{{ $article->web_url }}" data-ga="select_content">{{ $article->title }}</a></h2>
         @else
-            <h2 class="clamp-2"><a class="stretched" href="{{ $article->web_url }}">{{ $article->title }}</a></h2>
+            <h2 class="clamp-2"><a class="stretched" href="{{ $article->web_url }}" data-ga="select_content">{{ $article->title }}</a></h2>
         @endif
         @if ($excerpt !== '')
             <p class="dir-services {{ $isLead ? 'clamp-3' : 'clamp-2' }}">{{ $excerpt }}</p>

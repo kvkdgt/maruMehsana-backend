@@ -9,7 +9,7 @@
     <meta name="description" content="Get daily updates and local news of mehsana.">
     <meta property="og:title" content="Find Local News on Maru Mehsana">
     <meta property="og:description" content="Discover local businesses in Mehsana">
-    <meta property="og:image" content="https://your-domain.com/logo.png">
+    <meta property="og:image" content="{{ asset('assets/site/logo-512.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     
     <style>

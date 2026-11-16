@@ -189,11 +189,11 @@
 <div class="container quick-wrap">
     <nav class="quick" aria-label="{{ __('home.tiles_aria') }}">
         <ul class="quick-grid">
-            <li><a href="{{ route('businesses') }}" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
-            <li><a href="{{ route('places') }}" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
-            <li><a href="{{ route('news') }}" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
-            <li><a href="{{ route('jobs') }}" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
-            <li><button type="button" class="tile tile--add" data-open-enquiry aria-haspopup="dialog" aria-controls="enquiry"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></button></li>
+            <li><a href="{{ route('businesses') }}" data-ga="select_content" data-ga-content-type="home_tile" data-ga-item-id="businesses" class="tile is-active"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span><span class="tile-label">{{ __('home.tile_business') }}</span></a></li>
+            <li><a href="{{ route('places') }}" data-ga="select_content" data-ga-content-type="home_tile" data-ga-item-id="places" class="tile tile--orange"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="tile-label">{{ __('home.tile_places') }}</span></a></li>
+            <li><a href="{{ route('news') }}" data-ga="select_content" data-ga-content-type="home_tile" data-ga-item-id="news" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-news"/></svg></span><span class="tile-label">{{ __('home.tile_news') }}</span></a></li>
+            <li><a href="{{ route('jobs') }}" data-ga="select_content" data-ga-content-type="home_tile" data-ga-item-id="jobs" class="tile"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span><span class="tile-label">{{ __('home.tile_jobs') }}</span></a></li>
+            <li><button type="button" class="tile tile--add" data-open-enquiry data-ga-link-location="home_tile" aria-haspopup="dialog" aria-controls="enquiry"><span class="tile-ic"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="tile-label">{{ __('home.tile_add') }}</span></button></li>
         </ul>
     </nav>
 </div>
@@ -318,14 +318,14 @@
                     <h2 id="biz-title">{{ __('home.biz_title') }}</h2>
                     <p>{{ __('home.biz_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ route('businesses') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('businesses') }}" data-ga="select_content" data-ga-content-type="view_all" data-ga-item-id="businesses">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($topBusinesses->count())
-                <ul class="biz-grid">
+                <ul class="biz-grid" data-ga-list="home_top_businesses">
                     @foreach ($topBusinesses as $business)
                         @php $reviews = (int) $business->reviews_count; $avg = $business->reviews_avg_rating; @endphp
-                        <li class="biz-card">
+                        <li class="biz-card" data-ga-item data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-content-category="{{ optional($business->category)->name }}">
                             <div class="media ph">
                                 <svg class="icon ph-ico" aria-hidden="true"><use href="#i-store"/></svg>
                                 @if ($business->thumbnail)
@@ -333,7 +333,7 @@
                                 @endif
                             </div>
                             <div class="biz-body">
-                                <h3 class="clamp-1"><a class="stretched" href="{{ route('businesses.show', $business->id) }}">{{ $business->name }}</a></h3>
+                                <h3 class="clamp-1"><a class="stretched" href="{{ route('businesses.show', $business->id) }}" data-ga="select_content">{{ $business->name }}</a></h3>
                                 <p class="biz-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
                                 @if ($reviews > 0 && $avg)
                                     <p class="rating" aria-label="{{ __('home.rating_aria', ['rating' => number_format((float) $avg, 1), 'count' => $reviews]) }}">
@@ -359,14 +359,14 @@
                     <h2 id="news-title">{{ __('home.news_title') }}</h2>
                     <p>{{ __('home.news_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ route('news') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('news') }}" data-ga="select_content" data-ga-content-type="view_all" data-ga-item-id="news">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($latestNews->count())
-                <ul class="news-list">
+                <ul class="news-list" data-ga-list="home_news">
                     @foreach ($latestNews as $article)
-                        <li>
-                            <a class="news-row" href="{{ $article->web_url }}">
+                        <li data-ga-item data-ga-content-type="news" data-ga-content-id="{{ $article->id }}" data-ga-content-category="{{ optional($article->agency)->name }}">
+                            <a class="news-row" href="{{ $article->web_url }}" data-ga="select_content">
                                 <span class="news-thumb ph">
                                     <svg class="icon ph-ico" aria-hidden="true"><use href="#i-news"/></svg>
                                     @if ($article->imageUrl)
@@ -402,14 +402,14 @@
                     <h2 id="places-title">{{ __('home.places_title') }}</h2>
                     <p>{{ __('home.places_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ route('places') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('places') }}" data-ga="select_content" data-ga-content-type="view_all" data-ga-item-id="places">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($popularPlaces->count())
-                <ul class="place-grid">
+                <ul class="place-grid" data-ga-list="home_places">
                     @foreach ($popularPlaces as $place)
-                        <li>
-                            <a class="place-card" href="{{ route('places.show', $place->id) }}">
+                        <li data-ga-item data-ga-content-type="place" data-ga-content-id="{{ $place->id }}">
+                            <a class="place-card" href="{{ route('places.show', $place->id) }}" data-ga="select_content">
                                 <span class="media ph">
                                     <svg class="icon ph-ico" aria-hidden="true"><use href="#i-pin"/></svg>
                                     @if ($place->thumbnail)
@@ -439,15 +439,15 @@
                     <h2 id="jobs-title">{{ __('home.jobs_title') }}</h2>
                     <p>{{ __('home.jobs_sub') }}</p>
                 </div>
-                <a class="view-all" href="{{ route('jobs') }}">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="view-all" href="{{ route('jobs') }}" data-ga="select_content" data-ga-content-type="view_all" data-ga-item-id="jobs">{{ __('home.view_all') }} <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </header>
 
             @if ($latestJobs->count())
-                <ul class="job-list">
+                <ul class="job-list" data-ga-list="home_jobs">
                     @foreach ($latestJobs as $job)
                         @php $pay = $salary($job); @endphp
-                        <li>
-                            <a class="job-row" href="{{ route('jobs.show', $job->id) }}">
+                        <li data-ga-item data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-content-category="{{ $job->job_type }}">
+                            <a class="job-row" href="{{ route('jobs.show', $job->id) }}" data-ga="select_content">
                                 <span class="job-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span>
                                 <span class="job-text">
                                     <span class="job-title clamp-1">{{ $job->title }}</span>
@@ -500,7 +500,7 @@
         </div>
 
         <div class="app-get">
-            <a href="{{ $playStore }}" class="gplay" target="_blank" rel="noopener" aria-label="{{ __('home.play_aria') }}">
+            <a href="{{ $playStore }}" class="gplay" target="_blank" rel="noopener" data-ga-link-location="home_app_section" aria-label="{{ __('home.play_aria') }}">
                 <svg class="gplay-logo" viewBox="0 0 20 22" aria-hidden="true">
                     <path d="M1 1 11 11 1 21Z" fill="#00a0ff"/>
                     <path d="M1 1 14.5 8.5 11 11Z" fill="#00e575"/>

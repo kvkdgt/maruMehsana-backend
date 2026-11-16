@@ -10,7 +10,7 @@
         ? (\Illuminate\Support\Str::startsWith($business->thumbnail, ['http://', 'https://']) ? $business->thumbnail : asset('storage/' . ltrim($business->thumbnail, '/')))
         : null;
 @endphp
-<li class="dir-card">
+<li class="dir-card" data-ga-item data-ga-content-type="business" data-ga-content-id="{{ $business->id }}" data-ga-content-category="{{ optional($business->category)->name }}">
     <div class="media ph">
         <svg class="icon ph-ico" aria-hidden="true"><use href="#i-store"/></svg>
         @if ($thumb)
@@ -19,7 +19,7 @@
     </div>
     <div class="dir-body">
         <p class="dir-cat clamp-1">{{ optional($business->category)->name ?: __('home.business_default') }}</p>
-        <h2 class="clamp-2"><a class="stretched" href="{{ route('businesses.show', $business->id) }}">{{ $business->name }}</a></h2>
+        <h2 class="clamp-2"><a class="stretched" href="{{ route('businesses.show', $business->id) }}" data-ga="select_content">{{ $business->name }}</a></h2>
         @if ($reviews > 0 && $avg)
             <p class="rating" aria-label="{{ __('home.rating_aria', ['rating' => number_format((float) $avg, 1), 'count' => $reviews]) }}">
                 <svg class="icon icon--fill star" aria-hidden="true"><use href="#i-star"/></svg>
@@ -34,10 +34,10 @@
     @if ($phone || $wa)
         <div class="dir-actions">
             @if ($phone)
-                <a class="dir-btn dir-btn--call" href="tel:{{ $phone }}"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>{{ __('home.bizp_call') }}</a>
+                <a class="dir-btn dir-btn--call" href="tel:{{ $phone }}" data-ga-link-location="card"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>{{ __('home.bizp_call') }}</a>
             @endif
             @if ($wa)
-                <a class="dir-btn dir-btn--wa" href="https://wa.me/{{ $waDigits }}" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>WhatsApp</a>
+                <a class="dir-btn dir-btn--wa" href="https://wa.me/{{ $waDigits }}" target="_blank" rel="noopener" data-ga-link-location="card"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>WhatsApp</a>
             @endif
         </div>
     @endif

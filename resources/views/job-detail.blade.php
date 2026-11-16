@@ -29,6 +29,8 @@
     $typeLabel = fn ($t) => \Illuminate\Support\Facades\Lang::has('home.jbd_type_' . $t) ? __('home.jbd_type_' . $t) : \Illuminate\Support\Str::headline((string) $t);
 
     $isFilled = $job->status === 'filled';
+    // Google Analytics page context (partials/analytics).
+    $gaPage = ['content_id' => (string) $job->id, 'content_category' => $job->job_type];
     $company = trim((string) $job->company_name);
     $location = trim((string) $job->location);
     $salary = $salaryText($job);
@@ -270,7 +272,7 @@
                 @endif
                 <div class="jbd-apply-btns">
                     @foreach ($applyButtons as $key => $btn)
-                        <a class="jbd-btn {{ $btn['class'] }}" href="{{ $btn['href'] }}" @if (!empty($btn['external'])) target="_blank" rel="noopener nofollow" @else rel="nofollow" @endif>
+                        <a class="jbd-btn {{ $btn['class'] }}" href="{{ $btn['href'] }}" data-ga="{{ $key }}_click" data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-content-category="{{ $job->job_type }}" data-ga-link-location="job_apply" data-ga-apply-preferred="{{ $key === $first ? 'yes' : 'no' }}" @if (!empty($btn['external'])) target="_blank" rel="noopener nofollow" @else rel="nofollow" @endif>
                             @if ($key === 'call')
                                 <svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>
                             @elseif ($key === 'whatsapp')
@@ -281,7 +283,7 @@
                             <span>{{ $btn['label'] }}</span>
                         </a>
                     @endforeach
-                    <a class="jbd-btn jbd-btn--app" href="{{ $shareUrl }}" rel="noopener">
+                    <a class="jbd-btn jbd-btn--app" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-link-location="job_apply" data-ga-link-type="deep_link">
                         <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg><span>{{ __('home.bizd_app_open') }}</span>
                     </a>
                 </div>
@@ -304,16 +306,16 @@
         <section class="nwd-share" aria-labelledby="nwd-share-title">
             <h2 id="nwd-share-title">{{ __('home.jbd_share') }}</h2>
             <div class="nwd-share-btns">
-                <a class="nwd-sb nwd-sb--wa" href="{{ $waShareUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'WhatsApp']) }}">
+                <a class="nwd-sb nwd-sb--wa" data-ga="share" data-ga-content-type="job" data-ga-item-id="{{ $job->id }}" data-ga-method="whatsapp" href="{{ $waShareUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'WhatsApp']) }}">
                     <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg><span>WhatsApp</span>
                 </a>
-                <a class="nwd-sb nwd-sb--fb" href="{{ $fbUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'Facebook']) }}">
+                <a class="nwd-sb nwd-sb--fb" data-ga="share" data-ga-content-type="job" data-ga-item-id="{{ $job->id }}" data-ga-method="facebook" href="{{ $fbUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'Facebook']) }}">
                     <svg class="icon icon--fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.2c-.3 0-1.3-.2-2.5-.2-2.5 0-4.2 1.5-4.2 4.3v2.2H7.6V12h2.7v10H14V12h2.8l.4-3.5H14Z"/></svg><span>Facebook</span>
                 </a>
-                <a class="nwd-sb nwd-sb--x" href="{{ $xUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'X']) }}">
+                <a class="nwd-sb nwd-sb--x" data-ga="share" data-ga-content-type="job" data-ga-item-id="{{ $job->id }}" data-ga-method="x" href="{{ $xUrl }}" target="_blank" rel="noopener nofollow" aria-label="{{ __('home.nwd_share_on', ['site' => 'X']) }}">
                     <svg class="icon icon--fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 2.5h3.1l-6.8 7.8 8 10.6h-6.3l-4.9-6.4-5.6 6.4H2.2l7.3-8.3L1.8 2.5h6.4l4.4 5.9 5.2-5.9Zm-1.1 16.5h1.7L7.4 4.3H5.6L16.7 19Z"/></svg><span>X</span>
                 </a>
-                <button type="button" class="nwd-sb nwd-sb--copy" data-nwd-copy="{{ $webUrl }}">
+                <button type="button" class="nwd-sb nwd-sb--copy" data-ga="share" data-ga-content-type="job" data-ga-item-id="{{ $job->id }}" data-ga-method="copy_link" data-nwd-copy="{{ $webUrl }}">
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>{{ __('home.nwd_copy') }}</span>
                 </button>
             </div>
@@ -328,7 +330,7 @@
                 {{ __('home.jbd_safety_title') }}
             </h2>
             <p>{{ __('home.jbd_safety') }}</p>
-            <a class="jbd-report" href="{{ $shareUrl }}" rel="nofollow">{{ __('home.jbd_report') }}</a>
+            <a class="jbd-report" href="{{ $shareUrl }}" rel="nofollow" data-ga="report_click" data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-link-location="safety_card">{{ __('home.jbd_report') }}</a>
         </section>
 
         <section class="bd-card bd-app">
@@ -340,10 +342,10 @@
                 </div>
             </div>
             <div class="bd-app-btns">
-                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener">
+                <a class="bd-store" href="{{ $playUrl }}" target="_blank" rel="noopener" data-ga-link-location="sidebar">
                     <svg class="icon icon--fill" aria-hidden="true"><use href="#i-play"/></svg>{{ __('home.bizd_app_play') }}
                 </a>
-                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener">
+                <a class="bd-open" href="{{ $shareUrl }}" rel="noopener" data-ga="open_app_click" data-ga-content-type="job" data-ga-content-id="{{ $job->id }}" data-ga-link-location="sidebar" data-ga-link-type="deep_link">
                     <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>{{ __('home.bizd_app_open') }}
                 </a>
             </div>
@@ -356,11 +358,11 @@
 @if ($similar->count())
     <section class="container bd-similar">
         <h2>{{ __('home.jbd_similar') }}</h2>
-        <ul class="job-list jbd-similar">
+        <ul class="job-list jbd-similar" data-ga-list="similar_jobs">
             @foreach ($similar as $item)
                 @php $pay = $salaryText($item); @endphp
-                <li>
-                    <a class="job-row" href="{{ route('jobs.show', $item->id) }}">
+                <li data-ga-item data-ga-content-type="job" data-ga-content-id="{{ $item->id }}" data-ga-content-category="{{ $item->job_type }}">
+                    <a class="job-row" href="{{ route('jobs.show', $item->id) }}" data-ga="select_content">
                         <span class="job-ic"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg></span>
                         <span class="job-text">
                             <span class="job-title clamp-1">{{ $item->title }}</span>
