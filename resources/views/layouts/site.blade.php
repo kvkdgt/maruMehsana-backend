@@ -8,9 +8,16 @@
         $lang      = $lang ?? 'gu';
         $siteTitle = trim($__env->yieldContent('title')) ?: __('home.meta_title');
         $siteDesc  = trim($__env->yieldContent('description')) ?: __('home.meta_desc');
-        $siteImage = asset('assets/site/logo-512.png');
-        // Pages can set their own share image with @section('og_image', ...); the logo stays the default.
-        $pageImage = trim($__env->yieldContent('og_image')) ?: $siteImage;
+        // Default share image / Organization logo: the full logo (icon + name + tagline) when it has
+        // been saved at public/assets/site/logo-full.png, otherwise the square app icon.
+        $fullLogo  = public_path('assets/site/logo-full.png');
+        $siteImage = file_exists($fullLogo)
+            ? asset('assets/site/logo-full.png') . '?v=' . filemtime($fullLogo)
+            : asset('assets/site/logo-512.png');
+        // Pages can set their own share image with @section('og_image', ...) (and then push their own
+        // og:image:alt); the logo stays the default.
+        $ownImage  = trim($__env->yieldContent('og_image'));
+        $pageImage = $ownImage ?: $siteImage;
         $playStore = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
         $pageUrl   = url()->current();
         // Pages can set their own canonical (e.g. paginated or filtered lists) with @section('canonical', url).
@@ -37,6 +44,10 @@
     <meta property="og:description" content="{{ $siteDesc }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $pageImage }}">
+    @if (!$ownImage)
+        <meta property="og:image:alt" content="Maru Mehsana logo">
+        <meta name="twitter:image:alt" content="Maru Mehsana logo">
+    @endif
     <meta name="twitter:card" content="@yield('twitter_card', 'summary')">
     <meta name="twitter:title" content="{{ $siteTitle }}">
     <meta name="twitter:description" content="{{ $siteDesc }}">

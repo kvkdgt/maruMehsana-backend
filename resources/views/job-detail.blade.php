@@ -158,6 +158,9 @@
     @section('og_image', new \Illuminate\Support\HtmlString($thumb))
 @endif
 @push('head')
+    @if ($thumb)
+        <meta property="og:image:alt" content="{{ $job->title }}">
+    @endif
     @if ($jobLd)
         <script type="application/ld+json">{!! json_encode($jobLd, $jsonFlags) !!}</script>
     @endif

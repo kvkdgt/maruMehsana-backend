@@ -413,6 +413,7 @@ html:has(dialog.enq[open]), html:has(dialog.enq[open]) body { overflow: hidden; 
 
 .app-copy h2 { font-size: clamp(1.9rem, 3.4vw, 2.7rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--blue); }
 .app-sub { margin-top: 6px; font-size: clamp(1.05rem, 1.7vw, 1.4rem); font-weight: 700; color: var(--ink); line-height: 1.5; }
+.app-intro { margin-top: 10px; max-width: 62ch; font-size: 0.98rem; font-weight: 500; color: var(--ink); line-height: 1.6; opacity: 0.88; }
 .app-feats { display: flex; flex-wrap: wrap; gap: 14px 34px; margin-top: 24px; }
 .app-feats li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 700; color: var(--ink); text-align: center; line-height: 1.35; }
 .fi { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #fff; box-shadow: 0 6px 14px -8px rgba(15, 36, 71, 0.4); }

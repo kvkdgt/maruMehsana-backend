@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'meta_title' => 'Maru Mehsana - Everything about Mehsana, in one place',
-    'meta_desc'  => 'Find local businesses, tourist places, fresh news and jobs in Mehsana, all in one place. Free on Google Play.',
+    'meta_title' => "Maru Mehsana - Mehsana's own app for the city",
+    'meta_desc'  => "Mehsana's own app: local businesses, tourist places near Mehsana, the latest news and jobs in Mehsana, all in one place. Free on Google Play.",
     'skip'       => 'Skip to content',
     'home_aria'  => 'Maru Mehsana - home',
 
@@ -171,8 +171,9 @@ return [
     'empty_jobs'       => 'There are no open jobs right now.',
     'empty_more'       => 'See more in the app',
 
-    'app_title'     => 'Maru Mehsana App',
+    'app_title'     => "Maru Mehsana, Mehsana's own app",
     'app_sub'       => "All of Mehsana's information, now on your mobile",
+    'app_intro'     => 'Maru Mehsana is a free app made for Mehsana (also spelled Meshana), Gujarat. Find local shops and services, tourist places near Mehsana, the latest local news and jobs in Mehsana, in Gujarati or English.',
     'feat_business' => 'Find businesses',
     'feat_places'   => 'Explore places',
     'feat_news'     => 'Read news',
@@ -190,10 +191,10 @@ return [
     'made'           => 'Made with care in Mehsana, Gujarat',
 
     // Tourist places listing page (/places)
-    'plp_meta_title' => 'Tourist places in Mehsana | Maru Mehsana',
-    'plp_meta_desc'  => 'Explore temples, heritage sites and places worth visiting in and around Mehsana, with photos, ratings and directions.',
-    'plp_title'      => 'Tourist places in Mehsana',
-    'plp_sub'        => 'Temples, heritage sites and beautiful spots worth visiting around Mehsana.',
+    'plp_meta_title' => 'Tourist places near Mehsana | Maru Mehsana',
+    'plp_meta_desc'  => 'Tourist places in and near Mehsana: temples, heritage sites and picnic spots worth visiting, with photos, ratings and directions.',
+    'plp_title'      => 'Tourist places in and near Mehsana',
+    'plp_sub'        => 'Temples, heritage sites and beautiful spots worth visiting in Mehsana and nearby, with directions.',
     'plp_search_ph'  => 'Search a place or area',
     'plp_count'      => 'places',
     'plp_clear'      => 'Clear search',
@@ -295,10 +296,10 @@ return [
     'jbd_back'             => 'All jobs',
 
     // Jobs listing page (/jobs)
-    'jbl_meta_title'      => 'Jobs in Mehsana | Maru Mehsana',
-    'jbl_meta_desc'       => 'Find the latest job openings in Mehsana and nearby towns: full time, part time, internship and more, with salary and experience details.',
+    'jbl_meta_title'      => 'Jobs in Mehsana - Latest openings | Maru Mehsana',
+    'jbl_meta_desc'       => 'Latest jobs in Mehsana and nearby towns: full time, part time and internships, with salary and experience details. Contact employers for free.',
     'jbl_title'           => 'Jobs in Mehsana',
-    'jbl_sub'             => 'Latest openings from local employers. Contact them directly, for free.',
+    'jbl_sub'             => 'The latest job openings in Mehsana and nearby towns from local employers. Contact them directly, for free.',
     'jbl_search_ph'       => 'Search job, company or place',
     'jbl_types'           => 'Job types',
     'jbl_type_all'        => 'All',

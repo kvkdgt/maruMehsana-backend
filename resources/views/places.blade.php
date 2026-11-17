@@ -21,11 +21,29 @@
         'page_number'   => $places->currentPage(),
     ];
     $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'places', 'count' => $places->total()] : null;
+
+    // ItemList of the places shown on this page (positions continue across pages).
+    $listLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'ItemList',
+        'name' => __('home.plp_title'),
+        'url' => $canonicalUrl,
+        'numberOfItems' => $places->total(),
+        'itemListElement' => $places->values()->map(fn ($place, $i) => [
+            '@type' => 'ListItem',
+            'position' => ($places->firstItem() ?? 1) + $i,
+            'name' => $place->name,
+            'url' => route('places.show', $place->id) . ($lang === 'en' ? '?lang=en' : ''),
+        ])->all(),
+    ];
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
     @if ($prevUrl)<link rel="prev" href="{{ $prevUrl }}">@endif
     @if ($nextUrl)<link rel="next" href="{{ $nextUrl }}">@endif
+    @if ($places->count())
+        <script type="application/ld+json">{!! json_encode($listLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+    @endif
 @endpush
 
 @php

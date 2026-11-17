@@ -25,11 +25,29 @@
         'page_number'   => $jobs->currentPage(),
     ];
     $gaSearch = $q !== '' ? ['term' => $q, 'location' => 'jobs', 'count' => $jobs->total()] : null;
+
+    // ItemList of the jobs shown on this page (positions continue across pages).
+    $listLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'ItemList',
+        'name' => __('home.jbl_title'),
+        'url' => $canonicalUrl,
+        'numberOfItems' => $jobs->total(),
+        'itemListElement' => $jobs->values()->map(fn ($job, $i) => [
+            '@type' => 'ListItem',
+            'position' => ($jobs->firstItem() ?? 1) + $i,
+            'name' => $job->title,
+            'url' => route('jobs.show', $job->id) . ($lang === 'en' ? '?lang=en' : ''),
+        ])->all(),
+    ];
 @endphp
 @section('canonical', $canonicalUrl)
 @push('head')
     @if ($prevUrl)<link rel="prev" href="{{ $prevUrl }}">@endif
     @if ($nextUrl)<link rel="next" href="{{ $nextUrl }}">@endif
+    @if ($jobs->count())
+        <script type="application/ld+json">{!! json_encode($listLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+    @endif
 @endpush
 
 @php

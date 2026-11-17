@@ -30,7 +30,20 @@
         'content_category' => optional($business->category)->name,
         'category_id'      => $business->category_id ? (string) $business->category_id : null,
     ];
+    $langQ = $lang === 'en' ? '?lang=en' : '';
+    $crumbsLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => __('home.nav_home'), 'item' => url('/') . $langQ],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('home.nav_businesses'), 'item' => route('businesses') . $langQ],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $business->name, 'item' => route('businesses.show', $business->id) . $langQ],
+        ],
+    ];
 @endphp
+@push('head')
+    <script type="application/ld+json">{!! json_encode($crumbsLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endpush
 
 {{-- HtmlString: the layout escapes title/description itself, so don't let @section escape them a second time. --}}
 @section('title', new \Illuminate\Support\HtmlString($business->name . ' - ' . $catName . ' | Maru Mehsana'))

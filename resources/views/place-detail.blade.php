@@ -72,6 +72,19 @@
         <meta property="og:image:alt" content="{{ $place->name }}">
     @endif
     <script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+    @php
+        $langQ = $lang === 'en' ? '?lang=en' : '';
+        $crumbsLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'name' => __('home.nav_home'), 'item' => url('/') . $langQ],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => __('home.nav_places'), 'item' => route('places') . $langQ],
+                ['@type' => 'ListItem', 'position' => 3, 'name' => $place->name, 'item' => $canonicalUrl],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($crumbsLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
 @endpush
 
 @include('partials.web-visit', ['type' => 'place', 'id' => $place->id])

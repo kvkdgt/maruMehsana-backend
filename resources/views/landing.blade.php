@@ -1,7 +1,8 @@
 @extends('layouts.site')
 
-@section('title', __('home.meta_title'))
-@section('description', __('home.meta_desc'))
+{{-- HtmlString: the layout escapes title/description itself, so don't let @section escape them a second time. --}}
+@section('title', new \Illuminate\Support\HtmlString(__('home.meta_title')))
+@section('description', new \Illuminate\Support\HtmlString(__('home.meta_desc')))
 
 @php
     $playStore = 'https://play.google.com/store/apps/details?id=com.MaruMehsana';
@@ -54,7 +55,33 @@
     ];
 @endphp
 
+@php
+    // The Android app itself, so search engines can tie "Mehsana's own app" to the Play Store listing.
+    $appLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'MobileApplication',
+        'name' => 'Maru Mehsana',
+        'alternateName' => ['મારું મહેસાણા', 'Mehsana ni potani app'],
+        'description' => __('home.meta_desc'),
+        'url' => $playStore,
+        'installUrl' => $playStore,
+        'image' => asset('assets/site/logo-512.png'),
+        'operatingSystem' => 'ANDROID',
+        'applicationCategory' => 'LifestyleApplication',
+        'inLanguage' => ['gu', 'en'],
+        'offers' => ['@type' => 'Offer', 'price' => 0, 'priceCurrency' => 'INR'],
+        'areaServed' => [
+            '@type' => 'City',
+            'name' => 'Mehsana',
+            'alternateName' => 'મહેસાણા',
+            'containedInPlace' => ['@type' => 'State', 'name' => 'Gujarat'],
+        ],
+        'publisher' => ['@type' => 'Organization', 'name' => 'Maru Mehsana', 'url' => url('/')],
+    ];
+@endphp
+
 @push('head')
+    <script type="application/ld+json">{!! json_encode($appLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
     @if ($hasHero)
         <link rel="preload" as="image" href="{{ $heroMobUrl ?: $heroUrl }}" @if ($hasHeroMob) media="(max-width: 720px)" @endif fetchpriority="high">
         @if ($hasHeroMob)<link rel="preload" as="image" href="{{ $heroUrl }}" media="(min-width: 721px)" fetchpriority="high">@endif
@@ -491,6 +518,7 @@
         <div class="app-copy">
             <h2 id="app-title">{{ __('home.app_title') }}</h2>
             <p class="app-sub">{{ __('home.app_sub') }}</p>
+            <p class="app-intro">{{ __('home.app_intro') }}</p>
             <ul class="app-feats">
                 <li><span class="fi fi--orange"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>{{ __('home.feat_business') }}</li>
                 <li><span class="fi fi--blue"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span>{{ __('home.feat_places') }}</li>
