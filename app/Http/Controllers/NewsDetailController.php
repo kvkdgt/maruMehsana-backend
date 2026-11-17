@@ -6,8 +6,6 @@ use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\NewsArticle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Public web detail page for a news article: GET /news/{id}/{slug}
@@ -35,8 +33,6 @@ class NewsDetailController extends Controller
         }
 
         $lang = $this->resolveSiteLanguage($request);
-
-        $this->countWebVisit($request, $article->id);
 
         $columns = ['id', 'title', 'slug', 'image', 'is_for_mehsana', 'visitor', 'web_visitors', 'agency_id', 'created_at'];
 
@@ -80,31 +76,5 @@ class NewsDetailController extends Controller
     {
         return $query->where('is_active', true)
             ->whereHas('agency', fn (Builder $a) => $a->where('status', true));
-    }
-
-    /**
-     * Count one website view, kept apart from the app's `visitor` counter like businesses do.
-     * Only runs when news_articles has a `web_visitors` column. Skips HEAD requests and bots.
-     */
-    private function countWebVisit(Request $request, int $id): void
-    {
-        static $hasColumn = null;
-
-        if ($request->isMethod('HEAD')) {
-            return;
-        }
-        $ua = (string) $request->userAgent();
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua)) {
-            return;
-        }
-        try {
-            $hasColumn ??= Schema::hasColumn('news_articles', 'web_visitors');
-            if ($hasColumn) {
-                // Query builder, not Eloquent: a view must not bump updated_at (used as dateModified).
-                DB::table('news_articles')->where('id', $id)->increment('web_visitors');
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
     }
 }

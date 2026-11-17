@@ -39,6 +39,8 @@ Route::get('/news/{id}/{slug}', [App\Http\Controllers\NewsDetailController::clas
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/jobs', [App\Http\Controllers\JobListController::class, 'index'])->name('jobs');
 Route::get('/jobs/{id}', [App\Http\Controllers\JobDetailController::class, 'show'])->whereNumber('id')->name('jobs.show');
+// The browser reports one real website view here (see App\Support\WebVisit). Signed token, so no CSRF.
+Route::post('/visit', [App\Http\Controllers\WebVisitController::class, 'store'])->middleware('throttle:120,1')->name('web-visit');
 // App share links (open the app via deep link). The website uses /businesses/{id}, /places/{id} and /news/{id}/{slug} instead.
 Route::get('/business/{businessId}', [ShareController::class, 'business']);
 Route::get('/place/{placeId}', [ShareController::class, 'place']);

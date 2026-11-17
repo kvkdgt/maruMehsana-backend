@@ -164,6 +164,8 @@
     <script type="application/ld+json">{!! json_encode($crumbsLd, $jsonFlags) !!}</script>
 @endpush
 
+@include('partials.web-visit', ['type' => 'job', 'id' => $job->id])
+
 @section('content')
 <section class="page-hero">
     <div class="container page-hero-inner">

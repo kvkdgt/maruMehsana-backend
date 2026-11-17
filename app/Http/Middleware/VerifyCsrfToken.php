@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // Website view reports: sent by sendBeacon without a session, checked by a signed token instead.
+        'visit',
     ];
 }

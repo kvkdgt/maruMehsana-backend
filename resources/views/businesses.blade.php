@@ -44,6 +44,11 @@
     $total = $businesses->total();
 @endphp
 
+{{-- Opening a category counts one web view of it (first page only, so paging does not count again). --}}
+@if ($activeCategory && $businesses->onFirstPage())
+    @include('partials.web-visit', ['type' => 'category', 'id' => $activeCategory->id])
+@endif
+
 @section('content')
 <section class="page-hero">
     <div class="container page-hero-inner">

@@ -74,6 +74,8 @@
     <script type="application/ld+json">{!! json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
 @endpush
 
+@include('partials.web-visit', ['type' => 'place', 'id' => $place->id])
+
 @section('content')
 <section class="page-hero">
     <div class="container page-hero-inner">

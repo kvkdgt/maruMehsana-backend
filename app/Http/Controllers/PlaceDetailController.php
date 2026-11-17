@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\TouristPlace;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Public web detail page for a tourist place: GET /places/{id}
@@ -26,8 +25,6 @@ class PlaceDetailController extends Controller
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->findOrFail($id);
-
-        $this->countWebVisit($request, $place->id);
 
         // Latest reviews with the reviewer's name only (never phone/email/photo).
         $latestReviews = collect();
@@ -73,30 +70,5 @@ class PlaceDetailController extends Controller
         ]);
 
         return $this->rememberSiteLanguage($response, $request, $lang);
-    }
-
-    /**
-     * Count one website view, kept apart from the app's `visitors` like businesses do.
-     * Only runs when tourist_places has a `web_visitors` column. Skips HEAD requests and bots.
-     */
-    private function countWebVisit(Request $request, int $id): void
-    {
-        static $hasColumn = null;
-
-        if ($request->isMethod('HEAD')) {
-            return;
-        }
-        $ua = (string) $request->userAgent();
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua)) {
-            return;
-        }
-        try {
-            $hasColumn ??= Schema::hasColumn('tourist_places', 'web_visitors');
-            if ($hasColumn) {
-                TouristPlace::whereKey($id)->increment('web_visitors');
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
     }
 }

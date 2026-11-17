@@ -37,6 +37,8 @@
 @section('description', new \Illuminate\Support\HtmlString($desc ?: __('home.bizp_meta_desc')))
 @section('canonical', route('businesses.show', $business->id) . ($lang === 'en' ? '?lang=en' : ''))
 
+@include('partials.web-visit', ['type' => 'business', 'id' => $business->id])
+
 @section('content')
 <section class="page-hero">
     <div class="container page-hero-inner">

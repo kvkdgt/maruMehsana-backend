@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ResolvesSiteLanguage;
 use App\Models\JobVacancy;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Public web detail page for a job vacancy: GET /jobs/{id}
@@ -24,8 +22,6 @@ class JobDetailController extends Controller
         $job = JobVacancy::active()->findOrFail($id);
 
         $lang = $this->resolveSiteLanguage($request);
-
-        $this->countWebVisit($request, $job->id);
 
         // Other open jobs, same job type and/or same location first, then newest.
         $similar = JobVacancy::active()
@@ -48,31 +44,5 @@ class JobDetailController extends Controller
         ]);
 
         return $this->rememberSiteLanguage($response, $request, $lang);
-    }
-
-    /**
-     * Count one website view in `web_visitors`, kept apart from the app's `views_count`
-     * (which drives the poster's view-milestone notifications). Skips HEAD requests and bots.
-     */
-    private function countWebVisit(Request $request, int $id): void
-    {
-        static $hasColumn = null;
-
-        if ($request->isMethod('HEAD')) {
-            return;
-        }
-        $ua = (string) $request->userAgent();
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|preview|fetch|monitor|curl|wget|python|java\/|httpclient|headless|lighthouse/i', $ua)) {
-            return;
-        }
-        try {
-            $hasColumn ??= Schema::hasColumn('job_vacancies', 'web_visitors');
-            if ($hasColumn) {
-                // Query builder, not Eloquent: a view must not bump updated_at.
-                DB::table('job_vacancies')->where('id', $id)->increment('web_visitors');
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
     }
 }
