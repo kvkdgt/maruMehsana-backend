@@ -23,6 +23,9 @@ class Kernel extends ConsoleKernel
         // Notify job posters when their job crosses a views milestone (10+, 30+, 50+, ...)
         $schedule->command('jobs:notify-view-milestones')->everyTenMinutes()->withoutOverlapping()->runInBackground();
 
+        // Daily Maru Mehsana report (new users, jobs, enquiries) at 11:59 PM IST
+        $schedule->command('report:daily')->dailyAt('23:59')->timezone('Asia/Kolkata')->withoutOverlapping();
+
         // Expire orders unattended for 48h+ and auto-revoke delivery after 3 strikes
         $schedule->command('orders:expire-stale')->hourly()->withoutOverlapping()->runInBackground();
     }

@@ -61,20 +61,37 @@ class QuizAttempt extends Model
     }
 
     /**
-     * Top 10 players by total score in last 30 days.
+     * Single source of truth for the "this month" leaderboard (admin panel + app).
+     * Calendar month in Asia/Kolkata, ranked by total score, ties broken by
+     * correct answers then lowest user id so both screens always agree.
      */
-    public static function getLeaderboard()
+    public static function monthlyQuery(?\Carbon\Carbon $month = null)
     {
+        $month = ($month ?: now())->copy();
+
         return self::select(
                 'app_user_id',
                 DB::raw('SUM(score) as total_score'),
                 DB::raw('COUNT(*) as total_attempts'),
                 DB::raw('SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_answers')
             )
-            ->where('quiz_date', '>=', now()->subDays(30)->toDateString())
+            ->whereBetween('quiz_date', [
+                $month->copy()->startOfMonth()->toDateString(),
+                $month->copy()->endOfMonth()->toDateString(),
+            ])
             ->groupBy('app_user_id')
             ->orderByDesc('total_score')
-            ->limit(10)
+            ->orderByDesc('correct_answers')
+            ->orderBy('app_user_id');
+    }
+
+    /**
+     * Top players for the month (default: current month, top 20 - same as admin).
+     */
+    public static function getLeaderboard(?\Carbon\Carbon $month = null, int $limit = 20)
+    {
+        return self::monthlyQuery($month)
+            ->limit($limit)
             ->with('user:id,name,profile_picture')
             ->get();
     }

@@ -60,6 +60,11 @@ return [
         'notify_email' => env('LEAD_NOTIFY_EMAIL', 'kvkdgt12345@gmail.com'),
     ],
 
+    // Daily 11:59 PM IST report recipient(s); comma separated. Falls back to the lead alert address.
+    'reports' => [
+        'notify_email' => env('REPORT_NOTIFY_EMAIL', env('LEAD_NOTIFY_EMAIL', 'kvkdgt12345@gmail.com')),
+    ],
+
     /*
     | Google Analytics 4 for the public website (resources/views/partials/analytics.blade.php).
     | Nothing is output unless GA_MEASUREMENT_ID is set AND enabled is true.

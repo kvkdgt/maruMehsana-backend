@@ -316,10 +316,7 @@ class QuizController extends Controller
             $myRank = null;
 
             if ($userId) {
-                $ranked = QuizAttempt::select('app_user_id', DB::raw('SUM(score) as total_score'))
-                    ->where('quiz_date', '>=', now()->subDays(30)->toDateString())
-                    ->groupBy('app_user_id')
-                    ->orderByDesc('total_score')
+                $ranked = QuizAttempt::monthlyQuery()
                     ->pluck('app_user_id')
                     ->toArray();
 
@@ -674,15 +671,7 @@ class QuizController extends Controller
             ->get();
 
         // ── Month-wise leaderboard ────────────────────────────────────────
-        $monthlyLeaderboard = QuizAttempt::select(
-                'app_user_id',
-                DB::raw('SUM(score) as total_score'),
-                DB::raw('COUNT(*) as total_attempts'),
-                DB::raw('SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_answers')
-            )
-            ->whereBetween('quiz_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->groupBy('app_user_id')
-            ->orderByDesc('total_score')
+        $monthlyLeaderboard = QuizAttempt::monthlyQuery($monthStart)
             ->limit(20)
             ->with('user:id,name')
             ->get();
