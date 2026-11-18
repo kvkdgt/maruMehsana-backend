@@ -19,6 +19,11 @@
 
     RewriteEngine On
 
+    # One hostname only: send www.maru-mehsana.com to maru-mehsana.com (keeps the cookie consent
+    # choice, session and analytics in a single place)
+    RewriteCond %{HTTP_HOST} ^www\.maru-mehsana\.com$ [NC]
+    RewriteRule ^ https://maru-mehsana.com%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

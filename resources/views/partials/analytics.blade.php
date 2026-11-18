@@ -82,6 +82,7 @@
     // Advertising storage is always denied. The choice is kept in the first-party cookie mm_consent.
     (function () {
         var m = document.cookie.match(/(?:^|;\s*)mm_consent=(granted|denied)/);
+        if (!m) { try { var ls = localStorage.getItem('mm_consent'); if (ls === 'granted' || ls === 'denied') m = [null, ls]; } catch (e) {} }
         gtag('consent', 'default', {
             ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
             analytics_storage: m && m[1] === 'granted' ? 'granted' : 'denied',

@@ -48,9 +48,24 @@
     if (!box) return;
     var YEAR = 60 * 60 * 24 * 365;
 
+    // Cookie is shared by maru-mehsana.com and www.maru-mehsana.com (Domain=.maru-mehsana.com);
+    // localStorage is a second copy for browsers/webviews that drop cookies.
+    function cookieDomain() {
+        var m = location.hostname.match(/(^|\.)(maru-mehsana\.com)$/i);
+        return m ? '; domain=.' + m[2] : '';
+    }
     function current() {
         var m = document.cookie.match(/(?:^|;\s*)mm_consent=(granted|denied)/);
-        return m ? m[1] : null;
+        if (m) return m[1];
+        try {
+            var v = localStorage.getItem('mm_consent');
+            if (v === 'granted' || v === 'denied') {
+                // restore the cookie so analytics (consent default) sees it too
+                document.cookie = 'mm_consent=' + v + '; Max-Age=' + YEAR + '; path=/' + cookieDomain() + '; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+                return v;
+            }
+        } catch (e) {}
+        return null;
     }
     function dropGaCookies() {
         // Remove existing Google Analytics cookies when consent is withdrawn.
@@ -67,7 +82,8 @@
         });
     }
     function choose(value) {
-        document.cookie = 'mm_consent=' + value + '; Max-Age=' + YEAR + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+        document.cookie = 'mm_consent=' + value + '; Max-Age=' + YEAR + '; path=/' + cookieDomain() + '; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+        try { localStorage.setItem('mm_consent', value); } catch (e) {}
         if (typeof window.gtag === 'function') {
             window.gtag('consent', 'update', {analytics_storage: value});
             if (window.mmTrack && value === 'granted') window.mmTrack('consent_update', {consent_choice: value});
