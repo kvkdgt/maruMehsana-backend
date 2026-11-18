@@ -137,6 +137,10 @@
           <div class="filter-control" style="margin-bottom: 15px;">
             <label class="required-label">Image</label>
             <input type="file" id="banner-image" name="image" accept="image/*" required class="filter-input" style="width: 100%;">
+            <div style="margin-top: 8px; padding: 10px 12px; background: #eef6ff; border-left: 4px solid #3498db; border-radius: 6px; font-size: 0.82rem; color: #2c3e50; line-height: 1.5;">
+              <strong><i class="fas fa-info-circle"></i> Recommended size: 1200 x 600 px (2:1 ratio)</strong><br>
+              Use JPG or PNG, max 10 MB. Keep logos and text about 60 px away from the left and right edges. Other ratios will be cropped in the app.
+            </div>
           </div>
 
           <!-- Link Types -->
